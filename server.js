@@ -267,22 +267,46 @@ app.post("/login", async (req,res)=>{
 
 
 
-    res.json({
+    // Create JWT token
+const token = jwt.sign(
+  {
+    id: user.id,
+    username: user.username,
+    email: user.email
+  },
+  process.env.JWT_SECRET,
+  {
+    expiresIn: "7d"
+  }
+);
 
-      success:true,
 
-      message:"Login successful",
-
-      user:{
-
-        id:user.id,
-        username:user.username,
-        email:user.email
-
-      }
+// Save cookie
+res.cookie("token", token, {
+  httpOnly: true,
+  secure: true,
+  sameSite: "none",
+  maxAge: 7 * 24 * 60 * 60 * 1000
+});
 
 
-    });
+res.json({
+
+  success:true,
+
+  message:"Login successful",
+
+  user:{
+
+    id:user.id,
+    username:user.username,
+    email:user.email
+
+  },
+
+  token
+
+});
 
 
 
