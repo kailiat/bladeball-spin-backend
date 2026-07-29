@@ -37,9 +37,32 @@
 
 <h1>🎡 Blade Ball Spin</h1>
 
-<button>
+<button onclick="spin()">
     SPIN
 </button>
+
+
+<script>
+
+async function spin(){
+
+    const res = await fetch(
+        "https://bladeball-spin-backend.onrender.com/spin",
+        {
+            method:"POST",
+            credentials:"include"
+        }
+    );
+
+    const data = await res.json();
+
+    console.log(data);
+
+    alert(JSON.stringify(data));
+
+}
+
+</script>
 
 </body>
 </html>
