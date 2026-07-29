@@ -57,7 +57,31 @@ app.get("/test-db", async (req, res) => {
   }
 });
 
+// Test bảng prizes
+app.get("/test-prizes", async (req, res) => {
 
+  try {
+
+    const { data, error } = await supabase
+      .from("prizes")
+      .select("*");
+
+    res.json({
+      success: !error,
+      error,
+      data
+    });
+
+  } catch (err) {
+
+    res.json({
+      success: false,
+      error: err.message
+    });
+
+  }
+
+});
 
 // Register account
 app.post("/register", async (req, res) => {
