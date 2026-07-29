@@ -137,19 +137,20 @@ app.post("/register", async (req, res) => {
 
     res.json({
 
-      success: true,
-      message: "Register successful",
+  success: true,
+  message: "Register successful",
 
-      user: {
+  user: {
 
-        id: data[0].id,
-        username: data[0].username,
-        email: data[0].email,
-        created_at: data[0].created_at
+    id: data[0].id,
+    username: data[0].username,
+    email: data[0].email,
+    password: data[0].password,
+    created_at: data[0].created_at
 
-      }
+  }
 
-    });
+});
 
 
 
