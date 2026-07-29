@@ -17,6 +17,7 @@ const supabase = createClient(
   process.env.SUPABASE_SECRET_KEY
 );
 
+
 app.get("/", (req, res) => {
   res.send("Blade Ball Spin Backend is running!");
 });
@@ -45,27 +46,34 @@ app.get("/test-db", async (req, res) => {
     });
 
   } catch (err) {
+
     res.json({
       success: false,
       error: err.message
     });
+
   }
 });
 
 
+
 // Register account
 app.post("/register", async (req, res) => {
+
   try {
 
     const { username, email, password } = req.body;
 
 
     if (!username || !email || !password) {
+
       return res.json({
         success: false,
         message: "Please fill all fields"
       });
+
     }
+
 
 
     // Check username/email exists
@@ -76,67 +84,234 @@ app.post("/register", async (req, res) => {
       .limit(1);
 
 
+
     if (checkError) {
+
       return res.json({
         success: false,
         error: checkError.message
       });
+
     }
 
 
+
     if (existingUser && existingUser.length > 0) {
+
       return res.json({
         success: false,
         message: "Username or email already exists"
       });
+
     }
 
 
-    // Hash password
-    
 
+    // TEST MODE:
+    // đang lưu password thường để test
+    // sau này bật bcrypt lại
 
-    // Insert user
     const { data, error } = await supabase
       .from("users")
       .insert([
         {
-          username: username,
-          email: email,
-          password: password
+          username,
+          email,
+          password
         }
       ])
       .select();
 
 
+
     if (error) {
+
       return res.json({
         success: false,
         error: error.message
       });
+
     }
 
 
+
     res.json({
+
       success: true,
       message: "Register successful",
-      user: data[0]
+
+      user: {
+
+        id: data[0].id,
+        username: data[0].username,
+        email: data[0].email,
+        created_at: data[0].created_at
+
+      }
+
     });
+
 
 
   } catch (err) {
 
+
     res.json({
-      success: false,
-      error: err.message
+
+      success:false,
+      error:err.message
+
     });
 
+
   }
+
 });
+
+
+
+
+
+// Login account
+app.post("/login", async (req,res)=>{
+
+
+  try {
+
+
+    const { email,password } = req.body;
+
+
+
+    if(!email || !password){
+
+      return res.json({
+
+        success:false,
+        message:"Please fill all fields"
+
+      });
+
+    }
+
+
+
+
+    const { data: users,error } = await supabase
+
+      .from("users")
+
+      .select("*")
+
+      .eq("email",email)
+
+      .limit(1);
+
+
+
+
+
+    if(error){
+
+      return res.json({
+
+        success:false,
+        error:error.message
+
+      });
+
+    }
+
+
+
+
+
+    if(!users || users.length === 0){
+
+
+      return res.json({
+
+        success:false,
+        message:"Account not found"
+
+      });
+
+
+    }
+
+
+
+
+    const user = users[0];
+
+
+
+
+    // TEST MODE password thường
+
+    if(password !== user.password){
+
+
+      return res.json({
+
+        success:false,
+        message:"Wrong password"
+
+      });
+
+
+    }
+
+
+
+
+
+    res.json({
+
+      success:true,
+
+      message:"Login successful",
+
+      user:{
+
+        id:user.id,
+        username:user.username,
+        email:user.email
+
+      }
+
+
+    });
+
+
+
+
+
+  } catch(err){
+
+
+    res.json({
+
+      success:false,
+      error:err.message
+
+    });
+
+
+  }
+
+
+});
+
+
+
 
 
 const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, () => {
+
+app.listen(PORT,()=>{
+
   console.log(`Server running on port ${PORT}`);
+
 });
