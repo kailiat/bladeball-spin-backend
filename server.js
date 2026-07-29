@@ -93,7 +93,7 @@ app.post("/register", async (req, res) => {
 
 
     // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
+    
 
 
     // Insert user
@@ -103,7 +103,7 @@ app.post("/register", async (req, res) => {
         {
           username: username,
           email: email,
-          password: hashedPassword
+          password: password
         }
       ])
       .select();
