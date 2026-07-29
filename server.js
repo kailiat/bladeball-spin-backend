@@ -365,7 +365,105 @@ app.get("/me", async (req, res) => {
 
 });
 
+// Spin Wheel
+app.post("/spin", async (req, res) => {
 
+  try {
+
+    const token = req.cookies.token;
+
+    if (!token) {
+      return res.json({
+        success: false,
+        message: "Please login first"
+      });
+    }
+
+    // Verify token
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET
+    );
+
+    // Get prizes
+    const { data: prizes, error } = await supabase
+      .from("prizes")
+      .select("*");
+
+    if (error) {
+      return res.json({
+        success: false,
+        error: error.message
+      });
+    }
+
+    if (!prizes || prizes.length === 0) {
+      return res.json({
+        success: false,
+        message: "No prizes found"
+      });
+    }
+
+    // Random number 1 -> 100
+    const random = Math.floor(Math.random() * 100) + 1;
+
+    let totalChance = 0;
+    let reward = null;
+
+    for (const prize of prizes) {
+
+      totalChance += prize.chance;
+
+      if (random <= totalChance) {
+        reward = prize;
+        break;
+      }
+
+    }
+
+    // Safety
+    if (!reward) {
+      reward = prizes[prizes.length - 1];
+    }
+
+    res.json({
+
+      success: true,
+
+      message: "Spin successful",
+
+      random,
+
+      reward: {
+
+        id: reward.id,
+        name: reward.name,
+        amount: reward.amount,
+        chance: reward.chance
+
+      },
+
+      user: {
+
+        id: decoded.id,
+        username: decoded.username
+
+      }
+
+    });
+
+  } catch (err) {
+
+    res.json({
+
+      success: false,
+      error: err.message
+
+    });
+
+  }
+
+});
 const PORT = process.env.PORT || 3000;
 
 
