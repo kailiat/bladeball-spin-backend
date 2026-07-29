@@ -17,6 +17,8 @@ const supabase = createClient(
   process.env.SUPABASE_SECRET_KEY
 );
 
+console.log("Has secret key:", !!process.env.SUPABASE_SECRET_KEY);
+console.log("Secret starts with:", process.env.SUPABASE_SECRET_KEY?.slice(0, 12));
 
 app.get("/", (req, res) => {
   res.send("Blade Ball Spin Backend is running!");
