@@ -226,13 +226,11 @@ result.innerHTML="";
 
 // quay vòng
 
-let rotate =
-Math.floor(Math.random()*360)
-+1800;
+currentRotation +=
+1800 + Math.floor(Math.random()*360);
 
-
-wheel.style.transform=
-`rotate(${rotate}deg)`;
+wheel.style.transform =
+`rotate(${currentRotation}deg)`;
 
 
 
