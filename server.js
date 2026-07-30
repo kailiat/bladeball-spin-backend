@@ -482,7 +482,7 @@ if (userError) {
 
 // Cộng Token
 const newBalance =
-  (userData.tokens || 0) + reward.amount;
+  Number(userData.tokens || 0) + Number(reward.amount);
 
 // Update Token
 await supabase
@@ -510,15 +510,15 @@ await supabase
       random,
 
       reward: {
+  id: reward.id,
+  name: reward.name,
+  amount: reward.amount,
+  chance: reward.chance
+},
 
-        id: reward.id,
-        name: reward.name,
-        amount: reward.amount,
-        chance: reward.chance
+balance: newBalance,
 
-      },
-
-      user: {
+user: {
 
         id: decoded.id,
         username: decoded.username
