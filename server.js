@@ -345,7 +345,7 @@ res.json({
 
   },
 
-  token
+  
 
 });
 
