@@ -102,7 +102,33 @@ button:hover {
 
 }
 
+.logo{
+    font-size:60px;
+    margin-bottom:10px;
+    animation: float 2s ease-in-out infinite;
+}
 
+.subtitle{
+    color:#aaa;
+    font-size:18px;
+    margin-bottom:35px;
+}
+
+@keyframes float{
+
+    0%{
+        transform:translateY(0px);
+    }
+
+    50%{
+        transform:translateY(-8px);
+    }
+
+    100%{
+        transform:translateY(0px);
+    }
+
+}
 </style>
 
 </head>
@@ -111,9 +137,15 @@ button:hover {
 <body>
 
 
-<h1>
-🎡 Blade Ball Spin
-</h1>
+<div class="logo">
+    🎡
+</div>
+
+<h1>Blade Ball Spin</h1>
+
+<p class="subtitle">
+    Spin every day to win Tokens!
+</p>
 
 
 
