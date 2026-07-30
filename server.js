@@ -586,6 +586,20 @@ app.get("/history", async (req, res) => {
   }
 
 });
+app.post("/logout", (req, res) => {
+
+  res.clearCookie("token", {
+    httpOnly: true,
+    secure: true,
+    sameSite: "none"
+  });
+
+  res.json({
+    success: true,
+    message: "Logout successful"
+  });
+
+});
 const PORT = process.env.PORT || 3000;
 
 
