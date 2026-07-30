@@ -563,9 +563,13 @@ async function loginGoogle(){
         const user = result.user;
 
         document.getElementById("userBox").innerHTML = `
-            <h3>👤 ${user.displayName}</h3>
-            <p>${user.email}</p>
-        `;
+    <h3>👤 ${user.displayName}</h3>
+    <p>${user.email}</p>
+
+    <button onclick="logoutGoogle()">
+        Logout
+    </button>
+`;
 
     }catch(err){
 
