@@ -580,6 +580,24 @@ wheel.style.transform =
 setTimeout(async()=>{
 
 
+const user = window.auth.currentUser;
+
+
+if(!user){
+
+    alert("Please login first!");
+
+    spinning=false;
+
+    return;
+
+}
+
+
+const token = await user.getIdToken();
+
+
+
 const res = await fetch(
 
 "https://bladeball-spin-backend.onrender.com/spin",
@@ -588,7 +606,9 @@ const res = await fetch(
 
 method:"POST",
 
-credentials:"include"
+headers:{
+    Authorization:`Bearer ${token}`
+}
 
 }
 
