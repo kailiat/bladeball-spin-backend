@@ -551,6 +551,30 @@ function closePopup(){
 document.getElementById("popup").style.display="none";
 
 }
+async function loginGoogle(){
+
+    try{
+
+        const result = await window.signInWithPopup(
+            window.auth,
+            window.provider
+        );
+
+        const user = result.user;
+
+        document.getElementById("userBox").innerHTML = `
+            <h3>👤 ${user.displayName}</h3>
+            <p>${user.email}</p>
+        `;
+
+    }catch(err){
+
+        alert(err.message);
+
+    }
+
+}
+    
 function showWithdraw(){
 
     document.getElementById("withdrawPopup").style.display = "flex";
