@@ -65,7 +65,7 @@ h1 {
 }
 
 
-button {
+button{
 
     margin-top:20px;
 
@@ -77,18 +77,30 @@ button {
 
     border-radius:20px;
 
-    background:#7c3cff;
+    background:linear-gradient(
+        90deg,
+        #8b3dff,
+        #6d2dff
+    );
 
     color:white;
 
     cursor:pointer;
 
+    transition:.25s;
+
+    box-shadow:
+        0 0 20px rgba(124,60,255,.45);
+
 }
 
 
-button:hover {
+button:hover{
 
-    transform:scale(1.05);
+    transform:scale(1.08);
+
+    box-shadow:
+        0 0 35px rgba(124,60,255,.8);
 
 }
 
