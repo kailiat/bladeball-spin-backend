@@ -580,18 +580,29 @@ async function loginGoogle(){
 
 // lưu user vào Firestore
 
-await window.setDoc(
-    window.doc(window.db, "users", user.uid),
-    {
-        name: user.displayName,
-        email: user.email,
-        tokens: 2,
-        spins: 0
-    },
-    {
-        merge:true
-    }
+const userRef = window.doc(
+    window.db,
+    "users",
+    user.uid
 );
+
+
+const userSnap = await window.getDoc(userRef);
+
+
+if(!userSnap.exists()){
+
+    await window.setDoc(
+        userRef,
+        {
+            name:user.displayName,
+            email:user.email,
+            tokens:2,
+            spins:0
+        }
+    );
+
+}
 
 
 document.getElementById("userBox").innerHTML = `
