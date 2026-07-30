@@ -447,19 +447,32 @@ window.onAuthStateChanged(window.auth, async (user)=>{
         const userSnap = await window.getDoc(userRef);
 
 
-        if(!userSnap.exists()){
+if(!userSnap.exists()){
 
-            await window.setDoc(
-                userRef,
-                {
-                    name:user.displayName,
-                    email:user.email,
-                    tokens:2,
-                    spins:0
-                }
-            );
-
+    await window.setDoc(
+        userRef,
+        {
+            name:user.displayName,
+            email:user.email,
+            tokens:0,
+            spins:0
         }
+    );
+
+
+    document.getElementById("balanceValue").innerText = 0;
+
+
+}else{
+
+
+    const userData = userSnap.data();
+
+
+    document.getElementById("balanceValue").innerText =
+        userData.tokens;
+
+}
 
 
         document.getElementById("userBox").innerHTML = `
@@ -653,10 +666,20 @@ if(!userSnap.exists()){
         {
             name:user.displayName,
             email:user.email,
-            tokens:2,
+            tokens:0,
             spins:0
         }
     );
+
+    document.getElementById("balanceValue").innerText = 0;
+
+
+}else{
+
+    const userData = userSnap.data();
+
+    document.getElementById("balanceValue").innerText =
+        userData.tokens || 0;
 
 }
 
