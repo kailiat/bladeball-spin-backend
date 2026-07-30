@@ -243,6 +243,7 @@ button:hover{
     font-weight:bold;
     color:white;
     text-shadow:0 0 5px black;
+    transform: translate(-50%, -50%);
 }
 </style>
 
@@ -344,8 +345,8 @@ rewards.forEach((text, i) => {
     const y = 160 + radius * Math.sin(angle * Math.PI / 180);
 
     label.style.position = "absolute";
-    label.style.left = (x - 30) + "px";
-    label.style.top = (y - 10) + "px";
+    label.style.left = x + "px";
+label.style.top = y + "px";
 
     wheelLabels.appendChild(label);
 
