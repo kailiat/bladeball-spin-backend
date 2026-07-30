@@ -569,9 +569,13 @@ async function loginGoogle(){
 
     }catch(err){
 
-        alert(err.message);
-
+    if(err.code === "auth/cancelled-popup-request"){
+        return;
     }
+
+    alert("Login failed. Please try again.");
+
+}
 
 }
     
