@@ -225,16 +225,16 @@ app.post("/login", async (req,res)=>{
 
 
 
-    if(!email || !password){
+    if(!account || !password){
 
-      return res.json({
+  return res.json({
 
-        success:false,
-        message:"Please fill all fields"
+    success:false,
+    message:"Please fill all fields"
 
-      });
+  });
 
-    }
+}
 
 
 
