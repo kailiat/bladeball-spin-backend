@@ -580,15 +580,19 @@ async function spin() {
 
             if (data.success) {
 
-                document.getElementById("popupTitle").innerHTML =
-                    "Congratulations!";
+    // Cập nhật Token ngay
+    document.getElementById("balanceValue").innerText = data.balance;
 
-                document.getElementById("popupReward").innerHTML =
-                    `${data.reward.amount} Tokens`;
+    document.getElementById("popupTitle").innerHTML =
+        "Congratulations!";
 
-                document.getElementById("popup").style.display = "flex";
+    document.getElementById("popupReward").innerHTML =
+        `${data.reward.amount} Tokens`;
 
-            } else {
+    document.getElementById("popup").style.display = "flex";
+
+}
+            else {
 
                 alert(data.message || data.error);
 
