@@ -539,6 +539,53 @@ user: {
   }
 
 });
+// Get Spin History
+app.get("/history", async (req, res) => {
+
+  try {
+
+    const token = req.cookies.token;
+
+    if (!token) {
+      return res.json({
+        success: false,
+        message: "Please login first"
+      });
+    }
+
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET
+    );
+
+    const { data, error } = await supabase
+      .from("spin_history")
+      .select("*")
+      .eq("user_id", decoded.id)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      return res.json({
+        success: false,
+        error: error.message
+      });
+    }
+
+    res.json({
+      success: true,
+      history: data
+    });
+
+  } catch (err) {
+
+    res.json({
+      success: false,
+      error: err.message
+    });
+
+  }
+
+});
 const PORT = process.env.PORT || 3000;
 
 
