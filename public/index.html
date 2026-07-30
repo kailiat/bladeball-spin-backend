@@ -549,104 +549,62 @@ label.style.top = y + "px";
 
 });
 
-async function spin(){
+async function spin() {
 
+    if (spinning) return;
 
-if(spinning) return;
+    spinning = true;
 
+    const wheel = document.getElementById("wheel");
 
-spinning=true;
+    // Quay vòng
+    currentRotation += 1800 + Math.floor(Math.random() * 360);
 
+    wheel.style.transform = `rotate(${currentRotation}deg)`;
 
-const wheel=document.getElementById("wheel");
+    setTimeout(async () => {
 
+        try {
 
+            const res = await fetch(
+                "https://bladeball-spin-backend.onrender.com/spin",
+                {
+                    method: "POST",
+                    credentials: "include"
+                }
+            );
 
+            const data = await res.json();
 
+            console.log(data);
 
-// quay vòng
+            if (data.success) {
 
-currentRotation +=
-1800 + Math.floor(Math.random()*360);
+                document.getElementById("popupTitle").innerHTML =
+                    "Congratulations!";
 
-wheel.style.transform =
-`rotate(${currentRotation}deg)`;
+                document.getElementById("popupReward").innerHTML =
+                    `${data.reward.amount} Tokens`;
 
+                document.getElementById("popup").style.display = "flex";
 
+            } else {
 
+                alert(data.message || data.error);
 
-// gọi backend
+            }
 
-setTimeout(async()=>{
+        } catch (err) {
 
+            alert("Server Error");
 
-const user = window.auth.currentUser;
+            console.error(err);
 
+        }
 
-if(!user){
+        spinning = false;
 
-    alert("Please login first!");
-
-    spinning=false;
-
-    return;
-
-}
-
-
-const token = await user.getIdToken();
-
-
-
-const res = await fetch(
-
-"https://bladeball-spin-backend.onrender.com/spin",
-
-{
-
-method:"POST",
-
-headers:{
-    Authorization:`Bearer ${token}`
-}
-
-}
-
-);
-
-
-
-const data = await res.json();
-
-
-
-console.log(data);
-
-
-
-if (data.success) {
-
-    document.getElementById("popupTitle").innerHTML =
-        "Congratulations!";
-
-    document.getElementById("popupReward").innerHTML =
-        `${data.reward.amount} Tokens`;
-
-    document.getElementById("popup").style.display = "flex";
-
-} else {
-
-    alert(data.message || data.error);
-
-}
-
-spinning = false;
-
-
-
-},5000);
-
-
+    }, 5000);
 
 }
 
