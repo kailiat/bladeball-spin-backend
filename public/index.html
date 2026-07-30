@@ -1,68 +1,254 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-    <title>Blade Ball Spin</title>
 
-    <style>
-        body {
-            background:#111;
-            color:white;
-            font-family:Arial;
-            text-align:center;
-            padding-top:100px;
-        }
+<title>Blade Ball Spin</title>
 
-        h1 {
-            font-size:50px;
-        }
+<style>
 
-        button {
-            font-size:30px;
-            padding:20px 60px;
-            border-radius:20px;
-            cursor:pointer;
-            background:#7c3cff;
-            color:white;
-            border:none;
-        }
+body {
+    background:#111;
+    color:white;
+    font-family:Arial;
+    text-align:center;
+    padding-top:50px;
+}
 
-        button:hover {
-            transform:scale(1.05);
-        }
-    </style>
+
+h1 {
+    font-size:45px;
+}
+
+
+.wheel-container {
+    position:relative;
+    margin:40px auto;
+    width:320px;
+    height:320px;
+}
+
+
+.wheel {
+
+    width:320px;
+    height:320px;
+
+    border-radius:50%;
+
+    background:
+    conic-gradient(
+        #7c3cff 0deg 120deg,
+        #00c8ff 120deg 240deg,
+        #333 240deg 360deg
+    );
+
+
+    border:8px solid white;
+
+    transition: transform 5s cubic-bezier(.17,.67,.25,1);
+
+}
+
+
+
+.arrow {
+
+    position:absolute;
+
+    top:-20px;
+
+    left:145px;
+
+    font-size:40px;
+
+}
+
+
+button {
+
+    margin-top:20px;
+
+    font-size:30px;
+
+    padding:20px 70px;
+
+    border:none;
+
+    border-radius:20px;
+
+    background:#7c3cff;
+
+    color:white;
+
+    cursor:pointer;
+
+}
+
+
+button:hover {
+
+    transform:scale(1.05);
+
+}
+
+
+
+#result {
+
+    margin-top:30px;
+
+    font-size:35px;
+
+}
+
+
+</style>
 
 </head>
 
+
 <body>
 
-<h1>🎡 Blade Ball Spin</h1>
+
+<h1>
+🎡 Blade Ball Spin
+</h1>
+
+
+
+<div class="wheel-container">
+
+<div class="arrow">
+▼
+</div>
+
+
+<div id="wheel" class="wheel">
+
+</div>
+
+
+</div>
+
+
+
 
 <button onclick="spin()">
-    SPIN
+SPIN
 </button>
+
+
+<div id="result"></div>
+
 
 
 <script>
 
+
+let spinning = false;
+
+
+
 async function spin(){
 
-    const res = await fetch(
-        "https://bladeball-spin-backend.onrender.com/spin",
-        {
-            method:"POST",
-            credentials:"include"
-        }
-    );
 
-    const data = await res.json();
+if(spinning) return;
 
-    console.log(data);
 
-    alert(JSON.stringify(data));
+spinning=true;
+
+
+const wheel=document.getElementById("wheel");
+
+const result=document.getElementById("result");
+
+
+
+result.innerHTML="";
+
+
+
+// quay vòng
+
+let rotate =
+Math.floor(Math.random()*360)
++1800;
+
+
+wheel.style.transform=
+`rotate(${rotate}deg)`;
+
+
+
+
+// gọi backend
+
+setTimeout(async()=>{
+
+
+const res = await fetch(
+
+"https://bladeball-spin-backend.onrender.com/spin",
+
+{
+
+method:"POST",
+
+credentials:"include"
 
 }
 
+);
+
+
+
+const data = await res.json();
+
+
+
+console.log(data);
+
+
+
+if(data.success){
+
+
+result.innerHTML=
+`
+✨ ${data.reward.name}
+<br>
+${data.reward.amount} Tokens
+`;
+
+
+
+}else{
+
+
+result.innerHTML=
+data.message || data.error;
+
+
+}
+
+
+
+spinning=false;
+
+
+
+},5000);
+
+
+
+}
+
+
+
 </script>
 
+
 </body>
+
 </html>
