@@ -247,6 +247,21 @@ button:hover{
     text-shadow:0 0 5px black;
     transform: translate(-50%, -50%);
 }
+    .menu{
+
+    margin-top:35px;
+
+}
+
+.menu button{
+
+    margin:8px;
+
+    padding:14px 35px;
+
+    font-size:18px;
+
+}
 </style>
 
 </head>
@@ -285,7 +300,21 @@ button:hover{
 <button onclick="spin()">
 SPIN
 </button>
+<div class="menu">
 
+    <button onclick="showWithdraw()">
+        🎁 Withdraw
+    </button>
+
+    <button onclick="showHistory()">
+        📜 History
+    </button>
+
+    <button onclick="showProfile()">
+        👤 Profile
+    </button>
+
+</div>
 
 <div id="popup" class="popup">
 
