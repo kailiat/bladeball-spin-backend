@@ -375,7 +375,45 @@ SPIN
     </div>
 
 </div>
+<script type="module">
 
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
+
+import {
+    getAuth,
+    GoogleAuthProvider,
+    signInWithPopup,
+    signOut
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+
+const firebaseConfig = {
+
+    apiKey: "AIzaSyAwHP1TdLpeUUWn_wyU_e27XBJgUunJ2NU",
+
+    authDomain: "bladeballspin.firebaseapp.com",
+
+    projectId: "bladeballspin",
+
+    storageBucket: "bladeballspin.firebasestorage.app",
+
+    messagingSenderId: "383503271988",
+
+    appId: "1:383503271988:web:266ea99181ae0aec3ca261"
+
+};
+
+const app = initializeApp(firebaseConfig);
+
+const auth = getAuth(app);
+
+const provider = new GoogleAuthProvider();
+
+window.auth = auth;
+window.provider = provider;
+window.signInWithPopup = signInWithPopup;
+window.signOut = signOut;
+
+</script>
 <script>
 
 let spinning = false;
