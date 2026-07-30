@@ -6,11 +6,15 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
 
+const path = require("path");
+
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 app.use(cookieParser());
+
+app.use(express.static(path.join(__dirname, "public")));
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -20,9 +24,6 @@ const supabase = createClient(
 console.log("Has secret key:", !!process.env.SUPABASE_SECRET_KEY);
 console.log("Secret starts with:", process.env.SUPABASE_SECRET_KEY?.slice(0, 12));
 
-app.get("/", (req, res) => {
-  res.send("Blade Ball Spin Backend is running!");
-});
 
 
 // Test kết nối Supabase
