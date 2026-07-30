@@ -89,17 +89,31 @@ app.post("/register", async (req, res) => {
 
   try {
 
-    const { username, email, password } = req.body;
+    const { account, password } = req.body;
 
 
-    if (!username || !email || !password) {
+    if (!account || !password) {
 
       return res.json({
-        success: false,
-        message: "Please fill all fields"
+        success:false,
+        message:"Please fill all fields"
       });
 
     }
+
+
+    let username = null;
+    let email = null;
+
+
+    if(account.includes("@")){
+        email = account;
+    }else{
+        username = account;
+    }
+
+
+   
 
 
 
@@ -107,7 +121,7 @@ app.post("/register", async (req, res) => {
     const { data: existingUser, error: checkError } = await supabase
       .from("users")
       .select("id")
-      .or(`username.eq.${username},email.eq.${email}`)
+      .or(`username.eq.${account},email.eq.${account}`)
       .limit(1);
 
 
@@ -207,7 +221,7 @@ app.post("/login", async (req,res)=>{
   try {
 
 
-    const { email,password } = req.body;
+    const { account,password } = req.body;
 
 
 
@@ -228,12 +242,9 @@ app.post("/login", async (req,res)=>{
     const { data: users,error } = await supabase
 
       .from("users")
-
-      .select("*")
-
-      .eq("email",email)
-
-      .limit(1);
+.select("*")
+.or(`email.eq.${account},username.eq.${account}`)
+.limit(1);
 
 
 
