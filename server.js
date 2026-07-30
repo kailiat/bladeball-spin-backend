@@ -466,7 +466,41 @@ app.post("/spin", async (req, res) => {
     if (!reward) {
       reward = prizes[prizes.length - 1];
     }
+// Lấy dữ liệu user hiện tại
+const { data: userData, error: userError } = await supabase
+  .from("users")
+  .select("*")
+  .eq("id", decoded.id)
+  .single();
 
+if (userError) {
+  return res.json({
+    success: false,
+    error: userError.message
+  });
+}
+
+// Cộng Token
+const newBalance =
+  (userData.tokens || 0) + reward.amount;
+
+// Update Token
+await supabase
+  .from("users")
+  .update({
+    tokens: newBalance
+  })
+  .eq("id", decoded.id);
+
+// Lưu lịch sử quay
+await supabase
+  .from("spin_history")
+  .insert({
+    user_id: decoded.id,
+    reward: reward.name,
+    amount: reward.amount,
+    spin_date: new Date().toISOString().slice(0,10)
+  });
     res.json({
 
       success: true,
