@@ -582,6 +582,18 @@ async function loginGoogle(){
 }
 
 }
+
+async function logoutGoogle(){
+
+    await window.signOut(window.auth);
+
+    document.getElementById("userBox").innerHTML = `
+        <button onclick="loginGoogle()">
+            🔐 Login with Google
+        </button>
+    `;
+
+}
     
 function showWithdraw(){
 
