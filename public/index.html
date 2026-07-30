@@ -281,9 +281,13 @@ button:hover{
 </p>
 <div id="userBox">
 
-    <button onclick="loginGoogle()">
-        🔐 Login with Google
-    </button>
+<button onclick="showLogin()">
+🔐 Login
+</button>
+
+<button onclick="showRegister()">
+📝 Register
+</button>
 
 </div>
 
@@ -498,93 +502,47 @@ function closePopup(){
 document.getElementById("popup").style.display="none";
 
 }
-async function loginGoogle(){
+async function checkLogin(){
 
-    try{
-
-        const result = await window.signInWithPopup(
-            window.auth,
-            window.provider
-        );
-
-        const user = result.user;
-
-
-// lưu user vào Firestore
-
-const userRef = window.doc(
-    window.db,
-    "users",
-    user.uid
-);
-
-
-const userSnap = await window.getDoc(userRef);
-
-
-if(!userSnap.exists()){
-
-    await window.setDoc(
-        userRef,
+    const res = await fetch(
+        "https://bladeball-spin-backend.onrender.com/me",
         {
-            name:user.displayName,
-            email:user.email,
-            tokens:0,
-            spins:0
+            credentials:"include"
         }
     );
 
-    document.getElementById("balanceValue").innerText = 0;
+    const data = await res.json();
 
 
-}else{
-
-    const userData = userSnap.data();
-
-    document.getElementById("balanceValue").innerText =
-        userData.tokens || 0;
-
-}
-
-
-document.getElementById("userBox").innerHTML = `
-    <h3>👤 ${user.displayName}</h3>
-    <p>${user.email}</p>
-
-    <button onclick="logoutGoogle()">
-        Logout
-    </button>
-`;
-
-    }catch(err){
-
-    if(err.code === "auth/cancelled-popup-request"){
-        return;
-    }
-
-    alert("Login failed. Please try again.");
-
-}
-
-}
-
-async function logoutGoogle(){
-
-    try{
-
-        await window.signOut(window.auth);
+    if(data.success){
 
         document.getElementById("userBox").innerHTML = `
-            <button onclick="loginGoogle()">
-                🔐 Login with Google
-            </button>
+
+        <h3>👤 ${data.user.username}</h3>
+
+        <button onclick="logout()">
+            Logout
+        </button>
+
         `;
 
-    }catch(err){
-
-        alert("Logout failed.");
-
     }
+
+}
+
+
+async function logout(){
+
+    await fetch(
+        "https://bladeball-spin-backend.onrender.com/logout",
+        {
+            method:"POST",
+            credentials:"include"
+        }
+    );
+
+
+    location.reload();
 
 }
     
