@@ -433,7 +433,63 @@ window.auth = auth;
 window.provider = provider;
 window.signInWithPopup = signInWithPopup;
 window.signOut = signOut;
+window.onAuthStateChanged(window.auth, async (user)=>{
 
+    if(user){
+
+        const userRef = window.doc(
+            window.db,
+            "users",
+            user.uid
+        );
+
+
+        const userSnap = await window.getDoc(userRef);
+
+
+        if(!userSnap.exists()){
+
+            await window.setDoc(
+                userRef,
+                {
+                    name:user.displayName,
+                    email:user.email,
+                    tokens:2,
+                    spins:0
+                }
+            );
+
+        }
+
+
+        document.getElementById("userBox").innerHTML = `
+
+            <h3>👤 ${user.displayName}</h3>
+
+            <p>${user.email}</p>
+
+            <button onclick="logoutGoogle()">
+                Logout
+            </button>
+
+        `;
+
+
+    }else{
+
+
+        document.getElementById("userBox").innerHTML = `
+
+            <button onclick="loginGoogle()">
+                🔐 Login with Google
+            </button>
+
+        `;
+
+
+    }
+
+});
 </script>
 <script>
 
