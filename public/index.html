@@ -29,35 +29,42 @@ h1 {
 }
 
 
-.wheel {
+.wheel{
 
     width:320px;
     height:320px;
 
     border-radius:50%;
 
-    background:
-conic-gradient(
+    background-image:
 
-#6d2dff 0deg 30deg,
-#2d9cff 30deg 60deg,
-#444 60deg 90deg,
-#6d2dff 90deg 120deg,
-#2d9cff 120deg 150deg,
-#444 150deg 180deg,
-#6d2dff 180deg 210deg,
-#2d9cff 210deg 240deg,
-#444 240deg 270deg,
-#6d2dff 270deg 300deg,
-#2d9cff 300deg 330deg,
-#444 330deg 360deg
+    repeating-conic-gradient(
 
-);
+        rgba(255,255,255,.9) 0deg 1deg,
+        transparent 1deg 30deg
 
+    ),
+
+    conic-gradient(
+
+        #6d2dff 0deg 30deg,
+        #2d9cff 30deg 60deg,
+        #444444 60deg 90deg,
+        #6d2dff 90deg 120deg,
+        #2d9cff 120deg 150deg,
+        #444444 150deg 180deg,
+        #6d2dff 180deg 210deg,
+        #2d9cff 210deg 240deg,
+        #444444 240deg 270deg,
+        #6d2dff 270deg 300deg,
+        #2d9cff 300deg 330deg,
+        #444444 330deg 360deg
+
+    );
 
     border:8px solid white;
 
-    transition: transform 5s cubic-bezier(.17,.67,.25,1);
+    transition:transform 5s cubic-bezier(.17,.67,.25,1);
 
 }
 
@@ -117,12 +124,11 @@ button:hover{
 
 
 
-#result {
-
+#result{
     margin-top:30px;
-
+    min-height:90px;
     font-size:35px;
-
+    font-weight:bold;
 }
 
 .logo{
