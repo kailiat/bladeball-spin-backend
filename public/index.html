@@ -577,7 +577,24 @@ async function loginGoogle(){
 
         const user = result.user;
 
-        document.getElementById("userBox").innerHTML = `
+
+// lưu user vào Firestore
+
+await window.setDoc(
+    window.doc(window.db, "users", user.uid),
+    {
+        name: user.displayName,
+        email: user.email,
+        tokens: 2,
+        spins: 0
+    },
+    {
+        merge:true
+    }
+);
+
+
+document.getElementById("userBox").innerHTML = `
     <h3>👤 ${user.displayName}</h3>
     <p>${user.email}</p>
 
