@@ -336,7 +336,45 @@ SPIN
 
 </div>
 
+<div id="withdrawPopup" class="popup">
 
+    <div class="popup-box">
+
+        <h2>🎁 Withdraw</h2>
+
+        <p>
+            Your Balance
+            <br>
+            <span id="balanceValue">2</span> ⭐
+        </p>
+
+        <p>
+            Minimum Withdrawal
+            <br>
+            <b>3 Tokens</b>
+        </p>
+
+        <input id="robloxName" placeholder="Roblox Username">
+
+        <br><br>
+
+        <input id="discordName" placeholder="Discord Username">
+
+        <br><br>
+
+        <button id="withdrawBtn" onclick="submitWithdraw()">
+            Withdraw
+        </button>
+
+        <br><br>
+
+        <button onclick="closeWithdraw()">
+            Cancel
+        </button>
+
+    </div>
+
+</div>
 
 <script>
 
@@ -471,10 +509,29 @@ document.getElementById("popup").style.display="none";
 }
 function showWithdraw(){
 
-    alert("Withdraw page coming soon!");
+    document.getElementById("withdrawPopup").style.display = "flex";
 
 }
+function closeWithdraw(){
 
+    document.getElementById("withdrawPopup").style.display = "none";
+
+}
+function submitWithdraw(){
+
+    const balance =
+        parseInt(document.getElementById("balanceValue").innerText);
+
+    if(balance < 3){
+        alert("You need at least 3 Tokens to withdraw.");
+        return;
+    }
+
+    alert("Withdraw request sent!");
+
+    closeWithdraw();
+
+}
 function showHistory(){
 
     alert("History page coming soon!");
