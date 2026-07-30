@@ -585,13 +585,21 @@ async function loginGoogle(){
 
 async function logoutGoogle(){
 
-    await window.signOut(window.auth);
+    try{
 
-    document.getElementById("userBox").innerHTML = `
-        <button onclick="loginGoogle()">
-            🔐 Login with Google
-        </button>
-    `;
+        await window.signOut(window.auth);
+
+        document.getElementById("userBox").innerHTML = `
+            <button onclick="loginGoogle()">
+                🔐 Login with Google
+            </button>
+        `;
+
+    }catch(err){
+
+        alert("Logout failed.");
+
+    }
 
 }
     
