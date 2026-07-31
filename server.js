@@ -444,6 +444,11 @@ app.post("/spin", async (req, res) => {
         message: "No prizes found"
       });
     }
+    const rewardSlots = {
+  1: [0,3,6,9],
+  2: [1,4,7,10],
+  3: [2,5,8,11]
+};
 
     // Random number 1 -> 100
     const random = Math.floor(Math.random() * 100) + 1;
