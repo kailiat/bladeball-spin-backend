@@ -445,9 +445,9 @@ app.post("/spin", async (req, res) => {
       });
     }
     const rewardSlots = {
-  1: [0,3,6,9],
-  2: [1,4,7,10],
-  3: [2,5,8,11]
+  1: [0],
+  2: [1],
+  3: [2]
 };
 
     // Random number 1 -> 100
