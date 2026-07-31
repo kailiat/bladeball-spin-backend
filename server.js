@@ -471,6 +471,8 @@ app.post("/spin", async (req, res) => {
     if (!reward) {
       reward = prizes[prizes.length - 1];
     }
+    const slots = rewardSlots[reward.id];
+const slot = slots[Math.floor(Math.random() * slots.length)];
 // Lấy dữ liệu user hiện tại
 const { data: userData, error: userError } = await supabase
   .from("users")
@@ -524,7 +526,8 @@ console.log("==========================");
   id: reward.id,
   name: reward.name,
   amount: reward.amount,
-  chance: reward.chance
+  chance: reward.chance,
+  slot: slot
 },
 
 balance: newBalance,
