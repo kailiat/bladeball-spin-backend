@@ -451,7 +451,8 @@ function getRewardAngle(amount){
 
     const slot = slots[Math.floor(Math.random()*slots.length)];
 
-    // tâm ô
+    console.log("WIN SLOT:", slot);
+
     return slot * 30 + 15;
 }
 async function spin(){
@@ -482,12 +483,15 @@ async function spin(){
 
         }
 
-        const rewardAngle = getRewardAngle(data.reward.amount);
+        const rewardAngle = 45;
+
+console.log("REWARD:", data.reward.amount);
+console.log("ANGLE:", rewardAngle);
 
         const wheel =
             document.getElementById("wheel");
 
-        currentRotation += 1800 + (270 - rewardAngle);
+        currentRotation += 1800 - rewardAngle + 90;
 
 
         wheel.style.transform =
