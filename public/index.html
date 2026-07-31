@@ -441,6 +441,7 @@ async function spin(){
     if(spinning) return;
 
     spinning = true;
+    const wheel = document.getElementById("wheel");
 
     try{
 
@@ -469,14 +470,28 @@ async function spin(){
 console.log("SLOT:", data.reward.slot);
 console.log("ANGLE:", rewardAngle);
 
-const wheel = document.getElementById("wheel");
 
 // Quay nhanh trước
 currentRotation += 1800;
 
 wheel.style.transform = `rotate(${currentRotation}deg)`;
 
-        setTimeout(()=>{
+setTimeout(()=>{
+
+    // Snap bánh xe về đúng ô
+    const target =
+    currentRotation - (currentRotation % 360) + (270 - rewardAngle);
+
+currentRotation = target;
+
+    wheel.style.transition = "transform .5s ease-out";
+    wheel.style.transform = `rotate(${currentRotation}deg)`;
+    setTimeout(() => {
+
+    wheel.style.transition =
+        "transform 5s cubic-bezier(.17,.67,.25,1)";
+
+},500);
 
             document.getElementById("balanceValue").innerText =
                 data.balance;
@@ -496,11 +511,14 @@ wheel.style.transform = `rotate(${currentRotation}deg)`;
 
     }catch(err){
 
-        console.error(err);
-        alert("Server Error");
-        spinning = false;
+    console.error(err);
+    alert("Server Error");
+    spinning = false;
 
-    }
+    wheel.style.transition =
+        "transform 5s cubic-bezier(.17,.67,.25,1)";
+
+}
 
 }
 
