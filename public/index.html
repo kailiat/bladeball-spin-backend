@@ -433,26 +433,7 @@ label.style.top = y + "px";
     wheelLabels.appendChild(label);
 
 });
-function getRewardAngle(amount){
-
-    const slots = [];
-
-    rewards.forEach((reward,index)=>{
-
-        if(
-            (amount == 500 && reward == "500") ||
-            (amount == 100 && reward == "100") ||
-            (amount == 0 && reward == "Nothing")
-        ){
-            slots.push(index);
-        }
-
-    });
-
-    const slot = slots[Math.floor(Math.random()*slots.length)];
-
-    console.log("WIN SLOT:", slot);
-
+function getRewardAngle(slot){
     return slot * 30 + 15;
 }
 async function spin(){
@@ -483,19 +464,17 @@ async function spin(){
 
         }
 
-        const rewardAngle = 45;
+        const rewardAngle = getRewardAngle(data.reward.slot);
 
-console.log("REWARD:", data.reward.amount);
+console.log("SLOT:", data.reward.slot);
 console.log("ANGLE:", rewardAngle);
 
-        const wheel =
-            document.getElementById("wheel");
+const wheel = document.getElementById("wheel");
 
-        currentRotation += 1800 - rewardAngle + 90;
+// Quay nhanh trước
+currentRotation += 1800;
 
-
-        wheel.style.transform =
-            `rotate(${currentRotation}deg)`;
+wheel.style.transform = `rotate(${currentRotation}deg)`;
 
         setTimeout(()=>{
 
