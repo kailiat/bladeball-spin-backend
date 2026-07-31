@@ -485,8 +485,8 @@ async function spin(){
         const wheel =
             document.getElementById("wheel");
 
-        currentRotation =
-currentRotation + 1800 + (360 - rewardAngle);
+        currentRotation = 1800 + (360 - rewardAngle);
+
 
         wheel.style.transform =
             `rotate(${currentRotation}deg)`;
