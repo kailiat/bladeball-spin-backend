@@ -645,33 +645,69 @@ function showProfile(){
     alert("Profile page coming soon!");
 
 }
-    function testSpin(){
+   async function testSpin(){
 
-    const testRewards = [
-        5000,
-        3000,
-        1000,
-        500,
-        100
-    ];
+    if(spinning) return;
 
+    spinning = true;
 
-    const reward =
-        testRewards[
-            Math.floor(Math.random()*testRewards.length)
-        ];
+    const wheel = document.getElementById("wheel");
 
+    wheel.style.transition = "none";
+    wheel.style.transform = "rotate(0deg)";
 
-    document.getElementById("popupTitle").innerHTML =
-        "🎲 TEST JACKPOT";
+    await new Promise(r=>setTimeout(r,50));
 
+    wheel.style.transition = "transform 3s ease-out";
 
-    document.getElementById("popupReward").innerHTML =
-        reward + " Tokens";
+    // Tỉ lệ demo (95% jackpot)
+    const rewards = [5000,3000,1000,500,100];
 
+    const chances = [45,30,20,4,1];
 
-    document.getElementById("popup").style.display =
-        "flex";
+    let random = Math.random()*100;
+
+    let reward = 100;
+
+    let total = 0;
+
+    for(let i=0;i<chances.length;i++){
+
+        total += chances[i];
+
+        if(random<=total){
+
+            reward = rewards[i];
+
+            break;
+
+        }
+
+    }
+
+    // random ô để bánh xe vẫn quay đẹp
+    const slot = Math.floor(Math.random()*12);
+
+    const targetDeg =
+        1800 + (360 - (slot*30+15));
+
+    wheel.style.transform =
+        `rotate(${targetDeg}deg)`;
+
+    setTimeout(()=>{
+
+        document.getElementById("popupTitle").innerHTML =
+            "🎲 TEST JACKPOT";
+
+        document.getElementById("popupReward").innerHTML =
+            reward + " Tokens";
+
+        document.getElementById("popup").style.display =
+            "flex";
+
+        spinning = false;
+
+    },3000);
 
 }
     checkLogin();
