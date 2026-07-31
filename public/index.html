@@ -471,14 +471,14 @@ console.log(data);
         console.log(data.reward.slot);
 
         // quay 5 vòng
-        const spins = 5;
+        currentRotation = 0;
 
-        const finalRotation =
-    currentRotation +
-    spins * 360 -
-    rewardAngle;
+const finalRotation =
+spins * 360 +
+(270 - rewardAngle);
 
-        currentRotation = finalRotation;
+wheel.style.transform =
+`rotate(${finalRotation}deg)`;
 
         wheel.style.transform =
             `rotate(${currentRotation}deg)`;
