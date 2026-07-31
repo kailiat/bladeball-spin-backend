@@ -464,7 +464,7 @@ async function spin() {
     try {
 
         const res = await fetch(
-            "https://bladeball-spin-backend.onrender.com/spin",
+            "https://bladeball-spin-backend-kpjl.onrender.com/spin",
             {
                 method: "POST",
                 credentials: "include"
@@ -564,7 +564,7 @@ function closePopup(){
 async function checkLogin(){
 
     const res = await fetch(
-        "https://bladeball-spin-backend.onrender.com/me",
+        "https://bladeball-spin-backend-kpjl.onrender.com/me",
         {
             credentials:"include"
         }
@@ -593,7 +593,7 @@ async function checkLogin(){
 async function logout(){
 
     await fetch(
-        "https://bladeball-spin-backend.onrender.com/logout",
+        "https://bladeball-spin-backend-kpjl.onrender.com/logout",
         {
             method:"POST",
             credentials:"include"
@@ -608,7 +608,7 @@ async function logout(){
 async function showWithdraw(){
 
     const res = await fetch(
-        "https://bladeball-spin-backend.onrender.com/me",
+        "https://bladeball-spin-backend-kpjl.onrender.com/me",
         {
             credentials:"include"
         }
@@ -640,7 +640,7 @@ function submitWithdraw(){
 async function showHistory(){
 
     const res = await fetch(
-        "https://bladeball-spin-backend.onrender.com/history",
+        "https://bladeball-spin-backend-kpjl.onrender.com/history",
         {
             credentials:"include"
         }
