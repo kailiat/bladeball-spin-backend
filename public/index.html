@@ -228,6 +228,17 @@ button:hover{
     }
 
 }
+    @keyframes spinForever{
+
+    from{
+        transform:rotate(0deg);
+    }
+
+    to{
+        transform:rotate(360deg);
+    }
+
+}
     #wheelLabels{
     position:absolute;
     top:0;
@@ -444,8 +455,11 @@ async function spin() {
 
     const wheel = document.getElementById("wheel");
 
-    wheel.style.transition =
-        "transform 5s cubic-bezier(.17,.67,.25,1)";
+wheel.style.transition = "none";
+
+wheel.style.transform = "rotate(0deg)";
+wheel.offsetHeight;      // ép browser reset animation
+wheel.style.animation = "spinForever .6s linear infinite";
 
     try {
 
@@ -467,28 +481,15 @@ console.log(data);
             return;
         }
 
-        const rewardAngle = getRewardAngle(data.reward.slot);
-        console.log(data.reward.slot);
-
-        // quay 5 vòng
-        const spins = 5;
-
-const finalRotation =
-currentRotation +
-spins * 360 +
-(270 - rewardAngle);
-
-currentRotation = finalRotation;
-
-wheel.style.transform =
-`rotate(${currentRotation}deg)`;
-
+        
        
 
         setTimeout(() => {
 
-            document.getElementById("balanceValue").innerText =
-                data.balance;
+    wheel.style.animation = "none";
+
+    document.getElementById("balanceValue").innerText =
+        data.balance;
 
             document.getElementById("popupTitle").innerHTML =
                 "Congratulations!";
@@ -517,7 +518,12 @@ wheel.style.transform =
 
 function closePopup(){
 
-document.getElementById("popup").style.display="none";
+    document.getElementById("popup").style.display = "none";
+
+    const wheel = document.getElementById("wheel");
+
+    wheel.style.animation = "none";
+    wheel.style.transform = "rotate(0deg)";
 
 }
 async function checkLogin(){
