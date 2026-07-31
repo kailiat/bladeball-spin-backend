@@ -321,6 +321,9 @@ button:hover{
 <button onclick="spin()">
 SPIN
 </button>
+    <button onclick="testSpin()">
+🎲 Test Spin
+</button>
 <div class="menu">
 
     <button onclick="showWithdraw()">
@@ -640,6 +643,35 @@ function showHistory(){
 function showProfile(){
 
     alert("Profile page coming soon!");
+
+}
+    function testSpin(){
+
+    const testRewards = [
+        5000,
+        3000,
+        1000,
+        500,
+        100
+    ];
+
+
+    const reward =
+        testRewards[
+            Math.floor(Math.random()*testRewards.length)
+        ];
+
+
+    document.getElementById("popupTitle").innerHTML =
+        "🎲 TEST JACKPOT";
+
+
+    document.getElementById("popupReward").innerHTML =
+        reward + " Tokens";
+
+
+    document.getElementById("popup").style.display =
+        "flex";
 
 }
     checkLogin();
