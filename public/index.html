@@ -433,22 +433,23 @@ label.style.top = y + "px";
     wheelLabels.appendChild(label);
 
 });
-function getRewardAngle(rewardName){
+function getRewardAngle(amount){
 
-    console.log("Tên thưởng:", rewardName);
+    if(amount == 500){
 
-    const map = {
-        "500 Tokens":[15,105,195,285],
-        "100 Tokens":[45,135,225,315],
-        "Nothing":[75,165,255,345]
-    };
+        const list = [15,105,195,285];
+        return list[Math.floor(Math.random()*list.length)];
 
-    console.log("Góc:", map[rewardName]);
+    }
 
-    const list = map[rewardName];
+    if(amount == 100){
 
-    if(!list) return 75;
+        const list = [45,135,225,315];
+        return list[Math.floor(Math.random()*list.length)];
 
+    }
+
+    const list = [75,165,255,345];
     return list[Math.floor(Math.random()*list.length)];
 }
 async function spin(){
@@ -479,7 +480,7 @@ async function spin(){
 
         }
 
-        const rewardAngle = getRewardAngle(data.reward.name);
+        const rewardAngle = getRewardAngle(data.reward.amount);
 
         const wheel =
             document.getElementById("wheel");
