@@ -419,7 +419,7 @@ rewards.forEach((text, i) => {
 
     label.innerHTML = text;
 
-    const angle = i * 30 - 75;
+    const angle = i * 30 + 15;
 
     const radius = 125;
 
@@ -434,7 +434,7 @@ label.style.top = y + "px";
 
 });
 function getRewardAngle(slot){
-    return slot * 30 + 15;
+    return slot * 30 + 105;
 }
 async function spin() {
 
@@ -472,9 +472,9 @@ async function spin() {
         const spins = 5;
 
         const finalRotation =
-            currentRotation +
-            spins * 360 +
-            (270 - rewardAngle);
+    currentRotation +
+    spins * 360 -
+    rewardAngle;
 
         currentRotation = finalRotation;
 
