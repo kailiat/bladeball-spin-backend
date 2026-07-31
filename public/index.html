@@ -433,67 +433,87 @@ label.style.top = y + "px";
     wheelLabels.appendChild(label);
 
 });
+function getRewardAngle(rewardName){
 
-async function spin() {
+    switch(rewardName){
 
-    if (spinning) return;
+        case "500 Tokens":
+            return 15;
+
+        case "100 Tokens":
+            return 45;
+
+        case "Nothing":
+            return 75;
+
+        default:
+            return 75;
+    }
+
+}
+async function spin(){
+
+    if(spinning) return;
 
     spinning = true;
 
-    const wheel = document.getElementById("wheel");
+    try{
 
-    // Quay vòng
-    currentRotation += 1800 + Math.floor(Math.random() * 360);
-
-    wheel.style.transform = `rotate(${currentRotation}deg)`;
-
-    setTimeout(async () => {
-
-        try {
-
-            const res = await fetch(
-                "https://bladeball-spin-backend.onrender.com/spin",
-                {
-                    method: "POST",
-                    credentials: "include"
-                }
-            );
-
-            const data = await res.json();
-
-            console.log(data);
-
-            if (data.success) {
-
-    // Cập nhật Token ngay
-    document.getElementById("balanceValue").innerText = data.balance;
-
-    document.getElementById("popupTitle").innerHTML =
-        "Congratulations!";
-console.log(data.reward);
-    document.getElementById("popupReward").innerHTML =
-        `${data.reward.amount} Tokens`;
-
-    document.getElementById("popup").style.display = "flex";
-
-}
-            else {
-
-                alert(data.message || data.error);
-
+        const res = await fetch(
+            "https://bladeball-spin-backend.onrender.com/spin",
+            {
+                method:"POST",
+                credentials:"include"
             }
+        );
 
-        } catch (err) {
+        const data = await res.json();
 
-            alert("Server Error");
+        if(!data.success){
 
-            console.error(err);
+            alert(data.message || data.error);
+            spinning = false;
+            return;
 
         }
 
+        const rewardAngle =
+            getRewardAngle(data.reward.name);
+
+        const wheel =
+            document.getElementById("wheel");
+
+        currentRotation +=
+            1800 + (360 - rewardAngle);
+
+        wheel.style.transform =
+            `rotate(${currentRotation}deg)`;
+
+        setTimeout(()=>{
+
+            document.getElementById("balanceValue").innerText =
+                data.balance;
+
+            document.getElementById("popupTitle").innerHTML =
+                "Congratulations!";
+
+            document.getElementById("popupReward").innerHTML =
+                `${data.reward.amount} Tokens`;
+
+            document.getElementById("popup").style.display =
+                "flex";
+
+            spinning = false;
+
+        },5000);
+
+    }catch(err){
+
+        console.error(err);
+        alert("Server Error");
         spinning = false;
 
-    }, 5000);
+    }
 
 }
 
