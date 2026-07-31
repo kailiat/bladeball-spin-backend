@@ -454,11 +454,8 @@ async function spin() {
     spinning = true;
 
     const wheel = document.getElementById("wheel");
-
-    wheel.style.transition = "none";
-    wheel.style.transform = "rotate(0deg)";
-
-    await new Promise(r => setTimeout(r,50));
+    const currentRotation =
+    parseFloat(wheel.dataset.rotation || 0);
 
     wheel.style.transition = "transform 3s ease-out";
 
@@ -493,10 +490,14 @@ if(data.reward.slot !== undefined){
     const slot = data.reward.slot;
 
     const targetDeg =
-        1800 + (360 - (slot * 30 + 15));
+    currentRotation +
+    1800 +
+    (360 - (slot * 30 + 15));
 
-    wheel.style.transform =
-        `rotate(${targetDeg}deg)`;
+wheel.style.transform =
+    `rotate(${targetDeg}deg)`;
+
+wheel.dataset.rotation = targetDeg;
 
 }else{
 
@@ -559,11 +560,6 @@ function closePopup(){
 
     document.getElementById("popup").style.display = "none";
 
-    const wheel = document.getElementById("wheel");
-
-    wheel.style.animation = "none";
-    wheel.style.transform = "rotate(0deg)";
-
 }
 async function checkLogin(){
 
@@ -609,9 +605,16 @@ async function logout(){
 
 }
     
-function showWithdraw(){
+async function showWithdraw(){
 
-    document.getElementById("withdrawPopup").style.display = "flex";
+    const res = await fetch(
+        "https://bladeball-spin-backend.onrender.com/me",
+        {
+            credentials:"include"
+        }
+    );
+
+    document.getElementById("withdrawPopup").style.display="flex";
 
 }
 function closeWithdraw(){
@@ -634,9 +637,43 @@ function submitWithdraw(){
     closeWithdraw();
 
 }
-function showHistory(){
+async function showHistory(){
 
-    alert("History page coming soon!");
+    const res = await fetch(
+        "https://bladeball-spin-backend.onrender.com/history",
+        {
+            credentials:"include"
+        }
+    );
+
+    const data = await res.json();
+
+    if(!data.success){
+
+        alert(data.message || data.error);
+
+        return;
+
+    }
+
+    let text = "📜 Spin History\n\n";
+
+    if(data.history.length===0){
+
+        text += "No history";
+
+    }else{
+
+        data.history.forEach(item=>{
+
+            text +=
+            `${item.reward} (+${item.amount})\n`;
+
+        });
+
+    }
+
+    alert(text);
 
 }
 
@@ -652,13 +689,11 @@ function showProfile(){
     spinning = true;
 
     const wheel = document.getElementById("wheel");
+       const currentRotation =
+    parseFloat(wheel.dataset.rotation || 0);
 
-    wheel.style.transition = "none";
-    wheel.style.transform = "rotate(0deg)";
 
-    await new Promise(r=>setTimeout(r,50));
-
-    wheel.style.transition = "transform 3s ease-out";
+    
 
     // Tỉ lệ demo (95% jackpot)
     const rewards = [5000,3000,1000,500,100];
@@ -689,10 +724,14 @@ function showProfile(){
     const slot = Math.floor(Math.random()*12);
 
     const targetDeg =
-        1800 + (360 - (slot*30+15));
+    currentRotation +
+    1800 +
+    (360 - (slot*30+15));
 
-    wheel.style.transform =
-        `rotate(${targetDeg}deg)`;
+wheel.style.transform =
+    `rotate(${targetDeg}deg)`;
+
+wheel.dataset.rotation = targetDeg;
 
     setTimeout(()=>{
 
