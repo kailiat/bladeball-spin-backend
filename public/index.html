@@ -452,11 +452,14 @@ async function spin() {
 
     const wheel = document.getElementById("wheel");
 
-wheel.style.animation = "none";
+    wheel.style.transition = "none";
+    wheel.style.transform = "rotate(0deg)";
 
-wheel.style.transition = "transform 3s ease-out";
+    await new Promise(r => setTimeout(r,50));
 
-const startTime = Date.now();
+    wheel.style.transition = "transform 3s ease-out";
+
+    const startTime = Date.now();
 
     try {
 
