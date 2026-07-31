@@ -435,22 +435,29 @@ label.style.top = y + "px";
 });
 function getRewardAngle(amount){
 
-    if(amount == 500){
+    const slots = [];
 
-        const list = [15,105,195,285];
-        return list[Math.floor(Math.random()*list.length)];
+    rewards.forEach((reward,index)=>{
 
-    }
+        if(
+            (amount == 500 && reward == "500") ||
+            (amount == 100 && reward == "100") ||
+            (amount == 0 && reward == "Nothing")
+        ){
 
-    if(amount == 100){
+            slots.push(index);
 
-        const list = [45,135,225,315];
-        return list[Math.floor(Math.random()*list.length)];
+        }
 
-    }
+    });
 
-    const list = [75,165,255,345];
-    return list[Math.floor(Math.random()*list.length)];
+
+    const slot =
+    slots[Math.floor(Math.random()*slots.length)];
+
+
+    return slot * 30 + 15;
+
 }
 async function spin(){
 
