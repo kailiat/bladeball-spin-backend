@@ -501,6 +501,12 @@ await supabase
     amount: reward.amount,
     spin_date: new Date().toISOString().slice(0,10)
   });
+    console.log("========== SPIN ==========");
+console.log("Random:", random);
+console.log("Reward:", reward);
+console.log("Amount:", reward.amount);
+console.log("Balance:", newBalance);
+console.log("==========================");
     res.json({
 
       success: true,
