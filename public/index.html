@@ -66,7 +66,7 @@ h1 {
 
     border:8px solid white;
 
-    transition:transform 5s cubic-bezier(.17,.67,.25,1);
+    transition: transform 3s ease-out;
 
 }
 
@@ -403,7 +403,6 @@ SPIN
 <script>
 
 let spinning = false;
-let currentRotation = 0;
 
     const rewards = [
     "500",
@@ -444,9 +443,7 @@ label.style.top = y + "px";
     wheelLabels.appendChild(label);
 
 });
-function getRewardAngle(slot){
-    return slot * 30 + 15;
-}
+
 async function spin() {
 
     if (spinning) return;
@@ -455,11 +452,11 @@ async function spin() {
 
     const wheel = document.getElementById("wheel");
 
-wheel.style.transition = "none";
+wheel.style.animation = "none";
 
-wheel.style.transform = "rotate(0deg)";
-wheel.offsetHeight;      // ép browser reset animation
-wheel.style.animation = "spinForever .6s linear infinite";
+wheel.style.transition = "transform 3s ease-out";
+
+const startTime = Date.now();
 
     try {
 
@@ -472,6 +469,42 @@ wheel.style.animation = "spinForever .6s linear infinite";
         );
 
         const data = await res.json();
+
+console.log("SERVER:", data);
+
+if(!data.success){
+    alert(data.message || data.error);
+    spinning = false;
+    return;
+}
+
+const elapsed = Date.now() - startTime;
+
+
+// nếu backend có slot thì quay đúng ô
+if(data.reward.slot !== undefined){
+
+    const slot = data.reward.slot;
+
+    const targetDeg =
+        1800 + (360 - (slot * 30 + 15));
+
+    wheel.style.transform =
+        `rotate(${targetDeg}deg)`;
+
+}else{
+
+    // nếu chưa có slot thì quay random
+    const randomDeg =
+        1800 + Math.random()*720;
+
+    wheel.style.transform =
+        `rotate(${randomDeg}deg)`;
+
+}
+
+
+const waitTime = Math.max(0,3000-elapsed);
 
 console.log(data);
 
@@ -502,7 +535,7 @@ console.log(data);
 
             spinning = false;
 
-        }, 5000);
+        }, waitTime);
 
     } catch (err) {
 
