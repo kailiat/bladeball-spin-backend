@@ -472,42 +472,49 @@ console.log("ANGLE:", rewardAngle);
 
 
 // Quay nhanh trước
+// Quay nhanh trước
+const startRotation = currentRotation;
+
 currentRotation += 1800;
 
 wheel.style.transform = `rotate(${currentRotation}deg)`;
 
-setTimeout(()=>{
+setTimeout(() => {
 
-    // Snap bánh xe về đúng ô
     const target =
-    currentRotation - (currentRotation % 360) + (270 - rewardAngle);
+        startRotation +
+        1800 -
+        ((startRotation + 1800) % 360) +
+        (270 - rewardAngle);
 
-currentRotation = target;
+    currentRotation = target;
 
     wheel.style.transition = "transform .5s ease-out";
     wheel.style.transform = `rotate(${currentRotation}deg)`;
+
+    // Đợi snap xong mới hiện popup
     setTimeout(() => {
 
-    wheel.style.transition =
-        "transform 5s cubic-bezier(.17,.67,.25,1)";
+        wheel.style.transition =
+            "transform 5s cubic-bezier(.17,.67,.25,1)";
 
-},500);
+        document.getElementById("balanceValue").innerText =
+            data.balance;
 
-            document.getElementById("balanceValue").innerText =
-                data.balance;
+        document.getElementById("popupTitle").innerHTML =
+            "Congratulations!";
 
-            document.getElementById("popupTitle").innerHTML =
-                "Congratulations!";
+        document.getElementById("popupReward").innerHTML =
+            `${data.reward.amount} Tokens`;
 
-            document.getElementById("popupReward").innerHTML =
-                `${data.reward.amount} Tokens`;
+        document.getElementById("popup").style.display =
+            "flex";
 
-            document.getElementById("popup").style.display =
-                "flex";
+        spinning = false;
 
-            spinning = false;
+    }, 500);
 
-        },5000);
+}, 5000);
 
     }catch(err){
 
