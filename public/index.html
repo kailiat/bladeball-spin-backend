@@ -435,11 +435,15 @@ label.style.top = y + "px";
 });
 function getRewardAngle(rewardName){
 
+    console.log("Tên thưởng:", rewardName);
+
     const map = {
         "500 Tokens":[15,105,195,285],
         "100 Tokens":[45,135,225,315],
         "Nothing":[75,165,255,345]
     };
+
+    console.log("Góc:", map[rewardName]);
 
     const list = map[rewardName];
 
