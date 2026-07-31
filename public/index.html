@@ -435,21 +435,17 @@ label.style.top = y + "px";
 });
 function getRewardAngle(rewardName){
 
-    switch(rewardName){
+    const map = {
+        "500 Tokens":[15,105,195,285],
+        "100 Tokens":[45,135,225,315],
+        "Nothing":[75,165,255,345]
+    };
 
-        case "500 Tokens":
-            return 15;
+    const list = map[rewardName];
 
-        case "100 Tokens":
-            return 45;
+    if(!list) return 75;
 
-        case "Nothing":
-            return 75;
-
-        default:
-            return 75;
-    }
-
+    return list[Math.floor(Math.random()*list.length)];
 }
 async function spin(){
 
@@ -469,8 +465,7 @@ async function spin(){
 
         const data = await res.json();
 
-        console.log(data);
-alert(JSON.stringify(data));
+        
 
         if(!data.success){
 
@@ -480,14 +475,13 @@ alert(JSON.stringify(data));
 
         }
 
-        const rewardAngle =
-            getRewardAngle(data.reward.name);
+        const rewardAngle = getRewardAngle(data.reward.name);
 
         const wheel =
             document.getElementById("wheel");
 
-        currentRotation +=
-            1800 + (360 - rewardAngle);
+        currentRotation =
+currentRotation + 1800 + (360 - rewardAngle);
 
         wheel.style.transform =
             `rotate(${currentRotation}deg)`;
