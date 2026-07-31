@@ -580,6 +580,8 @@ app.get("/history", async (req, res) => {
       .select("*")
       .eq("user_id", decoded.id)
       .order("created_at", { ascending: false });
+    console.log("History error:", error);
+console.log("History data:", data);
 
     if (error) {
       return res.json({
