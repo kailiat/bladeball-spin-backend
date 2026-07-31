@@ -436,96 +436,77 @@ label.style.top = y + "px";
 function getRewardAngle(slot){
     return slot * 30 + 15;
 }
-async function spin(){
+async function spin() {
 
-    if(spinning) return;
+    if (spinning) return;
 
     spinning = true;
+
     const wheel = document.getElementById("wheel");
 
-    try{
+    wheel.style.transition =
+        "transform 5s cubic-bezier(.17,.67,.25,1)";
+
+    try {
 
         const res = await fetch(
             "https://bladeball-spin-backend.onrender.com/spin",
             {
-                method:"POST",
-                credentials:"include"
+                method: "POST",
+                credentials: "include"
             }
         );
 
         const data = await res.json();
 
-        console.log("FRONT DATA:", data);
-
-        if(!data.success){
-
+        if (!data.success) {
             alert(data.message || data.error);
             spinning = false;
             return;
-
         }
 
         const rewardAngle = getRewardAngle(data.reward.slot);
 
-console.log("SLOT:", data.reward.slot);
-console.log("ANGLE:", rewardAngle);
+        // quay 5 vòng
+        const spins = 5;
 
+        const finalRotation =
+            currentRotation +
+            spins * 360 +
+            (270 - rewardAngle);
 
-// Quay nhanh trước
-// Quay nhanh trước
-const startRotation = currentRotation;
+        currentRotation = finalRotation;
 
-currentRotation += 1800;
+        wheel.style.transform =
+            `rotate(${currentRotation}deg)`;
 
-wheel.style.transform = `rotate(${currentRotation}deg)`;
+        setTimeout(() => {
 
-setTimeout(() => {
+            document.getElementById("balanceValue").innerText =
+                data.balance;
 
-    const target =
-        startRotation +
-        1800 -
-        ((startRotation + 1800) % 360) +
-        (270 - rewardAngle);
+            document.getElementById("popupTitle").innerHTML =
+                "Congratulations!";
 
-    currentRotation = target;
+            document.getElementById("popupReward").innerHTML =
+                `${data.reward.amount} Tokens`;
 
-    wheel.style.transition = "transform .5s ease-out";
-    wheel.style.transform = `rotate(${currentRotation}deg)`;
+            document.getElementById("popup").style.display =
+                "flex";
 
-    // Đợi snap xong mới hiện popup
-    setTimeout(() => {
+            spinning = false;
 
-        wheel.style.transition =
-            "transform 5s cubic-bezier(.17,.67,.25,1)";
+        }, 5000);
 
-        document.getElementById("balanceValue").innerText =
-            data.balance;
+    } catch (err) {
 
-        document.getElementById("popupTitle").innerHTML =
-            "Congratulations!";
+        console.error(err);
 
-        document.getElementById("popupReward").innerHTML =
-            `${data.reward.amount} Tokens`;
-
-        document.getElementById("popup").style.display =
-            "flex";
+        alert("Server Error");
 
         spinning = false;
 
-    }, 500);
-
-}, 5000);
-
-    }catch(err){
-
-    console.error(err);
-    alert("Server Error");
-    spinning = false;
-
-    wheel.style.transition =
-        "transform 5s cubic-bezier(.17,.67,.25,1)";
-
-}
+    }
 
 }
 
