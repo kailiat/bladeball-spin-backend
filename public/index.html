@@ -670,6 +670,11 @@ function submitWithdraw(){
     closeWithdraw();
 
 }
+    function closeWithdraw(){
+
+    document.getElementById("withdrawPopup").style.display = "none";
+
+}
 async function showHistory(){
 
     const res = await fetch(
