@@ -653,19 +653,46 @@ async function showWithdraw(){
     document.getElementById("withdrawPopup").style.display="flex";
 
 }
-function submitWithdraw(){
+async function submitWithdraw(){
 
-    const balance =
-        parseInt(document.getElementById("balanceValue").innerText);
+    const roblox_username =
+    document.getElementById("robloxName").value.trim();
 
-    if(balance < 3){
-        alert("You need at least 3 Tokens to withdraw.");
+    const discord_username =
+    document.getElementById("discordName").value.trim();
+
+    const res = await fetch(
+        "https://bladeball-spin-backend-kpjl.onrender.com/withdraw",
+        {
+            method:"POST",
+            credentials:"include",
+            headers:{
+                "Content-Type":"application/json"
+            },
+            body:JSON.stringify({
+
+                roblox_username,
+                discord_username
+
+            })
+        }
+    );
+
+    const data = await res.json();
+
+    if(!data.success){
+
+        alert(data.message || data.error);
+
         return;
+
     }
 
-    alert("Withdraw request sent!");
+    alert(data.message);
 
     closeWithdraw();
+
+    await checkLogin();
 
 }
     function closeWithdraw(){
