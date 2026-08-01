@@ -391,6 +391,48 @@ z-index:10;
     margin-bottom:25px;
     letter-spacing:6px;
 }
+    input{
+
+    width:320px;
+
+    padding:16px 20px;
+
+    font-size:18px;
+
+    border-radius:15px;
+
+    border:2px solid rgba(139,61,255,.5);
+
+    background:#1c1c24;
+
+    color:white;
+
+    outline:none;
+
+    transition:.25s;
+
+    font-family:'Poppins',sans-serif;
+
+    box-sizing:border-box;
+
+}
+
+input::placeholder{
+
+    color:#9b9b9b;
+
+}
+
+input:focus{
+
+    border-color:#9b4dff;
+
+    box-shadow:
+        0 0 18px rgba(139,61,255,.7);
+
+    background:#252530;
+
+}
 </style>
 
 </head>
@@ -511,11 +553,11 @@ SPIN
             <b>3 Tokens</b>
         </p>
 
-        <input id="robloxName" placeholder="Roblox Username">
+        <input id="robloxName" placeholder="👤 Roblox Username">
 
         <br><br>
 
-        <input id="discordName" placeholder="Discord Username">
+        <input id="discordName" placeholder="💬 Discord Username">
 
         <br><br>
 
@@ -530,6 +572,69 @@ SPIN
         </button>
 
     </div>
+
+</div>
+    <div id="historyPopup" class="popup">
+
+    <div class="popup-box">
+
+        <h2>📜 Spin History</h2>
+
+        <div id="historyList"
+        style="
+        max-height:300px;
+        overflow-y:auto;
+        text-align:left;
+        margin:20px 0;
+        ">
+        </div>
+
+        <button onclick="closeHistory()">
+            Close
+        </button>
+
+    </div>
+
+</div>
+    <div id="profilePopup" class="popup">
+
+    <div class="popup-box">
+
+<h2>👤 Player Profile</h2>
+
+<div style="
+background:#252530;
+padding:18px;
+border-radius:15px;
+margin:15px 0;
+border:1px solid rgba(139,61,255,.35);
+">
+
+<p>
+🧑 Username
+<br>
+<b id="profileUser">Loading...</b>
+</p>
+
+<p>
+⭐ Tokens
+<br>
+<b id="profileBalance">0</b>
+</p>
+
+<p>
+🎲 Spin Chance
+<br>
+<b id="profileSpin">0</b>
+</p>
+
+</div>
+
+<button onclick="closeProfile()">
+Close
+</button>
+
+</div>
 
 </div>
 <script type="module">
@@ -870,47 +975,97 @@ async function submitWithdraw(){
 }
 async function showHistory(){
 
-    const res = await fetch(
-        "https://bladeball-spin-backend-kpjl.onrender.com/history",
-        {
-            credentials:"include"
-        }
-    );
+const res = await fetch(
+"https://bladeball-spin-backend-kpjl.onrender.com/history",
+{
+credentials:"include"
+}
+);
 
-    const data = await res.json();
+const data = await res.json();
 
-    if(!data.success){
+if(!data.success){
 
-    showToast(data.message || data.error);
+showToast(data.message);
 
-    return;
+return;
 
 }
 
-    let text = "📜 Spin History\n\n";
+let html="";
 
-    if(data.history.length===0){
+if(data.history.length==0){
 
-        text += "No history";
+html="<p>No history yet.</p>";
 
-    }else{
+}else{
 
-        data.history.forEach(item=>{
+data.history.forEach(item=>{
 
-            text +=
-            `${item.reward} (+${item.amount})\n`;
+html += `
+<div style="
+padding:12px;
+margin-bottom:10px;
+background:#23232d;
+border-radius:12px;
+border:1px solid rgba(139,61,255,.35);
+">
+🎁 ${item.reward}
+<span style="float:right;color:#ffd54f;">
++${item.amount}
+</span>
+</div>
+`;
 
-        });
-
-    }
-
-    alert(text);
+});
 
 }
 
-function showProfile(){
+document.getElementById("historyList").innerHTML=html;
 
-    showToast("👤 Profile coming soon!");
+document.getElementById("historyPopup").style.display="flex";
+
+}
+
+function closeHistory(){
+
+document.getElementById("historyPopup").style.display="none";
+
+}
+async function showProfile(){
+
+const res = await fetch(
+"https://bladeball-spin-backend-kpjl.onrender.com/me",
+{
+credentials:"include"
+}
+);
+
+const data = await res.json();
+
+if(!data.success){
+
+showToast("Please login first");
+return;
+
+}
+
+document.getElementById("profileUser").innerText =
+data.user.username;
+
+document.getElementById("profileBalance").innerText =
+data.user.tokens || 0;
+
+document.getElementById("profileSpin").innerText =
+data.user.spin_chances || 0;
+
+document.getElementById("profilePopup").style.display =
+"flex";
+
+}
+    function closeProfile(){
+
+document.getElementById("profilePopup").style.display="none";
 
 }
    async function testSpin(){
