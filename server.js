@@ -681,32 +681,34 @@ app.post("/claim-free-spin", async (req,res)=>{
       token,
       process.env.JWT_SECRET
     );
-    const today = new Date().toISOString().slice(0,10);
-
-const { data: claimedToday } = await supabase
-.from("daily_claims")
-.select("*")
-.eq("user_id", decoded.id)
-.eq("claim_date", today)
-.maybeSingle();
-
-if(claimedToday){
-
-    return res.json({
-        success:false,
-        message:"Already claimed today"
-    });
-
-}
+    
 
 
     // lấy user
     const { data:userData, error:userError } =
-    await supabase
-    .from("users")
-    .select("*")
-    .eq("id", decoded.id)
-    .single();
+await supabase
+.from("users")
+.select("*")
+.eq("id", decoded.id)
+.single();
+
+if(userError){
+    return res.json({
+        success:false,
+        error:userError.message
+    });
+}
+
+const today = new Date().toISOString().slice(0,10);
+
+if(userData.last_claim_date === today){
+    return res.json({
+        success:false,
+        message:"Already claimed today"
+    });
+}
+
+    
 
 
     if(userError){
@@ -724,17 +726,13 @@ if(claimedToday){
 
     const { error:updateError } =
     await supabase
-    .from("users")
-    .update({
-      spin_chances:newSpin
-    })
-    .eq("id", decoded.id);
-    await supabase
-.from("daily_claims")
-.insert({
-    user_id: decoded.id,
-    claim_date: today
-});
+.from("users")
+.update({
+    spin_chances:newSpin,
+    last_claim_date: today
+})
+.eq("id", decoded.id);
+    
 
 
 
