@@ -548,10 +548,73 @@ SPIN
         </p>
 
         <p>
-            Minimum Withdrawal
-            <br>
-            <b>3 Tokens</b>
-        </p>
+Minimum Withdrawal
+<br>
+<b>5 Tokens</b>
+</p>
+        <div style="margin:20px 0">
+
+<label>
+<input
+type="radio"
+name="withdrawType"
+value="token"
+checked
+onchange="changeWithdrawType()">
+⭐ Tokens
+</label>
+
+&nbsp;&nbsp;&nbsp;
+
+<label>
+<input
+type="radio"
+name="withdrawType"
+value="item"
+onchange="changeWithdrawType()">
+🗡️ Item
+</label>
+
+</div>
+        <div id="tokenBox">
+
+<input
+id="withdrawAmount"
+type="number"
+min="5"
+placeholder="⭐ Amount">
+
+</div>
+        <div
+id="itemBox"
+style="display:none;">
+
+<select
+id="itemSelect"
+    <select id="itemSelect">
+style="
+width:320px;
+padding:16px;
+border-radius:15px;
+background:#1c1c24;
+color:white;
+">
+
+<option>
+Loading...
+</option>
+
+</select>
+
+<br><br>
+
+<input
+id="itemQuantity"
+type="number"
+min="1"
+value="1">
+
+</div>
 
         <input id="robloxName" placeholder="👤 Roblox Username">
 
@@ -900,11 +963,17 @@ async function showWithdraw(){
 
 
     document.getElementById("withdrawPopup").style.display="flex";
+    changeWithdrawType();
 
 }
 let withdrawLoading = false;
 
 async function submitWithdraw(){
+
+    const type =
+    document.querySelector(
+    'input[name="withdrawType"]:checked'
+    ).value;
 
     try{
 
@@ -928,9 +997,23 @@ async function submitWithdraw(){
                     "Content-Type":"application/json"
                 },
                 body:JSON.stringify({
-                    roblox_username,
-                    discord_username
-                })
+
+type,
+
+amount:
+document.getElementById("withdrawAmount").value,
+
+item_id:
+document.getElementById("itemSelect").value,
+
+quantity:
+document.getElementById("itemQuantity").value,
+
+roblox_username,
+
+discord_username
+
+})
             }
         );
 
@@ -1164,6 +1247,64 @@ wheel.dataset.rotation = targetDeg;
 
 
     location.reload();
+
+}
+        function changeWithdrawType(){
+
+const type =
+document.querySelector(
+'input[name="withdrawType"]:checked'
+).value;
+
+document.getElementById("tokenBox").style.display =
+type=="token"?"block":"none";
+
+document.getElementById("itemBox").style.display =
+type=="item"?"block":"none";
+
+if(type=="item"){
+loadInventory();
+}
+
+}
+
+async function loadInventory(){
+
+const res = await fetch(
+"https://bladeball-spin-backend-kpjl.onrender.com/inventory",
+{
+credentials:"include"
+});
+
+const data = await res.json();
+
+const select =
+document.getElementById("itemSelect");
+
+select.innerHTML="";
+
+if(!data.success || data.items.length==0){
+
+select.innerHTML=
+"<option>No items available</option>";
+
+document.getElementById("withdrawBtn").disabled=true;
+
+return;
+
+}
+
+document.getElementById("withdrawBtn").disabled=false;
+
+data.items.forEach(item=>{
+
+select.innerHTML += `
+<option value="${item.id}">
+${item.name} (x${item.qty})
+</option>
+`;
+
+});
 
 }
     checkLogin();
