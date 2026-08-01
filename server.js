@@ -381,27 +381,44 @@ app.get("/me", async (req, res) => {
 
     if (!token) {
       return res.json({
-        success: false,
-        message: "Not logged in"
+        success:false,
+        message:"Not logged in"
       });
     }
+
 
     const decoded = jwt.verify(
       token,
       process.env.JWT_SECRET
     );
 
+
+    const { data:user, error } = await supabase
+      .from("users")
+      .select("id, username, email, tokens, spin_chances")
+      .eq("id", decoded.id)
+      .single();
+
+
+    if(error){
+      return res.json({
+        success:false,
+        error:error.message
+      });
+    }
+
+
     res.json({
-      success: true,
-      user: decoded
+      success:true,
+      user
     });
 
 
-  } catch (err) {
+  } catch(err){
 
     res.json({
-      success: false,
-      message: "Invalid token"
+      success:false,
+      message:"Invalid token"
     });
 
   }
