@@ -526,10 +526,21 @@ console.log(data);
 
         setTimeout(() => {
 
-    wheel.style.animation = "none";
+wheel.style.animation = "none";
 
-    document.getElementById("balanceValue").innerText =
-        data.balance;
+
+// cập nhật balance popup
+document.getElementById("balanceValue").innerText =
+    data.balance;
+
+
+// cập nhật balance trên màn hình
+const balanceText = document.querySelector("#userBox h3:nth-of-type(2)");
+
+if(balanceText){
+    balanceText.innerHTML =
+    `💰 Balance: ${data.balance} Tokens`;
+}
 
             document.getElementById("popupTitle").innerHTML =
                 "Congratulations!";
