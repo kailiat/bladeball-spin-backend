@@ -527,53 +527,38 @@ console.log(data);
         
        
 
-        setTimeout(() => {
+        setTimeout(async () => {
 
-wheel.style.animation = "none";
+    wheel.style.animation = "none";
 
+    // cập nhật popup
+    document.getElementById("balanceValue").innerText =
+        data.balance;
 
-// cập nhật balance popup
-document.getElementById("balanceValue").innerText =
-    data.balance;
+    document.getElementById("popupTitle").innerHTML =
+        "Congratulations!";
 
+    document.getElementById("popupReward").innerHTML =
+        `${data.reward.amount} Tokens`;
 
-// cập nhật balance trên màn hình
-const balanceText = document.querySelector("#userBox h3:nth-of-type(2)");
+    document.getElementById("popup").style.display =
+        "flex";
 
-if(balanceText){
-    balanceText.innerHTML =
-    `💰 Balance: ${data.balance} Tokens`;
+    // tải lại toàn bộ thông tin user
+    await checkLogin();
+
+    spinning = false;
+
+}, waitTime);
+        } catch (err) {
+
+    console.error(err);
+
+    alert("Server Error");
+
+    spinning = false;
+
 }
-            const spinText =
-document.querySelector("#userBox h3:nth-of-type(3)");
-
-if(spinText){
-    spinText.innerHTML =
-    `🎲 Spin Chance: ${data.spin_chances}`;
-}
-
-            document.getElementById("popupTitle").innerHTML =
-                "Congratulations!";
-
-            document.getElementById("popupReward").innerHTML =
-                `${data.reward.amount} Tokens`;
-
-            document.getElementById("popup").style.display =
-                "flex";
-
-            spinning = false;
-
-        }, waitTime);
-
-    } catch (err) {
-
-        console.error(err);
-
-        alert("Server Error");
-
-        spinning = false;
-
-    }
 
 }
 
