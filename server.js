@@ -681,6 +681,23 @@ app.post("/claim-free-spin", async (req,res)=>{
       token,
       process.env.JWT_SECRET
     );
+    const today = new Date().toISOString().slice(0,10);
+
+const { data: claimedToday } = await supabase
+.from("daily_claims")
+.select("*")
+.eq("user_id", decoded.id)
+.eq("claim_date", today)
+.maybeSingle();
+
+if(claimedToday){
+
+    return res.json({
+        success:false,
+        message:"Already claimed today"
+    });
+
+}
 
 
     // lấy user
@@ -712,6 +729,12 @@ app.post("/claim-free-spin", async (req,res)=>{
       spin_chances:newSpin
     })
     .eq("id", decoded.id);
+    await supabase
+.from("daily_claims")
+.insert({
+    user_id: decoded.id,
+    claim_date: today
+});
 
 
 
