@@ -6,7 +6,36 @@
 <title>Blade Ball Spin</title>
 
 <style>
+.toast{
+    position:fixed;
+    top:30px;
+    right:30px;
+    background:#1b1b1f;
+    color:white;
+    padding:18px 25px;
+    border-radius:15px;
+    border:1px solid #8b3dff;
+    box-shadow:0 0 25px rgba(139,61,255,.5);
+    display:none;
+    z-index:9999;
+    font-weight:bold;
+    animation:slide .3s ease;
+}
 
+
+@keyframes slide{
+
+from{
+    transform:translateX(100px);
+    opacity:0;
+}
+
+to{
+    transform:translateX(0);
+    opacity:1;
+}
+
+}
 body {
     background:#111;
     color:white;
@@ -285,7 +314,7 @@ button:hover{
     🎡
 </div>
 
-<h1>Blade Ball Spin TEST123</h1>
+<h1>Blade Ball Spin</h1>
 
 <p class="subtitle">
     Spin every day to win Tokens!
@@ -410,6 +439,26 @@ SPIN
 
 let spinning = false;
 
+
+// Toast notification
+function showToast(message){
+
+    const toast = document.getElementById("toast");
+    const text = document.getElementById("toast-message");
+
+    text.innerHTML = message;
+
+    toast.style.display = "block";
+
+
+    setTimeout(()=>{
+
+        toast.style.display = "none";
+
+    },3000);
+
+}
+
     const rewards = [
     "500",
     "100",
@@ -479,7 +528,7 @@ async function spin() {
 console.log("SERVER:", data);
 
 if(!data.success){
-    alert(data.message || data.error);
+    showToast(data.message || data.error);
     spinning = false;
     return;
 }
@@ -518,12 +567,6 @@ const waitTime = Math.max(0,3000-elapsed);
 
 console.log(data);
 
-        if (!data.success) {
-            alert(data.message || data.error);
-            spinning = false;
-            return;
-        }
-
         
        
 
@@ -554,7 +597,7 @@ console.log(data);
 
     console.error(err);
 
-    alert("Server Error");
+    showToast("❌ Server Error");
 
     spinning = false;
 
@@ -641,7 +684,7 @@ async function showWithdraw(){
 
 
     if(!data.success){
-        alert("Please login first");
+        showToast("Please login first");
         return;
     }
 
@@ -689,15 +732,15 @@ async function submitWithdraw(){
 
         if(!data.success){
 
-            alert(data.message || data.error);
+    showToast(data.message || data.error);
 
-            withdrawLoading = false;
+    withdrawLoading = false;
             document.getElementById("withdrawBtn").disabled = false;
 
             return;
         }
 
-        alert(data.message);
+        showToast(data.message);
 
         closeWithdraw();
 
@@ -707,7 +750,7 @@ async function submitWithdraw(){
 
     catch(err){
 
-        alert(err.message);
+        showToast(err.message);
 
     }
 
@@ -737,11 +780,11 @@ async function showHistory(){
 
     if(!data.success){
 
-        alert(data.message || data.error);
+    showToast(data.message || data.error);
 
-        return;
+    return;
 
-    }
+}
 
     let text = "📜 Spin History\n\n";
 
@@ -766,7 +809,7 @@ async function showHistory(){
 
 function showProfile(){
 
-    alert("Profile page coming soon!");
+    showToast("👤 Profile coming soon!");
 
 }
    async function testSpin(){
@@ -850,16 +893,18 @@ wheel.dataset.rotation = targetDeg;
     const data = await res.json();
 
 
-    if(!data.success){
 
-        alert(data.message || data.error);
+        if(!data.success){
 
-        return;
+    showToast(data.message || data.error);
 
-    }
+    return;
+
+}
 
 
-    alert("🎉 Received 1 Free Spin!");
+
+    showToast("🎉 Received 1 Free Spin!");
 
 
     location.reload();
@@ -868,7 +913,9 @@ wheel.dataset.rotation = targetDeg;
     checkLogin();
 </script>
 
-
+<div id="toast" class="toast">
+  <div id="toast-message"></div>
+</div>
 </body>
 
 </html>
