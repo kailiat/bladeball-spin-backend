@@ -501,6 +501,23 @@ const { data: userData, error: userError } = await supabase
   .select("*")
   .eq("id", decoded.id)
   .single();
+    if (userError) {
+  return res.json({
+    success:false,
+    error:userError.message
+  });
+}
+
+
+// kiểm tra lượt quay
+if(Number(userData.spin_chances || 0) <= 0){
+
+  return res.json({
+    success:false,
+    message:"No spin chance"
+  });
+
+}
 
 if (userError) {
   return res.json({
@@ -512,6 +529,10 @@ if (userError) {
 // Cộng Token
 const newBalance =
   Number(userData.tokens || 0) + Number(reward.amount);
+
+
+const newSpin =
+  Number(userData.spin_chances || 0) - 1;
 
 // Update Token
 await supabase
