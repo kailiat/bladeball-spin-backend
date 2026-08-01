@@ -509,9 +509,7 @@ SPIN
     <button onclick="showProfile()">
         👤 Profile
     </button>
-    <button onclick="showInventory()">
-🎒 Inventory
-</button>
+    
     <button onclick="claimFreeSpin()">
     🎁 Claim Free Spin
 </button>
@@ -697,23 +695,7 @@ border:1px solid rgba(139,61,255,.35);
 
 <hr style="border:.5px solid #444">
 
-<p>
-🎰 Total Spins
-<br>
-<b id="profileTotalSpin">0</b>
-</p>
 
-<p>
-🏆 Total Won
-<br>
-<b id="profileTotalWon">0</b>
-</p>
-
-<p>
-🎁 Total Withdraw
-<br>
-<b id="profileWithdraw">0</b>
-</p>
 
 <p>
 📅 Joined
@@ -730,29 +712,8 @@ Close
 </div>
 
 </div>
-    <div id="inventoryPopup" class="popup">
+    
 
-    <div class="popup-box">
-
-        <h2>🎒 Inventory</h2>
-
-        <div id="inventoryList"
-        style="
-        max-height:300px;
-        overflow-y:auto;
-        text-align:left;
-        margin:20px 0;
-        ">
-
-        </div>
-
-        <button onclick="closeInventory()">
-            Close
-        </button>
-
-    </div>
-
-</div>
 <script type="module">
 
 
@@ -1215,58 +1176,7 @@ document.getElementById("profilePopup").style.display =
 document.getElementById("profilePopup").style.display="none";
 
 }
-    async function showInventory(){
-
-const res=await fetch(
-"https://bladeball-spin-backend-kpjl.onrender.com/inventory",
-{
-credentials:"include"
-});
-
-const data=await res.json();
-
-let html="";
-
-if(!data.success || !data.items || data.items.length==0){
-
-    html="<p>No items available.</p>";
-
-}else{
-
-data.items.forEach(item=>{
-
-html+=`
-<div style="
-padding:12px;
-margin-bottom:10px;
-background:#252530;
-border-radius:12px;
-border:1px solid rgba(139,61,255,.3);
-">
-🗡️ ${item.name}
-
-<span style="float:right">
-x${item.qty}
-</span>
-
-</div>
-`;
-
-});
-
-}
-
-document.getElementById("inventoryList").innerHTML=html;
-
-document.getElementById("inventoryPopup").style.display="flex";
-
-}
-
-function closeInventory(){
-
-document.getElementById("inventoryPopup").style.display="none";
-
-}
+    
    async function testSpin(){
 
     if(spinning) return;
@@ -1379,50 +1289,12 @@ document.getElementById("itemBox").style.display =
 type=="item"?"block":"none";
 
 if(type=="item"){
-loadInventory();
+showToast("Item withdraw coming soon");
 }
 
 }
 
-async function loadInventory(){
 
-const res = await fetch(
-"https://bladeball-spin-backend-kpjl.onrender.com/inventory",
-{
-credentials:"include"
-});
-
-const data = await res.json();
-
-const select =
-document.getElementById("itemSelect");
-
-select.innerHTML="";
-
-if(!data.success || data.items.length==0){
-
-select.innerHTML=
-"<option>No items available</option>";
-
-document.getElementById("withdrawBtn").disabled=true;
-
-return;
-
-}
-
-document.getElementById("withdrawBtn").disabled=false;
-
-data.items.forEach(item=>{
-
-select.innerHTML += `
-<option value="${item.id}">
-${item.name} (x${item.qty})
-</option>
-`;
-
-});
-
-}
     checkLogin();
 </script>
 
