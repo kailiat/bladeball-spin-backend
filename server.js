@@ -619,6 +619,92 @@ app.post("/logout", (req, res) => {
   });
 
 });
+// Claim Free Spin
+app.post("/claim-free-spin", async (req,res)=>{
+
+  try {
+
+    const token = req.cookies.token;
+
+    if(!token){
+      return res.json({
+        success:false,
+        message:"Please login first"
+      });
+    }
+
+
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET
+    );
+
+
+    // lấy user
+    const { data:userData, error:userError } =
+    await supabase
+    .from("users")
+    .select("*")
+    .eq("id", decoded.id)
+    .single();
+
+
+    if(userError){
+      return res.json({
+        success:false,
+        error:userError.message
+      });
+    }
+
+
+    // cộng 1 lượt
+    const newSpin =
+    Number(userData.spin_chances || 0) + 1;
+
+
+    const { error:updateError } =
+    await supabase
+    .from("users")
+    .update({
+      spin_chances:newSpin
+    })
+    .eq("id", decoded.id);
+
+
+
+    if(updateError){
+
+      return res.json({
+        success:false,
+        error:updateError.message
+      });
+
+    }
+
+
+    res.json({
+
+      success:true,
+
+      message:"Free spin claimed!",
+
+      spin_chances:newSpin
+
+    });
+
+
+  }catch(err){
+
+    res.json({
+
+      success:false,
+      error:err.message
+
+    });
+
+  }
+
+});
 const PORT = process.env.PORT || 3000;
 
 
