@@ -769,109 +769,164 @@ if(userData.last_claim_date === today){
   }
 
 });
-app.post("/withdraw", async (req,res)=>{
+app.post("/withdraw", async(req,res)=>{
 
-  try{
+try{
 
-    const token = req.cookies.token;
+const token = req.cookies.token;
 
-    if(!token){
-      return res.json({
-        success:false,
-        message:"Please login first"
-      });
-    }
+if(!token){
+return res.json({
+success:false,
+message:"Please login first"
+});
+}
 
-    const decoded = jwt.verify(
-      token,
-      process.env.JWT_SECRET
-    );
 
-    const roblox_username =
-  (req.body.roblox_username || "").trim();
+const decoded = jwt.verify(
+token,
+process.env.JWT_SECRET
+);
 
-const discord_username =
-  (req.body.discord_username || "").trim();
-    if(!roblox_username){
 
-  return res.json({
-    success:false,
-    message:"Roblox username is required"
-  });
+const {
+type,
+amount,
+item_id,
+quantity,
+roblox_username,
+discord_username
+}=req.body;
+
+
+
+const {data:userData,error:userError}=await supabase
+.from("users")
+.select("*")
+.eq("id",decoded.id)
+.single();
+
+
+if(userError){
+return res.json({
+success:false,
+error:userError.message
+});
+}
+
+
+
+// TOKEN WITHDRAW
+if(type==="token"){
+
+
+const withdrawAmount = Number(amount);
+
+
+if(withdrawAmount < 5){
+return res.json({
+success:false,
+message:"Minimum 5 tokens"
+});
+}
+
+
+if(userData.tokens < withdrawAmount){
+
+return res.json({
+success:false,
+message:"Not enough tokens"
+});
 
 }
 
-    const { data:userData,error:userError } =
-    await supabase
-    .from("users")
-    .select("*")
-    .eq("id",decoded.id)
-    .single();
 
-    if(userError){
-      return res.json({
-        success:false,
-        error:userError.message
-      });
-    }
 
-    if(userData.tokens < 3){
+await supabase
+.from("withdraw_requests")
+.insert({
 
-      return res.json({
-        success:false,
-        message:"Need at least 3 Tokens"
-      });
+user_id:userData.id,
 
-    }
+type:"token",
 
-    const { error:insertError } =
-    await supabase
-    .from("withdraw_requests")
-    .insert({
+amount:withdrawAmount,
 
-      user_id:userData.id,
+roblox_username,
 
-      roblox_username,
+discord_username,
 
-      discord_username,
+status:"pending"
 
-      amount:userData.tokens,
+});
 
-      status:"pending"
 
-    });
 
-    if(insertError){
+await supabase
+.from("users")
+.update({
 
-      return res.json({
-        success:false,
-        error:insertError.message
-      });
+tokens:userData.tokens-withdrawAmount
 
-    }
+})
+.eq("id",decoded.id);
 
-    await supabase
-    .from("users")
-    .update({
-      tokens:0
-    })
-    .eq("id",userData.id);
 
-    res.json({
-      success:true,
-      message:"Withdraw request sent!"
-    });
 
-  }
+return res.json({
 
-  catch(err){
+success:true,
 
-    res.json({
-      success:false,
-      error:err.message
-    });
+message:"Token withdraw sent!"
 
-  }
+});
+
+
+}
+
+
+
+
+// ITEM WITHDRAW
+if(type==="item"){
+
+
+return res.json({
+
+success:false,
+
+message:"Item withdraw is not ready"
+
+});
+
+
+}
+
+
+
+res.json({
+
+success:false,
+
+message:"Invalid withdraw type"
+
+});
+
+
+}
+
+catch(err){
+
+res.json({
+
+success:false,
+
+error:err.message
+
+});
+
+}
+
 
 });
 const PORT = process.env.PORT || 3000;
