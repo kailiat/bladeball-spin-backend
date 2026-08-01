@@ -653,7 +653,15 @@ async function showWithdraw(){
     document.getElementById("withdrawPopup").style.display="flex";
 
 }
+let withdrawLoading = false;
+
 async function submitWithdraw(){
+
+    if(withdrawLoading) return;
+
+    withdrawLoading = true;
+
+    document.getElementById("withdrawBtn").disabled = true;
 
     const roblox_username =
     document.getElementById("robloxName").value.trim();
@@ -682,17 +690,33 @@ async function submitWithdraw(){
 
     if(!data.success){
 
-        alert(data.message || data.error);
+    alert(data.message || data.error);
 
-        return;
+    withdrawLoading = false;
+    document.getElementById("withdrawBtn").disabled = false;
 
-    }
+    return;
+
+}
 
     alert(data.message);
 
     closeWithdraw();
 
     await checkLogin();
+
+withdrawLoading = false;
+document.getElementById("withdrawBtn").disabled = false;
+
+}
+
+catch(err){
+
+    alert(err.message);
+
+    withdrawLoading = false;
+
+    document.getElementById("withdrawBtn").disabled = false;
 
 }
     function closeWithdraw(){
