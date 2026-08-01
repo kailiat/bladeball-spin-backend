@@ -534,11 +534,13 @@ const newBalance =
 const newSpin =
   Number(userData.spin_chances || 0) - 1;
 
-// Update Token
+
+// Update Token + giảm lượt quay
 await supabase
   .from("users")
   .update({
-    tokens: newBalance
+    tokens: newBalance,
+    spin_chances: newSpin
   })
   .eq("id", decoded.id);
 
