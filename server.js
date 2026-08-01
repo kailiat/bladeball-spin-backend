@@ -561,30 +561,31 @@ console.log("Balance:", newBalance);
 console.log("==========================");
     res.json({
 
-      success: true,
+  success: true,
 
-      message: "Spin successful",
+  message: "Spin successful",
 
-      random,
+  random,
 
-      reward: {
-  id: reward.id,
-  name: reward.name,
-  amount: reward.amount,
-  chance: reward.chance,
-  slot: slot
-},
+  reward: {
+    id: reward.id,
+    name: reward.name,
+    amount: reward.amount,
+    chance: reward.chance,
+    slot: slot
+  },
 
-balance: newBalance,
+  balance: newBalance,
+  spin_chances: newSpin,
 
-user: {
+  user: {
 
-        id: decoded.id,
-        username: decoded.username
+    id: decoded.id,
+    username: decoded.username
 
-      }
+  }
 
-    });
+});
 
   } catch (err) {
 
