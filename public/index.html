@@ -603,6 +603,9 @@ async function checkLogin(){
         <h3>
         💰 Balance: ${data.user.tokens || 0} Tokens
         </h3>
+        <h3>
+🎲 Spin Chance: ${data.user.spin_chances || 0}
+</h3>
 
 
         <button onclick="logout()">
@@ -788,6 +791,35 @@ wheel.dataset.rotation = targetDeg;
         spinning = false;
 
     },3000);
+
+}
+    async function claimFreeSpin(){
+
+    const res = await fetch(
+        "https://bladeball-spin-backend-kpjl.onrender.com/claim-free-spin",
+        {
+            method:"POST",
+            credentials:"include"
+        }
+    );
+
+
+    const data = await res.json();
+
+
+    if(!data.success){
+
+        alert(data.message || data.error);
+
+        return;
+
+    }
+
+
+    alert("🎉 Received 1 Free Spin!");
+
+
+    location.reload();
 
 }
     checkLogin();
