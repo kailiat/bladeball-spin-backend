@@ -842,23 +842,35 @@ message:"Not enough tokens"
 
 
 
+const { data:withdrawData, error:withdrawError } =
 await supabase
 .from("withdraw_requests")
 .insert({
 
-user_id:userData.id,
+    user_id:userData.id,
 
-type:"token",
+    type:"token",
 
-amount:withdrawAmount,
+    amount:withdrawAmount,
 
-roblox_username,
+    roblox_username,
 
-discord_username,
+    discord_username,
 
-status:"pending"
+    status:"pending"
 
-});
+})
+.select();
+
+
+if(withdrawError){
+
+    return res.json({
+        success:false,
+        error:withdrawError.message
+    });
+
+}
 
 
 
