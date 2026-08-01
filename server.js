@@ -748,6 +748,111 @@ app.post("/claim-free-spin", async (req,res)=>{
   }
 
 });
+app.post("/withdraw", async (req,res)=>{
+
+  try{
+
+    const token = req.cookies.token;
+
+    if(!token){
+      return res.json({
+        success:false,
+        message:"Please login first"
+      });
+    }
+
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET
+    );
+
+    const roblox_username =
+  (req.body.roblox_username || "").trim();
+
+const discord_username =
+  (req.body.discord_username || "").trim();
+    if(!roblox_username){
+
+  return res.json({
+    success:false,
+    message:"Roblox username is required"
+  });
+
+}
+
+    const { data:userData,error:userError } =
+    await supabase
+    .from("users")
+    .select("*")
+    .eq("id",decoded.id)
+    .single();
+
+    if(userError){
+      return res.json({
+        success:false,
+        error:userError.message
+      });
+    }
+
+    if(userData.tokens < 3){
+
+      return res.json({
+        success:false,
+        message:"Need at least 3 Tokens"
+      });
+
+    }
+
+    const { error:insertError } =
+    await supabase
+    .from("withdraw_requests")
+    .insert({
+
+      user_id:userData.id,
+
+      roblox_username,
+
+      discord_username,
+
+      amount:userData.tokens,
+
+      status:"pending"
+
+    });
+
+    if(insertError){
+
+      return res.json({
+        success:false,
+        error:insertError.message
+      });
+
+    }
+
+    await supabase
+    .from("users")
+    .update({
+      tokens:0
+    })
+    .eq("id",userData.id);
+
+    res.json({
+      success:true,
+      message:"Withdraw request sent!"
+    });
+
+  }
+
+  catch(err){
+
+    res.json({
+      success:false,
+      error:err.message
+    });
+
+  }
+
+});
 const PORT = process.env.PORT || 3000;
 
 
