@@ -544,6 +544,13 @@ if(balanceText){
     balanceText.innerHTML =
     `💰 Balance: ${data.balance} Tokens`;
 }
+            const spinText =
+document.querySelector("#userBox h3:nth-of-type(3)");
+
+if(spinText){
+    spinText.innerHTML =
+    `🎲 Spin Chance: ${data.spin_chances}`;
+}
 
             document.getElementById("popupTitle").innerHTML =
                 "Congratulations!";
