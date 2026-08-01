@@ -575,9 +575,21 @@ async function checkLogin(){
 
     if(data.success){
 
+
+        // cập nhật balance
+        document.getElementById("balanceValue").innerText =
+        data.user.tokens || 0;
+
+
+
         document.getElementById("userBox").innerHTML = `
 
         <h3>👤 ${data.user.username}</h3>
+
+        <h3>
+        💰 Balance: ${data.user.tokens || 0} Tokens
+        </h3>
+
 
         <button onclick="logout()">
             Logout
@@ -586,6 +598,7 @@ async function checkLogin(){
         `;
 
     }
+
 
 }
 
@@ -614,12 +627,21 @@ async function showWithdraw(){
         }
     );
 
+
+    const data = await res.json();
+
+
+    if(!data.success){
+        alert("Please login first");
+        return;
+    }
+
+
+    document.getElementById("balanceValue").innerText =
+    data.user.tokens || 0;
+
+
     document.getElementById("withdrawPopup").style.display="flex";
-
-}
-function closeWithdraw(){
-
-    document.getElementById("withdrawPopup").style.display = "none";
 
 }
 function submitWithdraw(){
