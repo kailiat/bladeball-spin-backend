@@ -158,12 +158,14 @@ app.post("/register", async (req, res) => {
     const { data, error } = await supabase
       .from("users")
       .insert([
-        {
-          username,
-          email,
-          password
-        }
-      ])
+{
+ username,
+ email,
+ password,
+ spin_chances:0,
+ tokens:0
+}
+])
       .select();
 
 
