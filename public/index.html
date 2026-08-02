@@ -277,10 +277,16 @@ button:hover{
 
 
 #feedText{
-    display:inline-block;
+    display:inline-flex;
+    align-items:center;
     white-space:nowrap;
-    animation:scroll 95s linear infinite;
-    font-size:18px;
+    animation:scroll 80s linear infinite;
+}
+
+.feed-item{
+    display:inline-block;
+    margin-right:140px;
+    font-weight:600;
 }
 
 
@@ -1346,6 +1352,7 @@ showToast("Item withdraw coming soon");
 }
 
 }
+    let currentFeed = "";
     async function loadLiveFeed(){
 
 try{
@@ -1366,16 +1373,22 @@ let text="";
 
 data.feed.forEach(item=>{
 
-text +=
-`🎉 ${item.username} won ${item.reward}
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-⭐
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`;
+text += `
+<span class="feed-item">
+🎉 ${item.username} won ${item.reward}
+</span>
+`;
 
 });
 
 
-document.getElementById("feedText").innerText=text;
+if(text !== currentFeed){
+
+    currentFeed = text;
+
+    document.getElementById("feedText").innerHTML = text;
+
+}
 
 
 }
@@ -1392,7 +1405,7 @@ console.log(err);
 
 loadLiveFeed();
 
-setInterval(loadLiveFeed,10000);
+setInterval(loadLiveFeed,20000);
 
 
     checkLogin();
