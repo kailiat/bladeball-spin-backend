@@ -964,6 +964,8 @@ process.env.JWT_SECRET
 
 const missionToken =
 crypto.randomBytes(32).toString("hex");
+  const missionKey =
+req.body.provider + "_daily";
 
 
 
@@ -973,7 +975,32 @@ Date.now() + 10 * 60 * 1000
 );
 
 
+const today =
+new Date().toISOString().slice(0,10);
 
+const { data: existed } =
+await supabase
+.from("mission_tokens")
+.select("*")
+.eq("user_id", decoded.id)
+.eq("mission_key", missionKey)
+.eq("used", true)
+.gte(
+"created_at",
+today + "T00:00:00"
+);
+
+if(existed && existed.length > 0){
+
+return res.json({
+
+success:false,
+
+message:"Mission already completed today"
+
+});
+
+}
 const { error } = await supabase
 .from("mission_tokens")
 .insert({
@@ -985,6 +1012,8 @@ token: missionToken,
 mission: req.body.mission,
 
 provider: req.body.provider,
+
+mission_key: missionKey,
 
 used:false,
 
