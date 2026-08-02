@@ -76,6 +76,19 @@ color:white;
 color:gold;
 
 }
+  .completed{
+
+color:#00ff7f;
+font-weight:bold;
+
+}
+
+.rejected{
+
+color:#ff4d4d;
+font-weight:bold;
+
+}
 
 </style>
 
@@ -140,17 +153,33 @@ html+=`
 
 <td>${w.discord_username}</td>
 
-<td class="pending">${w.status}</td>
+<td class="${w.status}">
+${w.status}
+</td>
 
 <td>
 
-<button class="approve">
+${
+w.status==="pending"
+?
+
+`
+<button class="approve"
+onclick="approveWithdraw(${w.id})">
 Approve
 </button>
 
-<button class="reject">
+<button class="reject"
+onclick="rejectWithdraw(${w.id},${w.user_id},${w.amount})">
 Reject
 </button>
+`
+
+:
+
+w.status
+
+}
 
 </td>
 
@@ -165,6 +194,52 @@ document.getElementById("withdrawTable").innerHTML=html;
 }
 
 loadWithdraws();
+  async function approveWithdraw(id){
+
+await fetch(
+"https://bladeball-spin-backend-kpjl.onrender.com/admin/approve",
+{
+
+method:"POST",
+
+headers:{
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify({
+id
+})
+
+});
+
+loadWithdraws();
+
+}
+  async function rejectWithdraw(id,user_id,amount){
+
+await fetch(
+"https://bladeball-spin-backend-kpjl.onrender.com/admin/reject",
+{
+
+method:"POST",
+
+headers:{
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify({
+
+id,
+user_id,
+amount
+
+})
+
+});
+
+loadWithdraws();
+
+}
 
 </script>
 
