@@ -980,6 +980,113 @@ error:err.message
 }
 
 });
+app.post("/admin/approve", async (req,res)=>{
+
+try{
+
+const {id}=req.body;
+
+await supabase
+.from("withdraw_requests")
+.update({
+status:"completed"
+})
+.eq("id",id);
+
+res.json({
+success:true
+});
+
+}catch(err){
+
+res.json({
+success:false,
+error:err.message
+});
+
+}
+
+});
+// =============================
+// ADMIN - REJECT WITHDRAW
+// =============================
+app.post("/admin/reject", async (req,res)=>{
+
+try{
+
+const { id } = req.body;
+
+// Lấy request
+const { data: withdraw } = await supabase
+.from("withdraw_requests")
+.select("*")
+.eq("id", id)
+.single();
+
+if(!withdraw){
+
+return res.json({
+success:false,
+message:"Withdraw not found"
+});
+
+}
+
+// Chỉ reject khi pending
+if(withdraw.status !== "pending"){
+
+return res.json({
+success:false,
+message:"Already processed"
+});
+
+}
+
+// Lấy user
+const { data:user } = await supabase
+.from("users")
+.select("*")
+.eq("id", withdraw.user_id)
+.single();
+
+// Trả token
+await supabase
+.from("users")
+.update({
+
+tokens:Number(user.tokens)+Number(withdraw.amount)
+
+})
+.eq("id", withdraw.user_id);
+
+// Đổi trạng thái
+await supabase
+.from("withdraw_requests")
+.update({
+
+status:"rejected"
+
+})
+.eq("id", id);
+
+res.json({
+
+success:true
+
+});
+
+}catch(err){
+
+res.json({
+
+success:false,
+error:err.message
+
+});
+
+}
+
+});
 const PORT = process.env.PORT || 3000;
 
 
