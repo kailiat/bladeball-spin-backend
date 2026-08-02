@@ -24,6 +24,7 @@ const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SECRET_KEY
 );
+const spinningUsers = new Set();
 
 console.log("Has secret key:", !!process.env.SUPABASE_SECRET_KEY);
 console.log("Secret starts with:", process.env.SUPABASE_SECRET_KEY?.slice(0, 12));
@@ -445,6 +446,15 @@ app.post("/spin", async (req, res) => {
       token,
       process.env.JWT_SECRET
     );
+    // chống spam spin
+if (spinningUsers.has(decoded.id)) {
+  return res.json({
+    success: false,
+    message: "Please wait..."
+  });
+}
+
+spinningUsers.add(decoded.id);
 
     // Get prizes
     const { data: prizes, error } = await supabase
@@ -598,7 +608,9 @@ console.log("==========================");
     });
 
   }
-
+finally{
+    spinningUsers.delete(decoded.id);
+}
 });
 // Get Spin History
 app.get("/history", async (req, res) => {
