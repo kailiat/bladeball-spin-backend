@@ -1062,7 +1062,7 @@ const redirectLink =
 if(req.body.provider === "lootlabs"){
 
 missionUrl =
-"https://links.lootlabs.gg/s?3AuQvzM3&redirect=" +
+"https://lootdest.org/s?dlJ3Rofo&redirect=" +
 encodeURIComponent(redirectLink);
 
 }
