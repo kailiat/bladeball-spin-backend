@@ -7,6 +7,7 @@ const jwt = require("jsonwebtoken");
 require("dotenv").config();
 
 const path = require("path");
+const crypto = require("crypto");
 
 const app = express();
 
@@ -1129,6 +1130,136 @@ app.post("/admin/login", (req, res) => {
 
 });
 // =============================
+// CLAIM MISSION REWARD
+// =============================
+app.post("/mission/claim", async (req, res) => {
+
+    try{
+
+        const token = req.cookies.token;
+
+        if(!token){
+
+            return res.json({
+                success:false,
+                message:"Please login first"
+            });
+
+        }
+
+        const decoded = jwt.verify(
+            token,
+            process.env.JWT_SECRET
+        );
+
+        const { token: missionToken } = req.body;
+
+        if(!missionToken){
+
+            return res.json({
+                success:false,
+                message:"Missing token"
+            });
+
+        }
+
+        // kiểm tra token
+        const { data: mission, error } = await supabase
+        .from("mission_tokens")
+        .select("*")
+        .eq("token", missionToken)
+        .single();
+
+        if(error || !mission){
+
+            return res.json({
+                success:false,
+                message:"Invalid token"
+            });
+
+        }
+
+        if(mission.user_id !== decoded.id){
+
+            return res.json({
+                success:false,
+                message:"Invalid user"
+            });
+
+        }
+
+        if(mission.used){
+
+            return res.json({
+                success:false,
+                message:"Already claimed"
+            });
+
+        }
+
+        if(new Date(mission.expire_at) < new Date()){
+
+            return res.json({
+                success:false,
+                message:"Token expired"
+            });
+
+        }
+
+        // lấy user
+        const { data:user } = await supabase
+        .from("users")
+        .select("*")
+        .eq("id", decoded.id)
+        .single();
+
+        const newSpin =
+        Number(user.spin_chances || 0) + 1;
+
+        // cộng spin
+        await supabase
+        .from("users")
+        .update({
+
+            spin_chances:newSpin
+
+        })
+        .eq("id", decoded.id);
+
+        // đánh dấu đã dùng
+        await supabase
+        .from("mission_tokens")
+        .update({
+
+            used:true
+
+        })
+        .eq("token", missionToken);
+
+        res.json({
+
+            success:true,
+
+            spin_chances:newSpin
+
+        });
+
+    }
+
+    catch(err){
+
+        res.json({
+
+            success:false,
+
+            error:err.message
+
+        });
+
+    }
+
+});
+// =============================
 // ADMIN DASHBOARD
 // =============================
 app.get("/admin/dashboard", async (req, res) => {
@@ -1378,6 +1509,80 @@ error:err.message
 });
 
 }
+
+});
+// =============================
+// CREATE MISSION TOKEN
+// =============================
+app.post("/mission/start", async (req, res) => {
+
+    try{
+
+        const token = req.cookies.token;
+
+        if(!token){
+
+            return res.json({
+                success:false,
+                message:"Please login first"
+            });
+
+        }
+
+        const decoded = jwt.verify(
+            token,
+            process.env.JWT_SECRET
+        );
+
+        const { mission } = req.body;
+
+        if(!mission){
+
+            return res.json({
+                success:false,
+                message:"Missing mission"
+            });
+
+        }
+
+        const missionToken =
+        crypto.randomBytes(32).toString("hex");
+
+        const expire =
+        new Date(Date.now() + 10 * 60 * 1000);
+
+        await supabase
+        .from("mission_tokens")
+        .insert({
+
+            user_id: decoded.id,
+
+            token: missionToken,
+
+            mission,
+
+            expire_at: expire
+
+        });
+
+        res.json({
+
+            success:true,
+
+            token: missionToken
+
+        });
+
+    }
+
+    catch(err){
+
+        res.json({
+            success:false,
+            error:err.message
+        });
+
+    }
 
 });
 const PORT = process.env.PORT || 3000;
