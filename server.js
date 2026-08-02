@@ -941,6 +941,45 @@ error:err.message
 
 
 });
+// =============================
+// ADMIN - GET ALL WITHDRAWS
+// =============================
+app.get("/admin/withdraws", async (req, res) => {
+
+try{
+
+const { data, error } = await supabase
+.from("withdraw_requests")
+.select(`
+*,
+users(username)
+`)
+.order("created_at",{ascending:false});
+
+if(error){
+
+return res.json({
+success:false,
+error:error.message
+});
+
+}
+
+res.json({
+success:true,
+data
+});
+
+}catch(err){
+
+res.json({
+success:false,
+error:err.message
+});
+
+}
+
+});
 const PORT = process.env.PORT || 3000;
 
 
