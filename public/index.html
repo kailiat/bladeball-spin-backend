@@ -56,24 +56,29 @@ h1 {
 
 
 .wheel-container{
+
     position:relative;
-    margin:50px auto;
+
+    margin-top:10px;
+
     width:420px;
+
     height:420px;
+
 }
     .main-layout{
 
-    width:1200px;
+    width:1180px;
 
-    margin:40px auto;
+    margin:30px auto;
 
     display:flex;
 
-    justify-content:space-between;
+    justify-content:center;
 
     align-items:flex-start;
 
-    gap:60px;
+    gap:80px;
 
 }
 
@@ -641,7 +646,9 @@ input:focus{
 
 <p>Reward: <b>+1 Spin</b></p>
 
-<button>CLAIM</button>
+<button onclick="claimFreeSpin()">
+CLAIM
+</button>
 
 </div>
 
@@ -705,12 +712,23 @@ input:focus{
 </div>
 
 
+<div
+style="
+display:flex;
+justify-content:center;
+gap:20px;
+margin-top:25px;
+">
+
 <button onclick="spin()">
 SPIN
 </button>
-    <button onclick="testSpin()">
+
+<button onclick="testSpin()">
 🎲 Test Spin
 </button>
+
+</div>
 <div class="menu">
 
     <button onclick="showWithdraw()">
@@ -725,9 +743,7 @@ SPIN
         👤 Profile
     </button>
     
-    <button onclick="claimFreeSpin()">
-    🎁 Claim Free Spin
-</button>
+    
 
 </div>
 
