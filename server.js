@@ -16,6 +16,7 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use(cookieParser());
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "123456";
 
 app.use(express.static(path.join(__dirname, "public")));
 
@@ -941,10 +942,43 @@ error:err.message
 
 
 });
+app.post("/admin/login", (req, res) => {
+
+  const { password } = req.body;
+
+  if (password !== ADMIN_PASSWORD) {
+
+    return res.json({
+      success: false,
+      message: "Wrong password"
+    });
+
+  }
+
+  res.cookie("admin", "true", {
+    httpOnly: true,
+    secure: true,
+    sameSite: "none",
+    maxAge: 7 * 24 * 60 * 60 * 1000
+  });
+
+  res.json({
+    success: true
+  });
+
+});
 // =============================
 // ADMIN - GET ALL WITHDRAWS
 // =============================
 app.get("/admin/withdraws", async (req, res) => {
+  if(req.cookies.admin !== "true"){
+
+    return res.json({
+        success:false,
+        message:"Unauthorized"
+    });
+
+}
 
 try{
 
@@ -981,6 +1015,14 @@ error:err.message
 
 });
 app.post("/admin/approve", async (req,res)=>{
+  if(req.cookies.admin !== "true"){
+
+    return res.json({
+        success:false,
+        message:"Unauthorized"
+    });
+
+}
 
 try{
 
@@ -1011,6 +1053,14 @@ error:err.message
 // ADMIN - REJECT WITHDRAW
 // =============================
 app.post("/admin/reject", async (req,res)=>{
+  if(req.cookies.admin !== "true"){
+
+    return res.json({
+        success:false,
+        message:"Unauthorized"
+    });
+
+}
 
 try{
 
