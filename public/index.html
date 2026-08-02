@@ -248,17 +248,34 @@ button:hover{
 
 }
     .live-feed{
-  width:100%;
-  overflow:hidden;
-  background:#111;
-  color:white;
-  padding:10px;
+
+    width:80%;
+    margin:20px auto;
+
+    overflow:hidden;
+
+    background:
+    rgba(139,61,255,0.12);
+
+    border:
+
+    1px solid rgba(139,61,255,.35);
+
+    border-radius:20px;
+
+    backdrop-filter:blur(10px);
+
+    padding:12px;
+
+    box-shadow:
+    0 0 25px rgba(139,61,255,.25);
+
 }
 
 #feedText{
     display:inline-block;
     white-space:nowrap;
-    animation:scroll 35s linear infinite;
+    animation:scroll 80s linear infinite;
     font-size:18px;
 }
 
@@ -465,13 +482,6 @@ input:focus{
 </head>
 
 
-<body>
-<div class="live-feed">
-  <div id="feedText">
-    Loading...
-  </div>
-</div>
-
 <div class="logo">
     ⚔️
 </div>
@@ -487,6 +497,14 @@ input:focus{
 <p class="subtitle">
     Daily Spin • Win Blade Ball Tokens
 </p>
+
+
+<div class="live-feed">
+  <div id="feedText">
+    Loading...
+  </div>
+</div>
+    
 <div id="userBox">
 
 <button onclick="location.href='/login.html'">
@@ -1344,8 +1362,13 @@ let text="";
 
 data.feed.forEach(item=>{
 
+data.feed.forEach(item=>{
+
 text += 
-`🎉 ${item.username} just won ${item.reward}     `;
+`
+🎉 ${item.username} won ${item.reward}     ✦     `;
+
+});
 
 });
 
