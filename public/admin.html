@@ -179,9 +179,12 @@ font-weight:bold;
 
 async function loadWithdraws(){
 
-const res=await fetch(
-"https://bladeball-spin-backend-kpjl.onrender.com/admin/withdraws"
-);
+const res=await
+fetch(
+"https://bladeball-spin-backend-kpjl.onrender.com/admin/withdraws",
+{
+credentials:"include"
+});
 
 const data=await res.json();
   let pending=0;
@@ -268,6 +271,8 @@ await fetch(
 
 method:"POST",
 
+credentials:"include",
+
 headers:{
 "Content-Type":"application/json"
 },
@@ -288,6 +293,8 @@ await fetch(
 {
 
 method:"POST",
+
+credentials:"include",
 
 headers:{
 "Content-Type":"application/json"
