@@ -10,6 +10,7 @@ const path = require("path");
 const crypto = require("crypto");
 
 const app = express();
+const spinCooldown = new Map();
 
 app.use(cors({
   origin:true,
@@ -1032,7 +1033,8 @@ mission_key: missionKey,
 
 used:false,
 
-
+expires_at:
+new Date(Date.now()+24*60*60*1000)
 
 });
 
@@ -1055,12 +1057,12 @@ error:error.message
 let missionUrl = "";
 
 const redirectLink =
-`https://bladeball-spin-backend-kpjl.onrender.com/claim.html?token=${missionToken}`;
+`https://bladeball-spin-backend-kpjl.onrender.com/mission/complete/${missionToken}`;
 
 if(req.body.provider === "lootlabs"){
 
 missionUrl =
-"https://loot-link.com/s?3AuQvzM3&redirect=" +
+"https://links.lootlabs.gg/s?3AuQvzM3&redirect=" +
 encodeURIComponent(redirectLink);
 
 }
@@ -1097,6 +1099,108 @@ error:err.message
 
 });
 
+
+}
+
+
+});
+// =============================
+// COMPLETE MISSION
+// =============================
+
+app.get("/mission/complete/:token", async(req,res)=>{
+
+try{
+
+
+const { token } = req.params;
+
+
+// tìm token
+const { data: mission, error } =
+await supabase
+.from("mission_tokens")
+.select("*")
+.eq("token", token)
+.single();
+
+
+
+if(error || !mission){
+
+return res.send("Invalid mission");
+
+}
+
+
+
+// chống nhận lại
+if(mission.used){
+
+return res.send("Mission already completed");
+
+}
+
+
+
+// lấy user
+
+const { data:user, error:userError } =
+await supabase
+.from("users")
+.select("*")
+.eq("id", mission.user_id)
+.single();
+
+
+
+if(userError){
+
+return res.send("User error");
+
+}
+
+
+
+// cộng spin
+
+await supabase
+.from("users")
+.update({
+
+spin_chances:
+Number(user.spin_chances || 0)+1
+
+})
+.eq("id", mission.user_id);
+
+
+
+
+// đánh dấu đã dùng
+
+await supabase
+.from("mission_tokens")
+.update({
+
+used:true
+
+})
+.eq("token",token);
+
+
+
+// quay về web spin
+
+res.redirect(
+"https://bladeball-spin-backend-kpjl.onrender.com"
+);
+
+
+
+}catch(err){
+
+res.send(err.message);
 
 }
 
