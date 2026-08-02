@@ -1045,8 +1045,7 @@ missionToken;
 if(req.body.provider === "lootlabs"){
 
 missionUrl =
-"https://lootdest.org/s?KHhWiw31&url=" +
-encodeURIComponent(redirectLink);
+"https://loot-link.com/s?3AuQvzM3";
 
 }
 
@@ -1054,8 +1053,7 @@ encodeURIComponent(redirectLink);
 if(req.body.provider === "linkvertise"){
 
 missionUrl =
-"https://direct-link.net/4248703/FxVrNlMWnooH?url=" +
-encodeURIComponent(redirectLink);
+"https://direct-link.net/4248703/FxVrNlMWnooH";
 
 }
 
