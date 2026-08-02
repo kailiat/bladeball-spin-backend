@@ -982,9 +982,9 @@ user_id: decoded.id,
 
 token: missionToken,
 
-mission: req.body.mission || "lootlabs",
+mission: req.body.mission,
 
-provider: "lootlabs",
+provider: req.body.provider,
 
 used:false,
 
@@ -1298,7 +1298,10 @@ app.post("/mission/claim", async (req, res) => {
             });
 
         }
-      if(mission.provider !== "lootlabs"){
+      if(
+mission.provider !== "lootlabs" &&
+mission.provider !== "linkvertise"
+){
 
 return res.json({
 
