@@ -557,13 +557,21 @@ await supabase
 
 // Lưu lịch sử quay
 await supabase
-  .from("spin_history")
-  .insert({
+.from("spin_history")
+.insert({
     user_id: decoded.id,
     reward: reward.name,
     amount: reward.amount,
     spin_date: new Date().toISOString().slice(0,10)
-  });
+});
+    await supabase
+.from("live_feed")
+.insert({
+    username: decoded.username,
+    reward: reward.name,
+    amount: reward.amount,
+    is_fake: false
+});
     console.log("========== SPIN ==========");
 console.log("Random:", random);
 console.log("Reward:", reward);
@@ -659,6 +667,43 @@ console.log("History data:", data);
     });
 
   }
+
+});
+// =============================
+// LIVE FEED
+// =============================
+app.get("/live-feed", async (req,res)=>{
+
+try{
+
+const { data, error } = await supabase
+.from("live_feed")
+.select("*")
+.order("created_at",{ascending:false})
+.limit(30);
+
+if(error){
+
+return res.json({
+success:false,
+error:error.message
+});
+
+}
+
+res.json({
+success:true,
+feed:data
+});
+
+}catch(err){
+
+res.json({
+success:false,
+error:err.message
+});
+
+}
 
 });
 app.post("/logout", (req, res) => {
@@ -977,6 +1022,88 @@ app.post("/admin/login", (req, res) => {
   res.json({
     success: true
   });
+
+});
+// =============================
+// ADMIN DASHBOARD
+// =============================
+app.get("/admin/dashboard", async (req, res) => {
+
+    if(req.cookies.admin !== "true"){
+
+        return res.json({
+            success:false,
+            message:"Unauthorized"
+        });
+
+    }
+
+    try{
+
+        // Total Users
+        const { count:userCount } = await supabase
+        .from("users")
+        .select("*",{count:"exact",head:true});
+
+        // Total Spins
+        const { count:spinCount } = await supabase
+        .from("spin_history")
+        .select("*",{count:"exact",head:true});
+
+        // Withdraw
+        const { data:withdraws } = await supabase
+        .from("withdraw_requests")
+        .select("status");
+
+        let pending=0;
+        let completed=0;
+        let rejected=0;
+
+        withdraws.forEach(w=>{
+
+            if(w.status==="pending") pending++;
+            if(w.status==="completed") completed++;
+            if(w.status==="rejected") rejected++;
+
+        });
+
+        // Total Token
+        const { data:users } = await supabase
+        .from("users")
+        .select("tokens");
+
+        let totalTokens=0;
+
+        users.forEach(u=>{
+
+            totalTokens += Number(u.tokens||0);
+
+        });
+
+        res.json({
+
+            success:true,
+
+            stats:{
+                users:userCount||0,
+                tokens:totalTokens,
+                spins:spinCount||0,
+                withdraws:withdraws.length,
+                pending,
+                completed,
+                rejected
+            }
+
+        });
+
+    }catch(err){
+
+        res.json({
+            success:false,
+            error:err.message
+        });
+
+    }
 
 });
 // =============================
