@@ -56,30 +56,24 @@ h1 {
 
 
 .wheel-container{
-
     position:relative;
 
-    margin-top:10px;
+    width:460px;
+    height:460px;
 
-    width:420px;
-
-    height:420px;
-
+    display:flex;
+    justify-content:center;
+    align-items:center;
 }
     .main-layout{
-
-    width:1180px;
-
+    width:1400px;
     margin:30px auto;
 
     display:flex;
-
     justify-content:center;
-
     align-items:flex-start;
 
-    gap:80px;
-
+    gap:150px;
 }
 
 .mission-panel{
@@ -140,7 +134,8 @@ h1 {
 
     padding:12px;
 
-    font-size:18px;
+    font-size:20px;
+font-weight:800;
 
 }
 
@@ -220,23 +215,13 @@ inset 0 0 35px rgba(255,255,255,.08);
 
 
 .arrow{
-
-position:absolute;
-
-top:-28px;
-
-left:190px;
-
-font-size:55px;
-
-color:#ffd54f;
-
-text-shadow:
-0 0 12px gold,
-0 0 25px orange;
-
-z-index:20;
-
+    position:absolute;
+    top:-35px;
+    left:50%;
+    transform:translateX(-50%);
+    font-size:60px;
+    color:#ffd54f;
+    z-index:30;
 }
 
 
@@ -276,6 +261,15 @@ button:hover{
 
     box-shadow:
         0 0 35px rgba(124,60,255,.8);
+
+}
+    button:disabled{
+
+    background:#555 !important;
+    cursor:not-allowed;
+    opacity:.6;
+    transform:none;
+    box-shadow:none;
 
 }
 
@@ -646,7 +640,7 @@ input:focus{
 
 <p>Reward: <b>+1 Spin</b></p>
 
-<button onclick="claimFreeSpin()">
+<button id="dailyClaimBtn" onclick="claimFreeSpin()">
 CLAIM
 </button>
 
@@ -1000,7 +994,7 @@ rewards.forEach((text, i) => {
 
     const angle = i * 30 + 15;
 
-    const radius = 150;
+    const radius = 170;
 
     const x = 210 + radius * Math.cos(angle * Math.PI / 180);
     const y = 210 + radius * Math.sin(angle * Math.PI / 180);
@@ -1165,6 +1159,19 @@ async function checkLogin(){
 
     }
 
+
+}
+    // Daily login đã nhận hôm nay chưa
+if(data.user.claimed_today){
+
+    const btn = document.getElementById("dailyClaimBtn");
+
+    if(btn){
+
+        btn.innerText = "CLAIMED";
+        btn.disabled = true;
+
+    }
 
 }
 
@@ -1502,8 +1509,12 @@ wheel.dataset.rotation = targetDeg;
 
     showToast("🎉 Received 1 Free Spin!");
 
+const btn = document.getElementById("dailyClaimBtn");
 
-    location.reload();
+btn.innerText = "CLAIMED";
+btn.disabled = true;
+
+await checkLogin();
 
 }
         function changeWithdrawType(){
