@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Admin Login</title>
+
+<style>
+
+body{
+background:#111118;
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+font-family:Arial;
+}
+
+.box{
+
+background:#1b1b24;
+padding:40px;
+border-radius:15px;
+width:300px;
+text-align:center;
+
+}
+
+input{
+
+width:100%;
+padding:12px;
+margin-top:15px;
+border-radius:8px;
+border:none;
+
+}
+
+button{
+
+margin-top:20px;
+padding:12px;
+width:100%;
+background:#8b3dff;
+border:none;
+color:white;
+font-weight:bold;
+border-radius:8px;
+cursor:pointer;
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="box">
+
+<h2>Admin Login</h2>
+
+<input
+id="password"
+type="password"
+placeholder="Password">
+
+<button onclick="login()">
+
+Login
+
+</button>
+
+</div>
+
+<script>
+
+async function login(){
+
+const password =
+document.getElementById("password").value;
+
+const res =
+await fetch(
+"https://bladeball-spin-backend-kpjl.onrender.com/admin/login",
+{
+
+method:"POST",
+
+credentials:"include",
+
+headers:{
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify({
+password
+})
+
+});
+
+const data=await res.json();
+
+if(data.success){
+
+location.href="panel_9x3h2.html";
+
+}else{
+
+alert(data.message);
+
+}
+
+}
+
+</script>
+
+</body>
+</html>
