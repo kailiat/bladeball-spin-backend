@@ -985,12 +985,11 @@ await supabase
 .eq("user_id", decoded.id)
 .eq("mission_key", missionKey)
 .eq("used", true)
-.gte(
-"created_at",
-today + "T00:00:00"
-);
+.gte("created_at", today + "T00:00:00");
 
-if(existed && existed.length > 0){
+const claimCount = existed ? existed.length : 0;
+
+if(claimCount >= 2){
 
 return res.json({
 
