@@ -1041,16 +1041,14 @@ let missionUrl = "";
 if(req.body.provider === "lootlabs"){
 
     missionUrl =
-    "https://lootlabs.gg/your-link?token=" +
-    missionToken;
+    "https://lootdest.org/s?vi8LAUz4";
 
 }
 
 if(req.body.provider === "linkvertise"){
 
     missionUrl =
-    "https://linkvertise.com/your-link?token=" +
-    missionToken;
+    "https://link-target.net/4248703/JJYNdz81flAc";
 
 }
 
