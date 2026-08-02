@@ -1286,15 +1286,13 @@ app.post("/admin/login", (req, res) => {
 // =============================
 // REDIRECT TO CLAIM PAGE
 // =============================
-app.get("/mission/redirect/:token", (req,res)=>{
+app.get("/mission/redirect/:token",(req,res)=>{
 
-console.log("REDIRECT HIT");
-console.log("TOKEN:", req.params.token);
+const token = req.params.token;
 
-res.send(`
-<h1>REDIRECT OK</h1>
-<p>Token: ${req.params.token}</p>
-`);
+res.redirect(
+"/claim.html?token=" + token
+);
 
 });
 // =============================
