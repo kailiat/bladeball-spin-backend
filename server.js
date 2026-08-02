@@ -1036,11 +1036,31 @@ error:error.message
 
 
 
+let missionUrl = "";
+
+if(req.body.provider === "lootlabs"){
+
+    missionUrl =
+    "https://lootlabs.gg/your-link?token=" +
+    missionToken;
+
+}
+
+if(req.body.provider === "linkvertise"){
+
+    missionUrl =
+    "https://linkvertise.com/your-link?token=" +
+    missionToken;
+
+}
+
 res.json({
 
-success:true,
+    success:true,
 
-token:missionToken
+    token:missionToken,
+
+    url:missionUrl
 
 });
 
