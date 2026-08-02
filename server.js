@@ -24,7 +24,7 @@ const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SECRET_KEY
 );
-const spinningUsers = new Set();
+
 // =============================
 // AUTO FAKE LIVE FEED
 // =============================
@@ -555,14 +555,7 @@ app.post("/spin", async (req, res) => {
       process.env.JWT_SECRET
     );
     // chống spam spin
-if (spinningUsers.has(decoded.id)) {
-  return res.json({
-    success: false,
-    message: "Please wait..."
-  });
-}
 
-spinningUsers.add(decoded.id);
 
     // Get prizes
     const { data: prizes, error } = await supabase
@@ -724,9 +717,7 @@ console.log("==========================");
     });
 
   }
-finally{
-    spinningUsers.delete(decoded.id);
-}
+
 });
 // Get Spin History
 app.get("/history", async (req, res) => {
