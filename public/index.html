@@ -1156,25 +1156,25 @@ async function checkLogin(){
         </button>
 
         `;
+                // Daily login đã nhận hôm nay chưa
+        if(data.user.claimed_today){
+
+            const btn = document.getElementById("dailyClaimBtn");
+
+            if(btn){
+
+                btn.innerText = "CLAIMED";
+                btn.disabled = true;
+
+            }
+
+        }
 
     }
 
 
 }
-    // Daily login đã nhận hôm nay chưa
-if(data.user.claimed_today){
-
-    const btn = document.getElementById("dailyClaimBtn");
-
-    if(btn){
-
-        btn.innerText = "CLAIMED";
-        btn.disabled = true;
-
-    }
-
-}
-
+  
 
 async function logout(){
 
