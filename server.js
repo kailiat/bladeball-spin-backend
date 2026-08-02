@@ -1038,19 +1038,23 @@ error:error.message
 
 let missionUrl = "";
 
+const redirectLink =
+"https://bladeball-spin-backend-kpjl.onrender.com/mission/redirect/" +
+missionToken;
+
 if(req.body.provider === "lootlabs"){
 
 missionUrl =
-"https://lootdest.org/s?vi8LAUz4&token=" +
-missionToken;
+"https://lootdest.org/s?vi8LAUz4&url=" +
+encodeURIComponent(redirectLink);
 
 }
 
 if(req.body.provider === "linkvertise"){
 
 missionUrl =
-"https://link-target.net/4248703/JJYNdz81flAc?token=" +
-missionToken;
+"https://link-target.net/4248703/JJYNdz81flAc?url=" +
+encodeURIComponent(redirectLink);
 
 }
 
@@ -1277,6 +1281,18 @@ app.post("/admin/login", (req, res) => {
   res.json({
     success: true
   });
+
+});
+// =============================
+// REDIRECT TO CLAIM PAGE
+// =============================
+app.get("/mission/redirect/:token", (req, res) => {
+
+const token = req.params.token;
+
+return res.redirect(
+"/claim.html?token=" + token
+);
 
 });
 // =============================
