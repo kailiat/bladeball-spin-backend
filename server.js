@@ -937,45 +937,76 @@ app.post("/mission/start", async (req,res)=>{
 
 try{
 
-const token=req.cookies.token;
+
+const token = req.cookies.token;
+
 
 if(!token){
 
 return res.json({
+
 success:false,
+
 message:"Login first"
+
 });
 
 }
 
-const decoded=jwt.verify(
+
+
+const decoded = jwt.verify(
 token,
 process.env.JWT_SECRET
 );
 
-const missionToken=
-require("crypto")
-.randomBytes(32)
-.toString("hex");
 
-const expire=
+
+const missionToken =
+crypto.randomBytes(32).toString("hex");
+
+
+
+const expire =
 new Date(
-Date.now()+10*60*1000
+Date.now() + 10 * 60 * 1000
 );
 
-await supabase
+
+
+const { error } = await supabase
 .from("mission_tokens")
 .insert({
 
-token:missionToken,
+user_id: decoded.id,
 
-user_id:decoded.id,
+token: missionToken,
 
-provider:req.body.provider,
+mission: req.body.mission || "lootlabs",
+
+provider: "lootlabs",
+
+used:false,
 
 expires_at:expire
 
 });
+
+
+
+if(error){
+
+return res.json({
+
+success:false,
+
+error:error.message
+
+});
+
+}
+
+
 
 res.json({
 
@@ -985,7 +1016,10 @@ token:missionToken
 
 });
 
+
+
 }catch(err){
+
 
 res.json({
 
@@ -995,7 +1029,9 @@ error:err.message
 
 });
 
+
 }
+
 
 });
 app.post("/withdraw", async(req,res)=>{
@@ -1245,7 +1281,7 @@ app.post("/mission/claim", async (req, res) => {
 
         }
 
-        if(mission.user_id !== decoded.id){
+        if(String(mission.user_id) !== String(decoded.id)){
 
             return res.json({
                 success:false,
@@ -1262,6 +1298,17 @@ app.post("/mission/claim", async (req, res) => {
             });
 
         }
+      if(mission.provider !== "lootlabs"){
+
+return res.json({
+
+success:false,
+
+message:"Invalid provider"
+
+});
+
+}
 
         if(new Date(mission.expires_at) < new Date()){
 
@@ -1577,80 +1624,7 @@ error:err.message
 }
 
 });
-// =============================
-// CREATE MISSION TOKEN
-// =============================
-app.post("/mission/start", async (req, res) => {
 
-    try{
-
-        const token = req.cookies.token;
-
-        if(!token){
-
-            return res.json({
-                success:false,
-                message:"Please login first"
-            });
-
-        }
-
-        const decoded = jwt.verify(
-            token,
-            process.env.JWT_SECRET
-        );
-
-        const { mission } = req.body;
-
-        if(!mission){
-
-            return res.json({
-                success:false,
-                message:"Missing mission"
-            });
-
-        }
-
-        const missionToken =
-        crypto.randomBytes(32).toString("hex");
-
-        const expire =
-        new Date(Date.now() + 10 * 60 * 1000);
-
-        await supabase
-        .from("mission_tokens")
-        .insert({
-
-            user_id: decoded.id,
-
-            token: missionToken,
-
-            mission,
-
-            expire_at: expire
-
-        });
-
-        res.json({
-
-            success:true,
-
-            token: missionToken
-
-        });
-
-    }
-
-    catch(err){
-
-        res.json({
-            success:false,
-            error:err.message
-        });
-
-    }
-
-});
 const PORT = process.env.PORT || 3000;
 
 
