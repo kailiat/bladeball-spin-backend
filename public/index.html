@@ -279,7 +279,7 @@ button:hover{
 #feedText{
     display:inline-block;
     white-space:nowrap;
-    animation:scroll 60s linear infinite;
+    animation:scroll 95s linear infinite;
     font-size:18px;
 }
 
@@ -1366,8 +1366,11 @@ let text="";
 
 data.feed.forEach(item=>{
 
-    text += 
-    `🎉 ${item.username} won ${item.reward}   •   `;
+text +=
+`🎉 ${item.username} won ${item.reward}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+⭐
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`;
 
 });
 
@@ -1389,7 +1392,7 @@ console.log(err);
 
 loadLiveFeed();
 
-setInterval(loadLiveFeed,30000);
+setInterval(loadLiveFeed,10000);
 
 
     checkLogin();
