@@ -1044,7 +1044,7 @@ const redirectLink =
 if(req.body.provider === "lootlabs"){
 
 missionUrl =
-"https://loot-link.com/s?3AuQvzM3&url=" +
+"https://loot-link.com/s?3AuQvzM3&redirect=" +
 encodeURIComponent(redirectLink);
 
 }
@@ -1286,13 +1286,15 @@ app.post("/admin/login", (req, res) => {
 // =============================
 // REDIRECT TO CLAIM PAGE
 // =============================
-app.get("/mission/redirect/:token", (req, res) => {
+app.get("/mission/redirect/:token", (req,res)=>{
 
-const token = req.params.token;
+console.log("REDIRECT HIT");
+console.log("TOKEN:", req.params.token);
 
-return res.redirect(
-"/claim.html?token=" + token
-);
+res.send(`
+<h1>REDIRECT OK</h1>
+<p>Token: ${req.params.token}</p>
+`);
 
 });
 // =============================
