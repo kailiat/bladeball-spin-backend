@@ -1045,15 +1045,16 @@ missionToken;
 if(req.body.provider === "lootlabs"){
 
 missionUrl =
-"https://lootdest.org/s?vi8LAUz4&url=" +
+"https://lootdest.org/s?KHhWiw31&url=" +
 encodeURIComponent(redirectLink);
 
 }
 
+
 if(req.body.provider === "linkvertise"){
 
 missionUrl =
-"https://link-target.net/4248703/JJYNdz81flAc?url=" +
+"https://direct-link.net/4248703/FxVrNlMWnooH?url=" +
 encodeURIComponent(redirectLink);
 
 }
