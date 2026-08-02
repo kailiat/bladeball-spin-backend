@@ -206,11 +206,74 @@ CLAIM REWARD
 
 <script>
 
-const params = new URLSearchParams(window.location.search);
 
+const params = new URLSearchParams(window.location.search);
 const token = params.get("token");
 
+const btn = document.getElementById("claimBtn");
+const status = document.getElementById("status");
+
+btn.onclick = async () => {
+
+    btn.disabled = true;
+    btn.innerText = "PLEASE WAIT...";
+
+    try{
+
+        const res = await fetch(
+            "https://bladeball-spin-backend-kpjl.onrender.com/mission/claim",
+            {
+                method:"POST",
+                credentials:"include",
+                headers:{
+                    "Content-Type":"application/json"
+                },
+                body:JSON.stringify({
+                    token
+                })
+            }
+        );
+
+        const data = await res.json();
+
+        if(!data.success){
+
+            status.style.color = "#ff6b6b";
+            status.innerText = data.message || data.error;
+
+            btn.disabled = false;
+            btn.innerText = "CLAIM REWARD";
+
+            return;
+
+        }
+
+        status.style.color = "#6dff91";
+        status.innerText = "✅ +1 Spin Added";
+
+        btn.innerText = "CLAIMED";
+
+        setTimeout(()=>{
+
+            window.location.href="/";
+
+        },2000);
+
+    }
+    catch(err){
+
+        status.style.color="#ff6b6b";
+        status.innerText="Server Error";
+
+        btn.disabled=false;
+        btn.innerText="CLAIM REWARD";
+
+    }
+
+}
 </script>
+
+
 
 </body>
 
