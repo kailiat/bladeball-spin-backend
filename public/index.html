@@ -247,6 +247,33 @@ button:hover{
     color:#ffd54f;
 
 }
+    .live-feed{
+  width:100%;
+  overflow:hidden;
+  background:#111;
+  color:white;
+  padding:10px;
+}
+
+#feedText{
+    display:inline-block;
+    white-space:nowrap;
+    animation:scroll 35s linear infinite;
+    font-size:18px;
+}
+
+
+@keyframes scroll{
+
+from{
+ transform:translateX(100%);
+}
+
+to{
+ transform:translateX(-100%);
+}
+
+}
 
 @keyframes popupShow{
 
@@ -439,7 +466,11 @@ input:focus{
 
 
 <body>
-
+<div class="live-feed">
+  <div id="feedText">
+    Loading...
+  </div>
+</div>
 
 <div class="logo">
     ⚔️
@@ -1293,6 +1324,50 @@ showToast("Item withdraw coming soon");
 }
 
 }
+    async function loadLiveFeed(){
+
+try{
+
+const res = await fetch(
+"https://bladeball-spin-backend-kpjl.onrender.com/live-feed",
+{
+credentials:"include"
+}
+);
+
+const data = await res.json();
+
+
+if(data.success){
+
+let text="";
+
+data.feed.forEach(item=>{
+
+text += 
+`🎉 ${item.username} just won ${item.reward}     `;
+
+});
+
+
+document.getElementById("feedText").innerText=text;
+
+
+}
+
+
+}catch(err){
+
+console.log(err);
+
+}
+
+}
+
+
+loadLiveFeed();
+
+setInterval(loadLiveFeed,30000);
 
 
     checkLogin();
