@@ -778,6 +778,7 @@ try{
 const { data, error } = await supabase
 .from("live_feed")
 .select("*")
+.not("amount","eq",0)
 .order("created_at",{ascending:false})
 .limit(30);
 
@@ -788,6 +789,10 @@ success:false,
 error:error.message
 });
 
+}
+  // Random vị trí feed để mỗi lần load không giống nhau
+if (data && data.length > 1) {
+  data.sort(() => Math.random() - 0.5);
 }
 
 res.json({
