@@ -25,7 +25,115 @@ const supabase = createClient(
   process.env.SUPABASE_SECRET_KEY
 );
 const spinningUsers = new Set();
+// =============================
+// AUTO FAKE LIVE FEED
+// =============================
 
+const fakeNames = [
+  "ShadowWolf",
+  "LuckyStar",
+  "MoonLight",
+  "DragonX",
+  "FireBlade",
+  "CyberWolf",
+  "NightKing",
+  "BluePhoenix",
+  "DarkHunter",
+  "GoldenTiger",
+  "IceMaster",
+  "StormPlayer",
+  "NovaX",
+  "GhostFire",
+  "AlphaWolf",
+  "ZeroKing",
+  "PixelHero",
+  "RedShadow",
+  "SkyDragon",
+  "UltraLuck"
+];
+
+
+const fakeRewards = [
+  {
+    reward:"50 Tokens",
+    amount:50
+  },
+  {
+    reward:"100 Tokens",
+    amount:100
+  },
+  {
+    reward:"250 Tokens",
+    amount:250
+  },
+  {
+    reward:"500 Tokens",
+    amount:500
+  }
+];
+
+
+async function createFakeFeed(){
+
+try{
+
+
+const name =
+fakeNames[
+Math.floor(Math.random()*fakeNames.length)
+];
+
+
+const prize =
+fakeRewards[
+Math.floor(Math.random()*fakeRewards.length)
+];
+
+
+
+await supabase
+.from("live_feed")
+.insert({
+
+username:name,
+
+reward:prize.reward,
+
+amount:prize.amount,
+
+is_fake:true
+
+});
+
+console.log(
+"Fake feed:",
+name,
+prize.reward
+);
+
+
+
+}catch(err){
+
+console.log(
+"Fake feed error:",
+err.message
+);
+
+
+}
+
+
+}
+
+
+// tạo feed mỗi 15-40 giây
+
+setInterval(()=>{
+
+createFakeFeed();
+
+},20000);
 console.log("Has secret key:", !!process.env.SUPABASE_SECRET_KEY);
 console.log("Secret starts with:", process.env.SUPABASE_SECRET_KEY?.slice(0, 12));
 
