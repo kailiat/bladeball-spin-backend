@@ -1055,7 +1055,7 @@ error:error.message
 let missionUrl = "";
 
 const redirectLink =
-`https://bladeball-spin-backend-kpjl.onrender.com/mission/redirect/${missionToken}?test=1`;
+`https://bladeball-spin-backend-kpjl.onrender.com/claim.html?token=${missionToken}`;
 
 if(req.body.provider === "lootlabs"){
 
