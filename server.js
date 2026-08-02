@@ -845,6 +845,7 @@ app.post("/claim-free-spin", async (req,res)=>{
       process.env.JWT_SECRET
     );
     
+    
 
 
     // lấy user
@@ -930,6 +931,71 @@ if(userData.last_claim_date === today){
     });
 
   }
+
+});
+app.post("/mission/start", async (req,res)=>{
+
+try{
+
+const token=req.cookies.token;
+
+if(!token){
+
+return res.json({
+success:false,
+message:"Login first"
+});
+
+}
+
+const decoded=jwt.verify(
+token,
+process.env.JWT_SECRET
+);
+
+const missionToken=
+require("crypto")
+.randomBytes(32)
+.toString("hex");
+
+const expire=
+new Date(
+Date.now()+10*60*1000
+);
+
+await supabase
+.from("mission_tokens")
+.insert({
+
+token:missionToken,
+
+user_id:decoded.id,
+
+provider:req.body.provider,
+
+expires_at:expire
+
+});
+
+res.json({
+
+success:true,
+
+token:missionToken
+
+});
+
+}catch(err){
+
+res.json({
+
+success:false,
+
+error:err.message
+
+});
+
+}
 
 });
 app.post("/withdraw", async(req,res)=>{
@@ -1197,7 +1263,7 @@ app.post("/mission/claim", async (req, res) => {
 
         }
 
-        if(new Date(mission.expire_at) < new Date()){
+        if(new Date(mission.expires_at) < new Date()){
 
             return res.json({
                 success:false,
