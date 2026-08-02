@@ -502,6 +502,25 @@ app.get("/me", async (req, res) => {
       token,
       process.env.JWT_SECRET
     );
+    const lastSpin = spinCooldown.get(decoded.id);
+
+if(lastSpin && Date.now() - lastSpin < 3000){
+
+return res.json({
+
+success:false,
+
+message:"Please wait"
+
+});
+
+}
+
+
+spinCooldown.set(
+decoded.id,
+Date.now()
+);
 
 
     const { data:user, error } = await supabase
@@ -969,10 +988,7 @@ req.body.provider + "_daily";
 
 
 
-const expire =
-new Date(
-Date.now() + 10 * 60 * 1000
-);
+
 
 
 const today =
@@ -1016,7 +1032,7 @@ mission_key: missionKey,
 
 used:false,
 
-expires_at:expire
+
 
 });
 
@@ -1283,162 +1299,8 @@ app.post("/admin/login", (req, res) => {
   });
 
 });
-// =============================
-// REDIRECT TO CLAIM PAGE
-// =============================
-app.get("/mission/redirect/:token",(req,res)=>{
 
-const token = req.params.token;
 
-res.redirect(
-"/claim.html?token=" + token
-);
-
-});
-// =============================
-// CLAIM MISSION REWARD
-// =============================
-app.post("/mission/claim", async (req, res) => {
-
-    try{
-
-        const token = req.cookies.token;
-
-        if(!token){
-
-            return res.json({
-                success:false,
-                message:"Please login first"
-            });
-
-        }
-
-        const decoded = jwt.verify(
-            token,
-            process.env.JWT_SECRET
-        );
-
-        const { token: missionToken } = req.body;
-
-        if(!missionToken){
-
-            return res.json({
-                success:false,
-                message:"Missing token"
-            });
-
-        }
-
-        // kiểm tra token
-        const { data: mission, error } = await supabase
-        .from("mission_tokens")
-        .select("*")
-        .eq("token", missionToken)
-        .single();
-
-        if(error || !mission){
-
-            return res.json({
-                success:false,
-                message:"Invalid token"
-            });
-
-        }
-
-        if(String(mission.user_id) !== String(decoded.id)){
-
-            return res.json({
-                success:false,
-                message:"Invalid user"
-            });
-
-        }
-
-        if(mission.used){
-
-            return res.json({
-                success:false,
-                message:"Already claimed"
-            });
-
-        }
-      if(
-mission.provider !== "lootlabs" &&
-mission.provider !== "linkvertise"
-){
-
-return res.json({
-
-success:false,
-
-message:"Invalid provider"
-
-});
-
-}
-
-        if(new Date(mission.expires_at) < new Date()){
-
-            return res.json({
-                success:false,
-                message:"Token expired"
-            });
-
-        }
-
-        // lấy user
-        const { data:user } = await supabase
-        .from("users")
-        .select("*")
-        .eq("id", decoded.id)
-        .single();
-
-        const newSpin =
-        Number(user.spin_chances || 0) + 1;
-
-        // cộng spin
-        await supabase
-        .from("users")
-        .update({
-
-            spin_chances:newSpin
-
-        })
-        .eq("id", decoded.id);
-
-        // đánh dấu đã dùng
-        await supabase
-        .from("mission_tokens")
-        .update({
-
-            used:true
-
-        })
-        .eq("token", missionToken);
-
-        res.json({
-
-            success:true,
-
-            spin_chances:newSpin
-
-        });
-
-    }
-
-    catch(err){
-
-        res.json({
-
-            success:false,
-
-            error:err.message
-
-        });
-
-    }
-
-});
 // =============================
 // ADMIN DASHBOARD
 // =============================
