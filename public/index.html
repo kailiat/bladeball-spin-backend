@@ -618,6 +618,9 @@ input:focus{
 <p class="subtitle">
     Daily Spin • Win Blade Ball Tokens
 </p>
+    <div style="margin-top:10px; font-weight:bold;">
+    Progress: <span id="progressText">0 / 2</span>
+</div>
 
 
 <div class="live-feed">
@@ -1715,17 +1718,34 @@ setInterval(loadLiveFeed,20000);
         }
     );
 
-    const data = await res.json();
+    // ✅ FIX LỖI SERVER JSON
+    const text = await res.text();
+
+    let data;
+
+    try{
+        data = JSON.parse(text);
+    }catch(e){
+        console.log("SERVER RAW:", text);
+        showToast("❌ Server lỗi");
+        return;
+    }
 
     if(data.success){
 
         showToast("+1 Spin 🎉");
 
-        // ✅ CẬP NHẬT PROGRESS NGAY
-        if(data.progress !== undefined){
-            document.getElementById("progressText").innerText =
-                data.progress + " / 2";
-        }
+        // ✅ FIX PROGRESS (vì backend chưa trả)
+        let current = Number(
+            localStorage.getItem("mission_progress") || 0
+        );
+
+        current++;
+
+        localStorage.setItem("mission_progress", current);
+
+        document.getElementById("progressText").innerText =
+            current + " / 2";
 
     }else{
         showToast(data.message || "Error");
@@ -1735,6 +1755,8 @@ setInterval(loadLiveFeed,20000);
 }
     updateMissionButton();
 checkLogin();
+    document.getElementById("progressText").innerText =
+    (localStorage.getItem("mission_progress") || 0) + " / 2";
 </script>
 
 <div id="toast" class="toast">
