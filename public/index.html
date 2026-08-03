@@ -1187,13 +1187,11 @@ async function checkLogin(){
 
         `;
                 // Daily login đã nhận hôm nay chưa
-        if(data.user.claimed_today){
+const btn = document.getElementById("dailyClaimBtn");
 
-    const btn = document.getElementById("dailyClaimBtn");
-
-    btn.innerText = "CLAIMED";
-    btn.disabled = true;
-
+if(btn && data.user.lootlabs_claimed){
+  btn.innerText = "CLAIMED";
+  btn.disabled = true;
 }
 
         }
