@@ -668,7 +668,7 @@ CLAIM
 
 </div>
 
-<p>0 / 2</p>
+<p id="lootlabsProgress">0 / 2</p>
 
 <p>Reward: <b>+1 Spin</b></p>
 
@@ -688,7 +688,7 @@ CLAIM
 
 </div>
 
-<p id="progressText">0 / 2</p>
+<p id="linkvertiseProgress">0 / 2</p>
 
 <p>Reward: <b>+1 Spin</b></p>
 
@@ -1700,7 +1700,6 @@ setInterval(loadLiveFeed,20000);
 }
     async function claimReward(type){
 
-    // reset timer
     localStorage.removeItem(type + "_start");
     localStorage.removeItem(type + "_delay");
 
@@ -1712,13 +1711,10 @@ setInterval(loadLiveFeed,20000);
             headers:{
                 "Content-Type":"application/json"
             },
-            body: JSON.stringify({
-                type: type
-            })
+            body: JSON.stringify({ type })
         }
     );
 
-    // ✅ FIX LỖI SERVER JSON
     const text = await res.text();
 
     let data;
@@ -1735,16 +1731,19 @@ setInterval(loadLiveFeed,20000);
 
         showToast("+1 Spin 🎉");
 
-        // ✅ FIX PROGRESS (vì backend chưa trả)
-        let current = Number(
-            localStorage.getItem("mission_progress") || 0
-        );
+        // ✅ mỗi mission tự tăng riêng
+        let key = type + "_progress";
+
+        let current = Number(localStorage.getItem(key) || 0);
 
         current++;
 
-        localStorage.setItem("mission_progress", current);
+        if(current > 2) current = 2;
 
-        document.getElementById("progressText").innerText =
+        localStorage.setItem(key, current);
+
+        // ✅ update đúng chỗ
+        document.getElementById(type + "Progress").innerText =
             current + " / 2";
 
     }else{
@@ -1752,11 +1751,15 @@ setInterval(loadLiveFeed,20000);
     }
 
     await checkLogin();
+        updateMissionButton();
 }
     updateMissionButton();
 checkLogin();
-    document.getElementById("progressText").innerText =
-    (localStorage.getItem("mission_progress") || 0) + " / 2";
+    document.getElementById("lootlabsProgress").innerText =
+    (parseInt(localStorage.getItem("lootlabs_progress")) || 0) + " / 2";
+
+document.getElementById("linkvertiseProgress").innerText =
+    (parseInt(localStorage.getItem("linkvertise_progress")) || 0) + " / 2";
 </script>
 
 <div id="toast" class="toast">
