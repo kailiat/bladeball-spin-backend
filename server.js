@@ -1418,12 +1418,24 @@ if (error) {
         error: error.message
     });
 }
-  if(!watchSessions[decoded.id]){
+  // 🔥 CHỐNG FAKE CLAIM
+const session = watchSessions[decoded.id];
+
+if(!session){
     return res.json({
         success:false,
         message:"Watch ads first"
     });
 }
+
+// 🔥 BẮT BUỘC XEM ÍT NHẤT 10s
+if(Date.now() - session.startedAt < 10000){
+    return res.json({
+        success:false,
+        message:"Watch longer"
+    });
+}
+  
 
 const today = new Date().toISOString().slice(0,10);
 
