@@ -272,11 +272,14 @@ app.post("/register", async (req, res) => {
       .from("users")
       .insert([
 {
- username,
- email,
- password,
- spin_chances:0,
- tokens:0
+username,
+email,
+password,
+spin_chances:0,
+tokens:0,
+lootlabs_progress: 0,
+linkvertise_progress: 0,
+last_mission_date: new Date().toISOString().slice(0,10)
 }
 ])
       .select();
@@ -555,6 +558,7 @@ if(user.last_mission_date !== today){
 
     user.lootlabs_progress = 0;
     user.linkvertise_progress = 0;
+  user.last_mission_date = today;
 }
 
 
@@ -1414,6 +1418,12 @@ if (error) {
         error: error.message
     });
 }
+  if(!watchSessions[decoded.id]){
+    return res.json({
+        success:false,
+        message:"Watch ads first"
+    });
+}
 
 const today = new Date().toISOString().slice(0,10);
 
@@ -1442,7 +1452,9 @@ if(user[type + "_progress"] >= 2){
 }
 
 // ✅ TĂNG PROGRESS
-const newProgress = user[type + "_progress"] + 1;
+const currentProgress = Number(user[type + "_progress"] || 0);
+
+const newProgress = currentProgress + 1;
 
 // ✅ TĂNG SPIN
 const newSpin = user.spin_chances + 1;
