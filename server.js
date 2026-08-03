@@ -11,6 +11,7 @@ const crypto = require("crypto");
 
 const app = express();
 const spinCooldown = new Map();
+const watchSessions = {}; // 🔥 thêm dòng này
 
 app.use(cors({
   origin:true,
@@ -1304,7 +1305,7 @@ error:err.message
 }
 
 });
-app.get("/watch", async (req, res) => {
+app.get("/watch", (req, res) => {
   try {
     const token = req.cookies.token;
 
@@ -1314,178 +1315,97 @@ app.get("/watch", async (req, res) => {
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    // ✅ LẤY PROVIDER TRƯỚC
     const provider = req.query.provider;
-    const mission = provider;
 
-    // ❌ CHẶN PROVIDER FAKE
     if (!["lootlabs", "linkvertise"].includes(provider)) {
       return res.send("Invalid provider");
     }
 
-    const today = new Date().toISOString().slice(0,10);
+    // 🔥 LƯU SESSION
+    watchSessions[decoded.id] = {
+      startedAt: Date.now(),
+      provider
+    };
 
-    // ✅ CHECK LIMIT 2 LẦN / NGÀY
-    const { data: doneToday } = await supabase
-      .from("mission_tokens")
-      .select("*")
-      .eq("user_id", decoded.id)
-      .eq("provider", provider)
-      .gte("created_at", today + "T00:00:00");
-
-    if (doneToday && doneToday.length >= 2) {
-      return res.send("Daily limit reached");
-    }
-// Xóa toàn bộ token chưa dùng của user/provider này
-await supabase
-  .from("mission_tokens")
-  .delete()
-  .eq("user_id", decoded.id)
-  .eq("provider", provider)
-  .eq("used", false);
-    // tạo token
-    const missionToken = crypto.randomBytes(32).toString("hex");
-
-    // lưu DB
-    const { error } = await supabase
-  .from("mission_tokens")
-  .insert([
-    {
-      user_id: decoded.id,
-      provider,
-      mission: provider, // 🔥 THÊM DÒNG NÀY
-      token: missionToken,
-      used: false,
-      expires_at: new Date(Date.now() + 5 * 60 * 1000)
-    }
-  ]);
-
-    if (error) {
-      return res.send(error.message);
-    }
-
-    // callback
-    const callbackUrl =
-      `https://bladeball-spin-backend-kpjl.onrender.com/callback?token=${missionToken}`;
-
-    let redirectLink = "";
+    // 🔥 LINK ADS (KHÔNG callback nữa)
+    let link = "";
 
     if (provider === "lootlabs") {
-  redirectLink =
-    "https://lootdest.org/s?dlJ3Rofo&redirect=" +
-    encodeURIComponent(callbackUrl);
-}
-
-    if (provider === "linkvertise") {
-      redirectLink =
-        "https://direct-link.net/yourcode?url=" +
-        encodeURIComponent(callbackUrl);
+      link = "https://lootdest.org/s?Mdiu912N";
     }
 
-    res.redirect(redirectLink);
+    if (provider === "linkvertise") {
+      link = "https://direct-link.net/yourcode";
+    }
+
+    return res.redirect(link);
 
   } catch (err) {
     res.send(err.message);
   }
 });
-app.get("/callback", async (req, res) => {
-try {
-  const token = req.query.token;
 
-  if (!token) {
-    return res.send("Missing token");
-  }
+app.post("/claim-mission", async (req, res) => {
+  try {
+    const token = req.headers.authorization?.split(" ")[1];
+    if (!token) {
+      return res.json({ success: false, message: "No token" });
+    }
 
-  const { data, error } = await supabase
-    .from("mission_tokens")
-    .select("*")
-    .eq("token", token)
-    .single();
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-  if (error || !data) {
-    return res.send("Token not found");
-  }
+    // ⏱️ Check thời gian (anti fake)
+    const timeSpent = Date.now() - (req.body.startTime || 0);
 
-  // 👉 KHÔNG cộng spin ở đây
-  // 👉 chỉ redirect sang claim page
+    if (timeSpent < 10000) {
+      return res.json({
+        success: false,
+        message: "Too fast (spam detected)"
+      });
+    }
 
-  res.redirect(`/claim.html?token=${token}`);
+    // 📅 LẤY NGÀY HÔM NAY
+    const today = new Date().toISOString().slice(0, 10);
 
-} catch (err) {
-  res.send(err.message);
-}
-});
-app.post("/claim-spin", async (req, res) => {
-try {
-  const { token } = req.body;
+    // 🔍 CHECK LỊCH SỬ
+    const { data: history, error } = await supabase
+      .from("spin_history")
+      .select("*")
+      .eq("user_id", decoded.id)
+      .eq("spin_date", today);
 
-  if (!token) {
-    return res.json({
-      success: false,
-      message: "Missing token"
-    });
-  }
+    if (error) {
+      return res.json({ success: false, message: "DB error" });
+    }
 
-  const { data, error } = await supabase
-    .from("mission_tokens")
-    .select("*")
-    .eq("token", token)
-    .single();
+    // 🚫 LIMIT 2 LẦN / NGÀY
+    if (history.length >= 2) {
+      return res.json({
+        success: false,
+        message: "Daily limit reached"
+      });
+    }
 
-  if (error || !data) {
-    return res.json({
-      success: false,
-      message: "Invalid token"
-    });
-  }
+    // ✅ CỘNG SPIN
+    await supabase
+      .from("users")
+      .update({ spins: supabase.raw("spins + 1") })
+      .eq("id", decoded.id);
 
-  if (data.used) {
-    return res.json({
-      success: false,
-      message: "Already claimed"
-    });
-  }
-  if(new Date(data.expires_at) < new Date()){
-
-    return res.json({
-        success:false,
-        message:"Token expired"
+    // 📝 LƯU LỊCH SỬ
+    await supabase.from("spin_history").insert({
+      user_id: decoded.id,
+      spin_date: today
     });
 
-}
+    return res.json({
+      success: true,
+      message: "+1 spin success"
+    });
 
-  // lấy user
-  const { data: user } = await supabase
-    .from("users")
-    .select("*")
-    .eq("id", data.user_id)
-    .single();
-
-  const newSpin = (user.spin_chances || 0) + 1;
-
-  // cộng spin
-  await supabase
-    .from("users")
-    .update({ spin_chances: newSpin })
-    .eq("id", data.user_id);
-
-  // đánh dấu đã dùng
-  await supabase
-    .from("mission_tokens")
-    .update({ used: true })
-    .eq("id", data.id);
-
-  res.json({
-    success: true,
-    message: "+1 spin"
-  });
-
-} catch (err) {
-  res.json({
-    success: false,
-    error: err.message
-  });
-}
+  } catch (err) {
+    return res.json({ success: false, message: "Server error" });
+  }
 });
 const PORT = process.env.PORT || 3000;
 
