@@ -1150,14 +1150,14 @@ function closePopup(){
 }
 async function checkLogin(){
 
-    const res = await fetch(
-        "https://bladeball-spin-backend-kpjl.onrender.com/me",
-        {
-            credentials:"include"
-        }
-    );
+    const res = await fetch("https://bladeball-spin-backend-kpjl.onrender.com/me", {
+    credentials: "include"
+});
 
-    const data = await res.json();
+const data = await res.json();
+
+// 👇 THÊM DÒNG NÀY
+console.log("USER DATA:", data.user);
 
 
     if(data.success){
