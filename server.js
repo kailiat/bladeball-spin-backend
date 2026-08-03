@@ -846,366 +846,13 @@ app.post("/logout", (req, res) => {
 
 });
 // Claim Free Spin
-app.post("/claim-free-spin", async (req,res)=>{
 
-  try {
 
-    const token = req.cookies.token;
-
-    if(!token){
-      return res.json({
-        success:false,
-        message:"Please login first"
-      });
-    }
-
-
-    const decoded = jwt.verify(
-      token,
-      process.env.JWT_SECRET
-    );
-    
-    
-
-
-    // lấy user
-    const { data:userData, error:userError } =
-await supabase
-.from("users")
-.select("*")
-.eq("id", decoded.id)
-.single();
-
-if(userError){
-    return res.json({
-        success:false,
-        error:userError.message
-    });
-}
-
-const today = new Date().toISOString().slice(0,10);
-
-if(userData.last_claim_date === today){
-    return res.json({
-        success:false,
-        message:"Already claimed today"
-    });
-}
-
-    
-
-
-    if(userError){
-      return res.json({
-        success:false,
-        error:userError.message
-      });
-    }
-
-
-    // cộng 1 lượt
-    const newSpin =
-    Number(userData.spin_chances || 0) + 1;
-
-
-    const { error:updateError } =
-    await supabase
-.from("users")
-.update({
-    spin_chances:newSpin,
-    last_claim_date: today
-})
-.eq("id", decoded.id);
-    
-
-
-
-    if(updateError){
-
-      return res.json({
-        success:false,
-        error:updateError.message
-      });
-
-    }
-
-
-    res.json({
-
-      success:true,
-
-      message:"Free spin claimed!",
-
-      spin_chances:newSpin
-
-    });
-
-
-  }catch(err){
-
-    res.json({
-
-      success:false,
-      error:err.message
-
-    });
-
-  }
-
-});
-app.post("/mission/start", async (req,res)=>{
-
-try{
-
-
-const token = req.cookies.token;
-
-
-if(!token){
-
-return res.json({
-
-success:false,
-
-message:"Login first"
-
-});
-
-}
-
-
-
-const decoded = jwt.verify(
-token,
-process.env.JWT_SECRET
-);
-
-
-
-const missionToken =
-crypto.randomBytes(32).toString("hex");
-  const missionKey =
-req.body.provider + "_daily";
-
-
-
-
-
-
-const today =
-new Date().toISOString().slice(0,10);
-
-const { data: existed } =
-await supabase
-.from("mission_tokens")
-.select("*")
-.eq("user_id", decoded.id)
-.eq("mission_key", missionKey)
-.eq("used", true)
-.gte("created_at", today + "T00:00:00");
-
-const claimCount = existed ? existed.length : 0;
-
-if(claimCount >= 2){
-
-return res.json({
-
-success:false,
-
-message:"Mission already completed today"
-
-});
-
-}
-const { error } = await supabase
-.from("mission_tokens")
-.insert({
-
-user_id: decoded.id,
-
-token: missionToken,
-
-mission: req.body.mission,
-
-provider: req.body.provider,
-
-mission_key: missionKey,
-
-used:false,
-
-expires_at:
-new Date(Date.now()+24*60*60*1000)
-
-});
-
-
-
-if(error){
-
-return res.json({
-
-success:false,
-
-error:error.message
-
-});
-
-}
-
-
-
-let missionUrl = "";
-
-const redirectLink =
-`https://bladeball-spin-backend-kpjl.onrender.com/mission/complete/${missionToken}`;
-
-if(req.body.provider === "lootlabs"){
-
-missionUrl =
-"https://lootdest.org/s?dlJ3Rofo&redirect=" +
-encodeURIComponent(redirectLink);
-
-}
-
-
-if(req.body.provider === "linkvertise"){
-
-missionUrl =
-"https://direct-link.net/4248703/FxVrNlMWnooH?url=" +
-encodeURIComponent(redirectLink);
-
-}
-
-res.json({
-
-    success:true,
-
-    token:missionToken,
-
-    url:missionUrl
-
-});
-
-
-
-}catch(err){
-
-
-res.json({
-
-success:false,
-
-error:err.message
-
-});
-
-
-}
-
-
-});
 // =============================
 // COMPLETE MISSION
 // =============================
 
-app.get("/mission/complete/:token", async(req,res)=>{
 
-try{
-
-
-const { token } = req.params;
-
-
-// tìm token
-const { data: mission, error } =
-await supabase
-.from("mission_tokens")
-.select("*")
-.eq("token", token)
-.single();
-
-
-
-if(error || !mission){
-
-return res.send("Invalid mission");
-
-}
-
-
-
-// chống nhận lại
-if(mission.used){
-
-return res.send("Mission already completed");
-
-}
-
-
-
-// lấy user
-
-const { data:user, error:userError } =
-await supabase
-.from("users")
-.select("*")
-.eq("id", mission.user_id)
-.single();
-
-
-
-if(userError){
-
-return res.send("User error");
-
-}
-
-
-
-// cộng spin
-
-await supabase
-.from("users")
-.update({
-
-spin_chances:
-Number(user.spin_chances || 0)+1
-
-})
-.eq("id", mission.user_id);
-
-
-
-
-// đánh dấu đã dùng
-
-await supabase
-.from("mission_tokens")
-.update({
-
-used:true
-
-})
-.eq("token",token);
-
-
-
-// quay về web spin
-
-res.redirect(
-"https://bladeball-spin-backend-kpjl.onrender.com"
-);
-
-
-
-}catch(err){
-
-res.send(err.message);
-
-}
-
-
-});
 app.post("/withdraw", async(req,res)=>{
 
 try{
@@ -1657,7 +1304,135 @@ error:err.message
 }
 
 });
+app.get("/watch", async (req, res) => {
+  try {
+    const token = req.cookies.token;
 
+    if (!token) {
+      return res.send("Login first");
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    // ✅ LẤY PROVIDER TRƯỚC
+    const provider = req.query.provider;
+
+    // ❌ CHẶN PROVIDER FAKE
+    if (!["lootlabs", "linkvertise"].includes(provider)) {
+      return res.send("Invalid provider");
+    }
+
+    const today = new Date().toISOString().slice(0,10);
+
+    // ✅ CHECK LIMIT 2 LẦN / NGÀY
+    const { data: doneToday } = await supabase
+      .from("mission_tokens")
+      .select("*")
+      .eq("user_id", decoded.id)
+      .eq("provider", provider)
+      .gte("created_at", today + "T00:00:00");
+
+    if (doneToday && doneToday.length >= 2) {
+      return res.send("Daily limit reached");
+    }
+
+    // tạo token
+    const missionToken = crypto.randomBytes(32).toString("hex");
+
+    // lưu DB
+    const { error } = await supabase
+      .from("mission_tokens")
+      .insert([
+        {
+          user_id: decoded.id,
+          provider,
+          token: missionToken,
+          used: false,
+          expires_at: new Date(Date.now() + 5 * 60 * 1000)
+        }
+      ]);
+
+    if (error) {
+      return res.send(error.message);
+    }
+
+    // callback
+    const callbackUrl =
+      `https://bladeball-spin-backend-kpjl.onrender.com/callback?token=${missionToken}`;
+
+    let redirectLink = "";
+
+    if (provider === "lootlabs") {
+      redirectLink =
+        "https://lootdest.org/s?PKkmK6aY&redirect=" +
+        encodeURIComponent(callbackUrl);
+    }
+
+    if (provider === "linkvertise") {
+      redirectLink =
+        "https://direct-link.net/yourcode?url=" +
+        encodeURIComponent(callbackUrl);
+    }
+
+    res.redirect(redirectLink);
+
+  } catch (err) {
+    res.send(err.message);
+  }
+});
+app.get("/callback", async (req, res) => {
+  try {
+    const token = req.query.token;
+
+    if (!token) {
+      return res.send("Invalid token");
+    }
+
+    // tìm token
+    const { data, error } = await supabase
+      .from("mission_tokens")
+      .select("*")
+      .eq("token", token)
+      .single();
+
+    if (error || !data) {
+      return res.send("Token not found");
+    }
+
+    if (data.used) {
+      return res.send("Already used");
+    }
+
+    if (new Date(data.expires_at) < new Date()) {
+      return res.send("Expired");
+    }
+
+    // cộng spin
+    const { data: user } = await supabase
+      .from("users")
+      .select("*")
+      .eq("id", data.user_id)
+      .single();
+
+    const newSpin = (user.spin_chances || 0) + 1;
+
+    await supabase
+      .from("users")
+      .update({ spin_chances: newSpin })
+      .eq("id", data.user_id);
+
+    // mark used
+    await supabase
+      .from("mission_tokens")
+      .update({ used: true })
+      .eq("id", data.id);
+
+    res.redirect("https://bladeball-spin-backend-kpjl.onrender.com");
+
+  } catch (err) {
+    res.send(err.message);
+  }
+});
 const PORT = process.env.PORT || 3000;
 
 
