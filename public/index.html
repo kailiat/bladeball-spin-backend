@@ -1046,6 +1046,7 @@ async function spin() {
         );
 
         const data = await res.json();
+       
 
 console.log("SERVER:", data);
 
@@ -1155,6 +1156,26 @@ async function checkLogin(){
 });
 
 const data = await res.json();
+    const btn = document.getElementById("dailyClaimBtn");
+
+if(btn){
+
+    const today = new Date().toISOString().slice(0,10);
+
+    if(data.user.last_claim_date === today){
+
+        btn.innerText = "CLAIMED";
+        btn.disabled = true;
+        btn.style.background = "#555";
+
+    }else{
+
+        btn.innerText = "CLAIM";
+        btn.disabled = false;
+        btn.style.background = "linear-gradient(90deg,#00c853,#00e676)";
+    }
+
+}
 
 // 👇 THÊM DÒNG NÀY
 console.log("USER DATA:", data.user);
@@ -1536,10 +1557,22 @@ wheel.dataset.rotation = targetDeg;
 
 const btn = document.getElementById("dailyClaimBtn");
 
-btn.innerText = "CLAIMED";
-btn.disabled = true;
+if(btn){
 
-await checkLogin();
+    const today = new Date().toISOString().slice(0,10);
+
+    if(data.user.last_claim_date === today){
+
+        btn.innerText = "CLAIMED";
+        btn.disabled = true;
+        btn.style.background = "#555";
+
+    }else{
+
+        btn.innerText = "CLAIM";
+        btn.disabled = false;
+        btn.style.background = "linear-gradient(90deg,#00c853,#00e676)";
+    }
 
 }
         function changeWithdrawType(){
