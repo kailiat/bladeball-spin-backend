@@ -1331,11 +1331,11 @@ app.get("/watch", (req, res) => {
     let link = "";
 
     if (provider === "lootlabs") {
-      link = "https://lootdest.org/s?Mdiu912N";
+      link = "https://loot-link.com/s?Io2URNwK";
     }
 
     if (provider === "linkvertise") {
-      link = "https://direct-link.net/yourcode";
+      link = "https://direct-link.net/4248703/FxVrNlMWnooH";
     }
 
     return res.redirect(link);
