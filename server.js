@@ -1445,6 +1445,14 @@ try {
       message: "Already claimed"
     });
   }
+  if(new Date(data.expires_at) < new Date()){
+
+    return res.json({
+        success:false,
+        message:"Token expired"
+    });
+
+}
 
   // lấy user
   const { data: user } = await supabase
