@@ -392,7 +392,14 @@ button:hover{
     margin-right:140px;
     font-weight:600;
 }
+.watch{
+    background: linear-gradient(90deg,#8b3dff,#6d2dff);
+}
 
+.claim{
+    background: linear-gradient(90deg,#00c853,#00e676);
+    box-shadow: 0 0 20px rgba(0,255,120,.6);
+}
 
 @keyframes scroll{
 
@@ -662,7 +669,9 @@ CLAIM
 
 <p>Reward: <b>+1 Spin</b></p>
 
-<button class="watch-btn" onclick="startMission()">WATCH</button>
+<button id="lootlabsBtn" class="watch-btn" onclick="startMission('lootlabs')">
+    WATCH
+</button>
 
 </div>
 
@@ -680,7 +689,9 @@ CLAIM
 
 <p>Reward: <b>+1 Spin</b></p>
 
-<button class="watch-btn" onclick="startMission()">WATCH</button>
+<button id="linkvertiseBtn" class="watch-btn" onclick="startMission('linkvertise')">
+    WATCH
+</button>
 
 </div>
 
@@ -1121,17 +1132,21 @@ function closePopup(){
     document.getElementById("popup").style.display = "none";
 
 }
-    function startMission() {
+    function startMission(type) {
 
     const now = Date.now();
+    const delay = 25000;
 
-    // random 30 - 60 giây
-    const delay = Math.floor(Math.random() * 30000) + 30000;
+    localStorage.setItem(type + "_start", now);
+    localStorage.setItem(type + "_delay", delay);
 
-    localStorage.setItem("missionStart", now);
-    localStorage.setItem("missionDelay", delay);
+    if(type === "lootlabs"){
+        window.open("LINK_LOOTLABS_CỦA_BẠN", "_blank");
+    }
 
-    window.location.href = "https://loot-link.com/s?Io2URNwK";
+    if(type === "linkvertise"){
+        window.open("LINK_LINKVERTISE_CỦA_BẠN", "_blank");
+    }
 }
 async function checkLogin(){
 
@@ -1174,14 +1189,12 @@ async function checkLogin(){
                 // Daily login đã nhận hôm nay chưa
         if(data.user.claimed_today){
 
-            const btn = document.getElementById("dailyClaimBtn");
+    const btn = document.getElementById("dailyClaimBtn");
 
-            if(btn){
+    btn.innerText = "CLAIMED";
+    btn.disabled = true;
 
-                btn.innerText = "CLAIMED";
-                btn.disabled = true;
-
-            }
+}
 
         }
 
@@ -1608,59 +1621,81 @@ setInterval(loadLiveFeed,20000);
 
     function updateMissionButton(){
 
-    const start = Number(localStorage.getItem("missionStart"));
-const delay = Number(localStorage.getItem("missionDelay"));
+    const missions = ["lootlabs","linkvertise"];
 
-    const btns = document.querySelectorAll(".watch-btn");
+    missions.forEach(type => {
 
-    if(!start || !delay){
-        btns.forEach(btn=>{
+        const start = Number(localStorage.getItem(type + "_start"));
+        const delay = Number(localStorage.getItem(type + "_delay"));
+
+        const btn = document.getElementById(type + "Btn");
+
+        if(!btn) return;
+
+        btn.classList.remove("claim","watch");
+
+        if(!start || !delay){
+
             btn.innerText = "WATCH";
             btn.disabled = false;
-            btn.onclick = startMission;
-        });
-        return;
-    }
+            btn.classList.add("watch");
 
-    const now = Date.now();
-    const passed = now - start;
+            btn.onclick = () => startMission(type);
 
-    if(passed >= delay){
+            return;
+        }
 
-        // ✅ đủ thời gian → CLAIM
-        btns.forEach(btn=>{
+        const now = Date.now();
+        const passed = now - start;
+
+        if(passed >= delay){
+
             btn.innerText = "CLAIM";
             btn.disabled = false;
-            btn.onclick = claimReward;
-        });
+            btn.classList.add("claim");
 
-    }else{
+            btn.onclick = () => claimReward(type);
 
-        // ⏳ chưa đủ → countdown realtime
-        const remaining = Math.ceil((delay - passed) / 1000);
+        }else{
 
-        btns.forEach(btn=>{
-            btn.innerText = `WAIT ${remaining}s`;
+            const seconds = Math.ceil((delay - passed)/1000);
+
+            btn.innerText = "WAIT " + seconds + "s";
             btn.disabled = true;
-        });
+            btn.classList.add("watch");
+        }
 
-        // 🔁 cập nhật mỗi giây
-        setTimeout(updateMissionButton, 1000);
-    }
-}
-    async function claimReward(){
-
-    localStorage.removeItem("missionStart");
-    localStorage.removeItem("missionDelay");
-
-    await fetch("https://bladeball-spin-backend-kpjl.onrender.com/claim-mission", {
-        method:"POST",
-        credentials:"include"
     });
 
-    showToast("+1 Spin 🎉");
+    setTimeout(updateMissionButton, 1000);
+}
+    async function claimReward(type){
 
-    updateMissionButton();
+    localStorage.removeItem(type + "_start");
+    localStorage.removeItem(type + "_delay");
+
+    const res = await fetch(
+        "https://bladeball-spin-backend-kpjl.onrender.com/claim-mission",
+        {
+            method:"POST",
+            credentials:"include",
+            headers:{
+                "Content-Type":"application/json"
+            },
+            body: JSON.stringify({
+                type: type   // 🔥 THÊM DÒNG NÀY
+            })
+        }
+    );
+
+    const data = await res.json();
+
+    if(data.success){
+        showToast("+1 Spin 🎉");
+    }else{
+        showToast(data.message || "Error");
+    }
+
     await checkLogin();
 }
     updateMissionButton();
