@@ -662,7 +662,7 @@ CLAIM
 
 <p>Reward: <b>+1 Spin</b></p>
 
-<button onclick="startMission()">WATCH</button>
+<button class="watch-btn" onclick="startMission()">WATCH</button>
 
 </div>
 
@@ -680,7 +680,7 @@ CLAIM
 
 <p>Reward: <b>+1 Spin</b></p>
 
-<button onclick="startMission()">WATCH</button>
+<button class="watch-btn" onclick="startMission()">WATCH</button>
 
 </div>
 
@@ -1048,7 +1048,7 @@ const elapsed = Date.now() - startTime;
 
 
 // nếu backend có slot thì quay đúng ô
-if(data.reward.slot !== undefined){
+if(data.reward && data.reward.slot !== undefined){
 
     const slot = data.reward.slot;
 
@@ -1122,7 +1122,16 @@ function closePopup(){
 
 }
     function startMission() {
-    window.open("https://loot-link.com/s?Io2URNwK", "_blank");
+
+    const now = Date.now();
+
+    // random 30 - 60 giây
+    const delay = Math.floor(Math.random() * 30000) + 30000;
+
+    localStorage.setItem("missionStart", now);
+    localStorage.setItem("missionDelay", delay);
+
+    window.location.href = "https://loot-link.com/s?Io2URNwK";
 }
 async function checkLogin(){
 
@@ -1597,7 +1606,65 @@ loadLiveFeed();
 setInterval(loadLiveFeed,20000);
 
 
-    checkLogin();
+    function updateMissionButton(){
+
+    const start = Number(localStorage.getItem("missionStart"));
+const delay = Number(localStorage.getItem("missionDelay"));
+
+    const btns = document.querySelectorAll(".watch-btn");
+
+    if(!start || !delay){
+        btns.forEach(btn=>{
+            btn.innerText = "WATCH";
+            btn.disabled = false;
+            btn.onclick = startMission;
+        });
+        return;
+    }
+
+    const now = Date.now();
+    const passed = now - start;
+
+    if(passed >= delay){
+
+        // ✅ đủ thời gian → CLAIM
+        btns.forEach(btn=>{
+            btn.innerText = "CLAIM";
+            btn.disabled = false;
+            btn.onclick = claimReward;
+        });
+
+    }else{
+
+        // ⏳ chưa đủ → countdown realtime
+        const remaining = Math.ceil((delay - passed) / 1000);
+
+        btns.forEach(btn=>{
+            btn.innerText = `WAIT ${remaining}s`;
+            btn.disabled = true;
+        });
+
+        // 🔁 cập nhật mỗi giây
+        setTimeout(updateMissionButton, 1000);
+    }
+}
+    async function claimReward(){
+
+    localStorage.removeItem("missionStart");
+    localStorage.removeItem("missionDelay");
+
+    await fetch("https://bladeball-spin-backend-kpjl.onrender.com/claim-mission", {
+        method:"POST",
+        credentials:"include"
+    });
+
+    showToast("+1 Spin 🎉");
+
+    updateMissionButton();
+    await checkLogin();
+}
+    updateMissionButton();
+checkLogin();
 </script>
 
 <div id="toast" class="toast">
