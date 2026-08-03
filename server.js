@@ -527,7 +527,7 @@ Date.now()
 
     const { data:user, error } = await supabase
       .from("users")
-      .select("id, username, email, tokens, spin_chances, claimed_today")
+      .select("id, username, email, tokens, spin_chances, claimed_today, lootlabs_claimed, linkvertise_claimed")
       .eq("id", decoded.id)
       .single();
 
