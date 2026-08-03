@@ -1346,62 +1346,70 @@ app.get("/watch", (req, res) => {
 });
 
 app.post("/claim-mission", async (req, res) => {
+try {
 
-    try{
+    const token = req.cookies.token;
 
-        const userId = req.session.userId;
-
-        if(!userId){
-            return res.json({
-                success:false,
-                message:"Not logged in"
-            });
-        }
-
-        const { type } = req.body;
-
-        if(!type){
-            return res.json({
-                success:false,
-                message:"Missing type"
-            });
-        }
-
-        // 🔥 CHỐNG SPAM (quan trọng)
-        const key = `${type}_claimed`;
-
-        const user = await User.findById(userId);
-
-        if(user[key]){
-            return res.json({
-                success:false,
-                message:"Already claimed"
-            });
-        }
-
-        // ✅ cộng spin
-        user.spin_chances = (user.spin_chances || 0) + 1;
-
-        // đánh dấu đã claim
-        user[key] = true;
-
-        await user.save();
-
-        res.json({
-            success:true,
-            spin:user.spin_chances
-        });
-
-    }catch(err){
-
-        console.error(err);
-
-        res.json({
-            success:false,
-            message:"Server error"
+    if (!token) {
+        return res.json({
+            success: false,
+            message: "Please login first"
         });
     }
 
+    const decoded = jwt.verify(
+        token,
+        process.env.JWT_SECRET
+    );
+
+    const { type } = req.body;
+
+    if (!type) {
+        return res.json({
+            success: false,
+            message: "Missing type"
+        });
+    }
+
+    // 🔥 LẤY USER
+    const { data: user, error } = await supabase
+        .from("users")
+        .select("spin_chances")
+        .eq("id", decoded.id)
+        .single();
+
+    if (error) {
+        return res.json({
+            success: false,
+            error: error.message
+        });
+    }
+
+    // 🔥 CỘNG SPIN
+    const newSpin = Number(user.spin_chances || 0) + 1;
+
+    await supabase
+        .from("users")
+        .update({
+            spin_chances: newSpin
+        })
+        .eq("id", decoded.id);
+
+    // 🔥 TRẢ VỀ PROGRESS
+    return res.json({
+        success: true,
+        spin_chances: newSpin
+    });
+
+} catch (err) {
+
+    console.log("CLAIM ERROR:", err);
+
+    return res.json({
+        success: false,
+        message: "Server error"
+    });
+}
 });
 app.post("/claim-daily", async (req, res) => {
 try {
