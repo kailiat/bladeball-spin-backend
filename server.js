@@ -1342,16 +1342,17 @@ app.get("/watch", async (req, res) => {
 
     // lưu DB
     const { error } = await supabase
-      .from("mission_tokens")
-      .insert([
-        {
-          user_id: decoded.id,
-          provider,
-          token: missionToken,
-          used: false,
-          expires_at: new Date(Date.now() + 5 * 60 * 1000)
-        }
-      ]);
+  .from("mission_tokens")
+  .insert([
+    {
+      user_id: decoded.id,
+      provider,
+      mission: provider, // 🔥 THÊM DÒNG NÀY
+      token: missionToken,
+      used: false,
+      expires_at: new Date(Date.now() + 5 * 60 * 1000)
+    }
+  ]);
 
     if (error) {
       return res.send(error.message);
