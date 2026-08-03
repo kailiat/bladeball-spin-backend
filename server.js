@@ -1371,10 +1371,10 @@ await supabase
     let redirectLink = "";
 
     if (provider === "lootlabs") {
-      redirectLink =
-        "https://lootdest.org/s?PKkmK6aY&redirect=" +
-        encodeURIComponent(callbackUrl);
-    }
+  redirectLink =
+    "https://lootdest.org/s?dlJ3Rofo&redirect=" +
+    encodeURIComponent(callbackUrl);
+}
 
     if (provider === "linkvertise") {
       redirectLink =
