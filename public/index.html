@@ -1164,84 +1164,56 @@ function closePopup(){
 async function checkLogin(){
 
     const res = await fetch("https://bladeball-spin-backend-kpjl.onrender.com/me", {
-    credentials: "include"
-});
+        credentials: "include"
+    });
 
-const data = await res.json();
+    const data = await res.json();
+
+    console.log("USER DATA:", data.user);
+
+    if(!data.success){
+        return;
+    }
+
     const btn = document.getElementById("dailyClaimBtn");
 
-if(btn){
+    if(btn){
+        const today = new Date().toISOString().slice(0,10);
 
-    const today = new Date().toISOString().slice(0,10);
-
-    if(data.user.last_claim_date === today){
-
-        btn.innerText = "CLAIMED";
-        btn.disabled = true;
-        btn.style.background = "#555";
-
-    }else{
-
-        btn.innerText = "CLAIM";
-        btn.disabled = false;
-        btn.style.background = "linear-gradient(90deg,#00c853,#00e676)";
+        if(data.user.last_claim_date === today){
+            btn.innerText = "CLAIMED";
+            btn.disabled = true;
+            btn.style.background = "#555";
+        }else{
+            btn.innerText = "CLAIM";
+            btn.disabled = false;
+            btn.style.background = "linear-gradient(90deg,#00c853,#00e676)";
+        }
     }
 
-}
+    // progress
     missionProgress.lootlabs = data.user.lootlabs_progress || 0;
-missionProgress.linkvertise = data.user.linkvertise_progress || 0;
+    missionProgress.linkvertise = data.user.linkvertise_progress || 0;
+
     document.getElementById("lootlabsProgress").innerText =
-        (data.user.lootlabs_progress || 0) + " / 2";
+        missionProgress.lootlabs + " / 2";
 
     document.getElementById("linkvertiseProgress").innerText =
-        (data.user.linkvertise_progress || 0) + " / 2";
+        missionProgress.linkvertise + " / 2";
 
-    // 👉 cập nhật nút WATCH / DONE
-    updateMissionButton();
-    
-}
-
-// 👇 THÊM DÒNG NÀY
-console.log("USER DATA:", data.user);
-
-
-    if(data.success){
-
-
-        // cập nhật balance
-        document.getElementById("balanceValue").innerText =
+    // user UI
+    document.getElementById("balanceValue").innerText =
         data.user.tokens || 0;
 
-
-
-        document.getElementById("userBox").innerHTML = `
-
+    document.getElementById("userBox").innerHTML = `
         <h3>👤 ${data.user.username}</h3>
+        <h3>💰 Balance: ${data.user.tokens || 0} Tokens</h3>
+        <h3>🎲 Spin Chance: ${data.user.spin_chances || 0}</h3>
+        <button onclick="logout()">Logout</button>
+    `;
 
-        <h3>
-        💰 Balance: ${data.user.tokens || 0} Tokens
-        </h3>
-        <h3>
-🎲 Spin Chance: ${data.user.spin_chances || 0}
-</h3>
-
-
-        <button onclick="logout()">
-            Logout
-        </button>
-
-        `;
-                // Daily login đã nhận hôm nay chưa
-
-
-
-        }
-
-    }
-
-
-  
-
+    updateMissionButton();
+}
 async function logout(){
 
     await fetch(
