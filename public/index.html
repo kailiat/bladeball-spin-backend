@@ -662,7 +662,7 @@ CLAIM
 
 <p>Reward: <b>+1 Spin</b></p>
 
-<button>WATCH</button>
+<button onclick="startMission()">WATCH</button>
 
 </div>
 
@@ -680,7 +680,7 @@ CLAIM
 
 <p>Reward: <b>+1 Spin</b></p>
 
-<button>WATCH</button>
+<button onclick="startMission()">WATCH</button>
 
 </div>
 
@@ -1120,6 +1120,9 @@ function closePopup(){
 
     document.getElementById("popup").style.display = "none";
 
+}
+    function startMission() {
+    window.open("https://google.com", "_blank");
 }
 async function checkLogin(){
 
