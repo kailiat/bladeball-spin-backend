@@ -1144,7 +1144,7 @@ function closePopup(){
     function startMission(type) {
 
     const now = Date.now();
-    const delay = 25000;
+    const delay = (40 + Math.random() * 20) * 1000;
 
     localStorage.setItem(type + "_start", now);
     localStorage.setItem(type + "_delay", delay);
