@@ -1336,7 +1336,13 @@ app.get("/watch", async (req, res) => {
     if (doneToday && doneToday.length >= 2) {
       return res.send("Daily limit reached");
     }
-
+// Xóa toàn bộ token chưa dùng của user/provider này
+await supabase
+  .from("mission_tokens")
+  .delete()
+  .eq("user_id", decoded.id)
+  .eq("provider", provider)
+  .eq("used", false);
     // tạo token
     const missionToken = crypto.randomBytes(32).toString("hex");
 
