@@ -661,9 +661,7 @@ CLAIM
 <h3>📺 LootLabs</h3>
 
 <div class="progress">
-
-<div class="progress-fill"></div>
-
+    <div id="lootlabsBar" class="progress-fill"></div>
 </div>
 
 <p id="lootlabsProgress">0 / 2</p>
@@ -681,9 +679,7 @@ CLAIM
 <h3>📺 Linkvertise</h3>
 
 <div class="progress">
-
-<div class="progress-fill"></div>
-
+    <div id="linkvertiseBar" class="progress-fill"></div>
 </div>
 
 <p id="linkvertiseProgress">0 / 2</p>
@@ -962,7 +958,18 @@ Close
 
 let spinning = false;
 
+function updateProgressUI(type, current){
 
+    // TEXT
+    document.getElementById(type + "Progress").innerText =
+        current + " / 2";
+
+    // BAR
+    let percent = (current / 2) * 100;
+
+    document.getElementById(type + "Bar").style.width =
+        percent + "%";
+}
 // Toast notification
 function showToast(message){
 
@@ -1652,15 +1659,27 @@ setInterval(loadLiveFeed,20000);
 
     missions.forEach(type => {
 
+        const btn = document.getElementById(type + "Btn");
+        if(!btn) return;
+
+        const progress =
+        Number(localStorage.getItem(type + "_progress") || 0);
+
+        // ✅ DONE
+        if(progress >= 2){
+            btn.innerText = "DONE";
+            btn.disabled = true;
+            btn.style.background = "#444";
+            btn.onclick = null;
+            return;
+        }
+
         const start = Number(localStorage.getItem(type + "_start"));
         const delay = Number(localStorage.getItem(type + "_delay"));
 
-        const btn = document.getElementById(type + "Btn");
-
-        if(!btn) return;
-
         btn.classList.remove("claim","watch");
 
+        // ✅ CHƯA WATCH
         if(!start || !delay){
 
             btn.innerText = "WATCH";
@@ -1668,13 +1687,13 @@ setInterval(loadLiveFeed,20000);
             btn.classList.add("watch");
 
             btn.onclick = () => startMission(type);
-
             return;
         }
 
         const now = Date.now();
         const passed = now - start;
 
+        // ✅ ĐỦ THỜI GIAN → CLAIM
         if(passed >= delay){
 
             btn.innerText = "CLAIM";
@@ -1685,9 +1704,8 @@ setInterval(loadLiveFeed,20000);
 
         }else{
 
-            
-
-            btn.innerText = "WAIT"; 
+            // ✅ ĐANG ĐỢI
+            btn.innerText = "WAIT";
             btn.disabled = true;
             btn.classList.add("watch");
         }
@@ -1697,6 +1715,12 @@ setInterval(loadLiveFeed,20000);
     setTimeout(updateMissionButton, 1000);
 }
     async function claimReward(type){
+        let current = Number(localStorage.getItem(type + "_progress") || 0);
+
+if(current >= 2){
+    showToast("Đã hoàn thành mission rồi!");
+    return;
+}
 
     localStorage.removeItem(type + "_start");
     localStorage.removeItem(type + "_delay");
@@ -1741,8 +1765,7 @@ setInterval(loadLiveFeed,20000);
         localStorage.setItem(key, current);
 
         // ✅ update đúng chỗ
-        document.getElementById(type + "Progress").innerText =
-            current + " / 2";
+        updateProgressUI(type, current);
 
     }else{
         showToast(data.message || "Error");
@@ -1753,11 +1776,14 @@ setInterval(loadLiveFeed,20000);
 }
     updateMissionButton();
 checkLogin();
-    document.getElementById("lootlabsProgress").innerText =
-    (parseInt(localStorage.getItem("lootlabs_progress")) || 0) + " / 2";
+    ["lootlabs","linkvertise"].forEach(type => {
 
-document.getElementById("linkvertiseProgress").innerText =
-    (parseInt(localStorage.getItem("linkvertise_progress")) || 0) + " / 2";
+    let current =
+    Number(localStorage.getItem(type + "_progress") || 0);
+
+    updateProgressUI(type, current);
+
+});
 </script>
 
 <div id="toast" class="toast">
