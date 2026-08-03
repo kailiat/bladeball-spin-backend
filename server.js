@@ -1346,66 +1346,62 @@ app.get("/watch", (req, res) => {
 });
 
 app.post("/claim-mission", async (req, res) => {
-  try {
-    const token = req.headers.authorization?.split(" ")[1];
-    if (!token) {
-      return res.json({ success: false, message: "No token" });
+
+    try{
+
+        const userId = req.session.userId;
+
+        if(!userId){
+            return res.json({
+                success:false,
+                message:"Not logged in"
+            });
+        }
+
+        const { type } = req.body;
+
+        if(!type){
+            return res.json({
+                success:false,
+                message:"Missing type"
+            });
+        }
+
+        // 🔥 CHỐNG SPAM (quan trọng)
+        const key = `${type}_claimed`;
+
+        const user = await User.findById(userId);
+
+        if(user[key]){
+            return res.json({
+                success:false,
+                message:"Already claimed"
+            });
+        }
+
+        // ✅ cộng spin
+        user.spin_chances = (user.spin_chances || 0) + 1;
+
+        // đánh dấu đã claim
+        user[key] = true;
+
+        await user.save();
+
+        res.json({
+            success:true,
+            spin:user.spin_chances
+        });
+
+    }catch(err){
+
+        console.error(err);
+
+        res.json({
+            success:false,
+            message:"Server error"
+        });
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-    // ⏱️ Check thời gian (anti fake)
-    const timeSpent = Date.now() - (req.body.startTime || 0);
-
-    if (timeSpent < 10000) {
-      return res.json({
-        success: false,
-        message: "Too fast (spam detected)"
-      });
-    }
-
-    // 📅 LẤY NGÀY HÔM NAY
-    const today = new Date().toISOString().slice(0, 10);
-
-    // 🔍 CHECK LỊCH SỬ
-    const { data: history, error } = await supabase
-      .from("spin_history")
-      .select("*")
-      .eq("user_id", decoded.id)
-      .eq("spin_date", today);
-
-    if (error) {
-      return res.json({ success: false, message: "DB error" });
-    }
-
-    // 🚫 LIMIT 2 LẦN / NGÀY
-    if (history.length >= 2) {
-      return res.json({
-        success: false,
-        message: "Daily limit reached"
-      });
-    }
-
-    // ✅ CỘNG SPIN
-    await supabase
-      .from("users")
-      .update({ spins: supabase.raw("spins + 1") })
-      .eq("id", decoded.id);
-
-    // 📝 LƯU LỊCH SỬ
-    await supabase.from("spin_history").insert({
-      user_id: decoded.id,
-      spin_date: today
-    });
-
-    return res.json({
-      success: true,
-      message: "+1 spin success"
-    });
-
-  } catch (err) {
-    return res.json({ success: false, message: "Server error" });
-  }
 });
 const PORT = process.env.PORT || 3000;
 
