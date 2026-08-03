@@ -527,7 +527,7 @@ Date.now()
 
     const { data:user, error } = await supabase
       .from("users")
-      .select("id, username, email, tokens, spin_chances")
+      .select("id, username, email, tokens, spin_chances, claimed_today")
       .eq("id", decoded.id)
       .single();
 
@@ -1402,6 +1402,68 @@ app.post("/claim-mission", async (req, res) => {
         });
     }
 
+});
+app.post("/claim-daily", async (req, res) => {
+try {
+    const token = req.cookies.token;
+
+    if (!token) {
+        return res.json({
+            success: false,
+            message: "Please login first"
+        });
+    }
+
+    const decoded = jwt.verify(
+        token,
+        process.env.JWT_SECRET
+    );
+
+    // Lấy user
+    const { data: user, error } = await supabase
+        .from("users")
+        .select("*")
+        .eq("id", decoded.id)
+        .single();
+
+    if (error) {
+        return res.json({
+            success: false,
+            error: error.message
+        });
+    }
+
+    // ❌ đã claim rồi
+    if (user.claimed_today) {
+        return res.json({
+            success: false,
+            message: "Already claimed"
+        });
+    }
+
+    // ✅ cộng spin
+    const newSpin = (user.spin_chances || 0) + 1;
+
+    // update DB
+    await supabase
+        .from("users")
+        .update({
+            spin_chances: newSpin,
+            claimed_today: true
+        })
+        .eq("id", decoded.id);
+
+    res.json({
+        success: true,
+        spin: newSpin
+    });
+
+} catch (err) {
+    res.json({
+        success: false,
+        error: err.message
+    });
+}
 });
 const PORT = process.env.PORT || 3000;
 
