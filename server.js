@@ -526,10 +526,10 @@ Date.now()
 
 
     const { data:user, error } = await supabase
-      .from("users")
-      .select("id, username, email, tokens, spin_chances, claimed_today, lootlabs_claimed, linkvertise_claimed")
-      .eq("id", decoded.id)
-      .single();
+  .from("users")
+  .select("id, username, email, tokens, spin_chances, last_claim_date")
+  .eq("id", decoded.id)
+  .single();
 
 
     if(error){
@@ -1404,15 +1404,35 @@ app.post("/claim-mission", async (req, res) => {
 
 });
 app.post("/claim-daily", async (req, res) => {
+try {
 
-    const userId = req.user.id; // hoặc lấy từ session
+    const token = req.cookies.token;
 
-    const result = await db.query(
-        "SELECT * FROM users WHERE id = $1",
-        [userId]
+    if (!token) {
+        return res.json({
+            success:false,
+            message:"Please login first"
+        });
+    }
+
+    const decoded = jwt.verify(
+        token,
+        process.env.JWT_SECRET
     );
 
-    const user = result.rows[0];
+    // lấy user
+    const { data:user, error } = await supabase
+        .from("users")
+        .select("id, spin_chances, last_claim_date")
+        .eq("id", decoded.id)
+        .single();
+
+    if(error){
+        return res.json({
+            success:false,
+            error:error.message
+        });
+    }
 
     const today = new Date().toISOString().slice(0,10);
 
@@ -1424,21 +1444,28 @@ app.post("/claim-daily", async (req, res) => {
         });
     }
 
-    // ✅ cho claim
-    const update = await db.query(
-        `UPDATE users
-         SET spins = spins + 1,
-             last_claim_date = $1
-         WHERE id = $2
-         RETURNING spins`,
-        [today, userId]
-    );
+    // ✅ update
+    const newSpin = Number(user.spin_chances || 0) + 1;
+
+    await supabase
+        .from("users")
+        .update({
+            spin_chances: newSpin,
+            last_claim_date: today
+        })
+        .eq("id", decoded.id);
 
     return res.json({
         success:true,
-        balance: update.rows[0].spins
+        spin_chances: newSpin
     });
 
+} catch (err) {
+    res.json({
+        success:false,
+        error:err.message
+    });
+}
 });
 const PORT = process.env.PORT || 3000;
 
