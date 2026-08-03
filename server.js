@@ -1404,66 +1404,41 @@ app.post("/claim-mission", async (req, res) => {
 
 });
 app.post("/claim-daily", async (req, res) => {
-try {
-    const token = req.cookies.token;
 
-    if (!token) {
-        return res.json({
-            success: false,
-            message: "Please login first"
-        });
-    }
+    const userId = req.user.id; // hoặc lấy từ session
 
-    const decoded = jwt.verify(
-        token,
-        process.env.JWT_SECRET
+    const result = await db.query(
+        "SELECT * FROM users WHERE id = $1",
+        [userId]
     );
 
-    // Lấy user
-    const { data: user, error } = await supabase
-        .from("users")
-        .select("*")
-        .eq("id", decoded.id)
-        .single();
+    const user = result.rows[0];
 
-    if (error) {
+    const today = new Date().toISOString().slice(0,10);
+
+    // ❌ đã claim hôm nay
+    if(user.last_claim_date === today){
         return res.json({
-            success: false,
-            error: error.message
+            success:false,
+            message:"Already claimed today"
         });
     }
 
-    // ❌ đã claim rồi
-    if (user.claimed_today) {
-        return res.json({
-            success: false,
-            message: "Already claimed"
-        });
-    }
+    // ✅ cho claim
+    const update = await db.query(
+        `UPDATE users
+         SET spins = spins + 1,
+             last_claim_date = $1
+         WHERE id = $2
+         RETURNING spins`,
+        [today, userId]
+    );
 
-    // ✅ cộng spin
-    const newSpin = (user.spin_chances || 0) + 1;
-
-    // update DB
-    await supabase
-        .from("users")
-        .update({
-            spin_chances: newSpin,
-            claimed_today: true
-        })
-        .eq("id", decoded.id);
-
-    res.json({
-        success: true,
-        spin: newSpin
+    return res.json({
+        success:true,
+        balance: update.rows[0].spins
     });
 
-} catch (err) {
-    res.json({
-        success: false,
-        error: err.message
-    });
-}
 });
 const PORT = process.env.PORT || 3000;
 
