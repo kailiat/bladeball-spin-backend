@@ -957,6 +957,10 @@ Close
 <script>
 
 let spinning = false;
+    let missionProgress = {
+    lootlabs: 0,
+    linkvertise: 0
+};
 
 function updateProgressUI(type, current){
 
@@ -1184,6 +1188,8 @@ if(btn){
     }
 
 }
+    missionProgress.lootlabs = data.user.lootlabs_progress || 0;
+missionProgress.linkvertise = data.user.linkvertise_progress || 0;
     document.getElementById("lootlabsProgress").innerText =
         (data.user.lootlabs_progress || 0) + " / 2";
 
@@ -1192,6 +1198,7 @@ if(btn){
 
     // 👉 cập nhật nút WATCH / DONE
     updateMissionButton();
+    
 }
 
 // 👇 THÊM DÒNG NÀY
@@ -1671,8 +1678,7 @@ setInterval(loadLiveFeed,20000);
         const btn = document.getElementById(type + "Btn");
         if(!btn) return;
 
-        const progress =
-        Number(localStorage.getItem(type + "_progress") || 0);
+        const progress = missionProgress[type];
 
         // ✅ DONE
         if(progress >= 2){
@@ -1759,6 +1765,8 @@ setInterval(loadLiveFeed,20000);
     if(data.success){
 
         showToast("+1 Spin 🎉");
+        missionProgress.lootlabs = data.lootlabs_progress || 0;
+missionProgress.linkvertise = data.linkvertise_progress || 0;
 
         // ✅ CHỈ dùng server trả về
         document.getElementById("lootlabsProgress").innerText =
@@ -1778,8 +1786,7 @@ setInterval(loadLiveFeed,20000);
 checkLogin();
     ["lootlabs","linkvertise"].forEach(type => {
 
-    let current =
-    Number(localStorage.getItem(type + "_progress") || 0);
+    let current = missionProgress[type] || 0;
 
     updateProgressUI(type, current);
 
