@@ -1543,6 +1543,12 @@ wheel.dataset.rotation = targetDeg;
 
     showToast("🎉 Received 1 Free Spin!");
 
+// ✅ CẬP NHẬT NGAY BALANCE (không cần F5)
+document.getElementById("balanceValue").innerText = data.balance;
+
+// ✅ hoặc reload lại user
+await checkLogin();
+
     const btn = document.getElementById("dailyClaimBtn");
 
     if(btn){
