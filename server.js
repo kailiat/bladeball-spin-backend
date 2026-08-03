@@ -1316,6 +1316,7 @@ app.get("/watch", async (req, res) => {
 
     // ✅ LẤY PROVIDER TRƯỚC
     const provider = req.query.provider;
+    const mission = provider;
 
     // ❌ CHẶN PROVIDER FAKE
     if (!["lootlabs", "linkvertise"].includes(provider)) {
