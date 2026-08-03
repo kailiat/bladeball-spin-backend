@@ -685,7 +685,7 @@ CLAIM
 
 </div>
 
-<p>0 / 2</p>
+<p id="progressText">0 / 2</p>
 
 <p>Reward: <b>+1 Spin</b></p>
 
@@ -1684,7 +1684,7 @@ setInterval(loadLiveFeed,20000);
 
         }else{
 
-            const seconds = Math.ceil((delay - passed)/1000);
+            
 
             btn.innerText = "WAIT"; 
             btn.disabled = true;
@@ -1697,6 +1697,7 @@ setInterval(loadLiveFeed,20000);
 }
     async function claimReward(type){
 
+    // reset timer
     localStorage.removeItem(type + "_start");
     localStorage.removeItem(type + "_delay");
 
@@ -1709,7 +1710,7 @@ setInterval(loadLiveFeed,20000);
                 "Content-Type":"application/json"
             },
             body: JSON.stringify({
-                type: type   // 🔥 THÊM DÒNG NÀY
+                type: type
             })
         }
     );
@@ -1717,7 +1718,15 @@ setInterval(loadLiveFeed,20000);
     const data = await res.json();
 
     if(data.success){
+
         showToast("+1 Spin 🎉");
+
+        // ✅ CẬP NHẬT PROGRESS NGAY
+        if(data.progress !== undefined){
+            document.getElementById("progressText").innerText =
+                data.progress + " / 2";
+        }
+
     }else{
         showToast(data.message || "Error");
     }
