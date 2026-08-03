@@ -527,17 +527,35 @@ Date.now()
 
     const { data:user, error } = await supabase
   .from("users")
-  .select("id, username, email, tokens, spin_chances, last_claim_date")
+  .select("id, username, email, tokens, spin_chances, last_claim_date, lootlabs_progress, linkvertise_progress, last_mission_date")
   .eq("id", decoded.id)
   .single();
 
 
     if(error){
-      return res.json({
-        success:false,
-        error:error.message
-      });
-    }
+  return res.json({
+    success:false,
+    error:error.message
+  });
+}
+
+// 👇 DÁN NGAY TẠI ĐÂY
+const today = new Date().toISOString().slice(0,10);
+
+if(user.last_mission_date !== today){
+
+    await supabase
+    .from("users")
+    .update({
+        lootlabs_progress: 0,
+        linkvertise_progress: 0,
+        last_mission_date: today
+    })
+    .eq("id", decoded.id);
+
+    user.lootlabs_progress = 0;
+    user.linkvertise_progress = 0;
+}
 
 
     res.json({
@@ -641,7 +659,24 @@ const { data: userData, error: userError } = await supabase
     error:userError.message
   });
 }
+const today = new Date().toISOString().slice(0,10);
 
+// ✅ RESET MISSION MỖI NGÀY
+if(userData.last_mission_date !== today){
+
+    await supabase
+    .from("users")
+    .update({
+        lootlabs_progress: 0,
+        linkvertise_progress: 0,
+        last_mission_date: today
+    })
+    .eq("id", decoded.id);
+
+    // update lại biến
+    userData.lootlabs_progress = 0;
+    userData.linkvertise_progress = 0;
+}
 
 // kiểm tra lượt quay
 if(Number(userData.spin_chances || 0) <= 0){
@@ -1347,68 +1382,96 @@ app.get("/watch", (req, res) => {
 
 app.post("/claim-mission", async (req, res) => {
 try {
+const token = req.cookies.token;
 
-    const token = req.cookies.token;
-
-    if (!token) {
-        return res.json({
-            success: false,
-            message: "Please login first"
-        });
-    }
-
-    const decoded = jwt.verify(
-        token,
-        process.env.JWT_SECRET
-    );
-
-    const { type } = req.body;
-
-    if (!type) {
-        return res.json({
-            success: false,
-            message: "Missing type"
-        });
-    }
-
-    // 🔥 LẤY USER
-    const { data: user, error } = await supabase
-        .from("users")
-        .select("spin_chances")
-        .eq("id", decoded.id)
-        .single();
-
-    if (error) {
-        return res.json({
-            success: false,
-            error: error.message
-        });
-    }
-
-    // 🔥 CỘNG SPIN
-    const newSpin = Number(user.spin_chances || 0) + 1;
-
-    await supabase
-        .from("users")
-        .update({
-            spin_chances: newSpin
-        })
-        .eq("id", decoded.id);
-
-    // 🔥 TRẢ VỀ PROGRESS
-    return res.json({
-        success: true,
-        spin_chances: newSpin
-    });
-
-} catch (err) {
-
-    console.log("CLAIM ERROR:", err);
-
+if (!token) {
     return res.json({
         success: false,
-        message: "Server error"
+        message: "Please login first"
     });
+}
+
+const decoded = jwt.verify(token, process.env.JWT_SECRET);
+const { type } = req.body;
+
+if (!["lootlabs","linkvertise"].includes(type)) {
+    return res.json({
+        success: false,
+        message: "Invalid type"
+    });
+}
+
+// 🔥 LẤY USER
+const { data: user, error } = await supabase
+    .from("users")
+    .select("*")
+    .eq("id", decoded.id)
+    .single();
+
+if (error) {
+    return res.json({
+        success: false,
+        error: error.message
+    });
+}
+
+const today = new Date().toISOString().slice(0,10);
+
+// ✅ RESET NGÀY
+if(user.last_mission_date !== today){
+
+    await supabase
+    .from("users")
+    .update({
+        lootlabs_progress: 0,
+        linkvertise_progress: 0,
+        last_mission_date: today
+    })
+    .eq("id", decoded.id);
+
+    user.lootlabs_progress = 0;
+    user.linkvertise_progress = 0;
+}
+
+// ✅ CHECK LIMIT
+if(user[type + "_progress"] >= 2){
+    return res.json({
+        success:false,
+        message:"Mission completed"
+    });
+}
+
+// ✅ TĂNG PROGRESS
+const newProgress = user[type + "_progress"] + 1;
+
+// ✅ TĂNG SPIN
+const newSpin = user.spin_chances + 1;
+
+// ✅ UPDATE
+await supabase
+.from("users")
+.update({
+    [type + "_progress"]: newProgress,
+    spin_chances: newSpin
+})
+.eq("id", decoded.id);
+
+return res.json({
+    success:true,
+    spin_chances: newSpin,
+    lootlabs_progress:
+        type === "lootlabs" ? newProgress : user.lootlabs_progress,
+    linkvertise_progress:
+        type === "linkvertise" ? newProgress : user.linkvertise_progress
+});
+
+} catch (err) {
+console.log("CLAIM ERROR:", err);
+
+return res.json({
+    success: false,
+    message: "Server error"
+});
 }
 });
 app.post("/claim-daily", async (req, res) => {
