@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Claim Spin</title>
+
+<style>
+body{
+    background:#0f172a;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+    color:white;
+    font-family:Arial;
+}
+
+.box{
+    background:#1e293b;
+    padding:40px;
+    border-radius:18px;
+    text-align:center;
+}
+
+button{
+    margin-top:20px;
+    padding:14px 30px;
+    border:none;
+    border-radius:12px;
+    background:#22c55e;
+    color:white;
+    cursor:pointer;
+    font-size:18px;
+}
+
+button:disabled{
+    background:#555;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="box">
+
+<h2>Mission Completed</h2>
+
+<p>Click below to claim your reward.</p>
+
+<button id="claimBtn">
+CLAIM
+</button>
+
+<p id="status"></p>
+
+</div>
+
+<script>
+
+const params=new URLSearchParams(window.location.search);
+
+const token=params.get("token");
+
+document.getElementById("claimBtn").onclick=async()=>{
+
+const btn=document.getElementById("claimBtn");
+
+btn.disabled=true;
+
+const res=await fetch("/claim-spin",{
+
+method:"POST",
+
+headers:{
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify({
+token
+})
+
+});
+
+const data=await res.json();
+
+document.getElementById("status").innerText=data.message;
+
+if(!data.success){
+btn.disabled=false;
+}else{
+btn.innerText="CLAIMED";
+}
+
+}
+
+</script>
+
+</body>
+</html>
