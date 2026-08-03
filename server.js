@@ -1390,7 +1390,7 @@ app.get("/callback", async (req, res) => {
       return res.send("Invalid token");
     }
 
-    // tìm token
+    // tìm token trong DB
     const { data, error } = await supabase
       .from("mission_tokens")
       .select("*")
@@ -1405,8 +1405,9 @@ app.get("/callback", async (req, res) => {
       return res.send("Already used");
     }
 
-    if (new Date(data.expires_at) < new Date()) {
-      return res.send("Expired");
+    // check hết hạn
+    if (new Date() > new Date(data.expires_at)) {
+      return res.send("Token expired");
     }
 
     // cộng spin
@@ -1429,7 +1430,7 @@ app.get("/callback", async (req, res) => {
       .update({ used: true })
       .eq("id", data.id);
 
-    res.redirect("https://bladeball-spin-backend-kpjl.onrender.com");
+    return res.send("Mission completed +1 spin ✅");
 
   } catch (err) {
     res.send(err.message);
