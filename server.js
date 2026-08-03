@@ -1383,58 +1383,95 @@ app.get("/watch", async (req, res) => {
   }
 });
 app.get("/callback", async (req, res) => {
-  try {
-    const token = req.query.token;
+try {
+  const token = req.query.token;
 
-    if (!token) {
-      return res.send("Invalid token");
-    }
-
-    // tìm token trong DB
-    const { data, error } = await supabase
-      .from("mission_tokens")
-      .select("*")
-      .eq("token", token)
-      .single();
-
-    if (error || !data) {
-      return res.send("Token not found");
-    }
-
-    if (data.used) {
-      return res.send("Already used");
-    }
-
-    // check hết hạn
-    if (new Date() > new Date(data.expires_at)) {
-      return res.send("Token expired");
-    }
-
-    // cộng spin
-    const { data: user } = await supabase
-      .from("users")
-      .select("*")
-      .eq("id", data.user_id)
-      .single();
-
-    const newSpin = (user.spin_chances || 0) + 1;
-
-    await supabase
-      .from("users")
-      .update({ spin_chances: newSpin })
-      .eq("id", data.user_id);
-
-    // mark used
-    await supabase
-      .from("mission_tokens")
-      .update({ used: true })
-      .eq("id", data.id);
-
-    return res.send("Mission completed +1 spin ✅");
-
-  } catch (err) {
-    res.send(err.message);
+  if (!token) {
+    return res.send("Missing token");
   }
+
+  const { data, error } = await supabase
+    .from("mission_tokens")
+    .select("*")
+    .eq("token", token)
+    .single();
+
+  if (error || !data) {
+    return res.send("Token not found");
+  }
+
+  // 👉 KHÔNG cộng spin ở đây
+  // 👉 chỉ redirect sang claim page
+
+  res.redirect(`/claim.html?token=${token}`);
+
+} catch (err) {
+  res.send(err.message);
+}
+});
+app.post("/claim-spin", async (req, res) => {
+try {
+  const { token } = req.body;
+
+  if (!token) {
+    return res.json({
+      success: false,
+      message: "Missing token"
+    });
+  }
+
+  const { data, error } = await supabase
+    .from("mission_tokens")
+    .select("*")
+    .eq("token", token)
+    .single();
+
+  if (error || !data) {
+    return res.json({
+      success: false,
+      message: "Invalid token"
+    });
+  }
+
+  if (data.used) {
+    return res.json({
+      success: false,
+      message: "Already claimed"
+    });
+  }
+
+  // lấy user
+  const { data: user } = await supabase
+    .from("users")
+    .select("*")
+    .eq("id", data.user_id)
+    .single();
+
+  const newSpin = (user.spin_chances || 0) + 1;
+
+  // cộng spin
+  await supabase
+    .from("users")
+    .update({ spin_chances: newSpin })
+    .eq("id", data.user_id);
+
+  // đánh dấu đã dùng
+  await supabase
+    .from("mission_tokens")
+    .update({ used: true })
+    .eq("id", data.id);
+
+  res.json({
+    success: true,
+    message: "+1 spin"
+  });
+
+} catch (err) {
+  res.json({
+    success: false,
+    error: err.message
+  });
+}
 });
 const PORT = process.env.PORT || 3000;
 
