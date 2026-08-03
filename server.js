@@ -12,6 +12,7 @@ const crypto = require("crypto");
 const app = express();
 const spinCooldown = new Map();
 const watchSessions = {}; // 🔥 thêm dòng này
+const claimLocks = {};
 
 app.use(cors({
   origin:true,
@@ -1396,9 +1397,22 @@ if (!token) {
 }
 
 const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+// 🔒 CHẶN SPAM CLICK
+if(claimLocks[decoded.id]){
+    return res.json({
+        success:false,
+        message:"Too fast"
+    });
+}
+
+// 🔒 LOCK USER
+claimLocks[decoded.id] = true;
+
 const { type } = req.body;
 
 if (!["lootlabs","linkvertise"].includes(type)) {
+    delete claimLocks[decoded.id];
     return res.json({
         success: false,
         message: "Invalid type"
@@ -1413,18 +1427,17 @@ const { data: user, error } = await supabase
     .single();
 
 if (error) {
+    delete claimLocks[decoded.id];
     return res.json({
         success: false,
         error: error.message
     });
 }
-  
 
 const today = new Date().toISOString().slice(0,10);
 
 // ✅ RESET NGÀY
 if(user.last_mission_date !== today){
-
     await supabase
     .from("users")
     .update({
@@ -1438,23 +1451,30 @@ if(user.last_mission_date !== today){
     user.linkvertise_progress = 0;
 }
 
-// ✅ CHECK LIMIT
+// ❗ CHẶN HOÀN THÀNH RỒI
 if(user[type + "_progress"] >= 2){
+    delete claimLocks[decoded.id];
     return res.json({
         success:false,
         message:"Mission completed"
     });
 }
 
-// ✅ TĂNG PROGRESS
-const currentProgress = Number(user[type + "_progress"] || 0);
+// ❗ CHECK SESSION (ANTI FAKE WATCH)
 
-const newProgress = currentProgress + 1;
 
-// ✅ TĂNG SPIN
-const newSpin = user.spin_chances + 1;
+// ✅ TĂNG PROGRESS (ANTI RACE)
+const current = Number(user[type + "_progress"] || 0);
 
-// ✅ UPDATE
+if(current >= 2){
+    delete claimLocks[decoded.id];
+    return res.json({ success:false });
+}
+
+const newProgress = current + 1;
+const newSpin = Number(user.spin_chances || 0) + 1;
+
+// ✅ UPDATE DB
 await supabase
 .from("users")
 .update({
@@ -1462,6 +1482,11 @@ await supabase
     spin_chances: newSpin
 })
 .eq("id", decoded.id);
+
+// 🔓 MỞ LOCK SAU 2s
+setTimeout(() => {
+    delete claimLocks[decoded.id];
+}, 2000);
 
 return res.json({
     success:true,
