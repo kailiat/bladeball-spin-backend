@@ -1184,6 +1184,15 @@ if(btn){
     }
 
 }
+    document.getElementById("lootlabsProgress").innerText =
+        (data.user.lootlabs_progress || 0) + " / 2";
+
+    document.getElementById("linkvertiseProgress").innerText =
+        (data.user.linkvertise_progress || 0) + " / 2";
+
+    // 👉 cập nhật nút WATCH / DONE
+    updateMissionButton();
+}
 
 // 👇 THÊM DÒNG NÀY
 console.log("USER DATA:", data.user);
@@ -1715,12 +1724,10 @@ setInterval(loadLiveFeed,20000);
     setTimeout(updateMissionButton, 1000);
 }
     async function claimReward(type){
-        let current = Number(localStorage.getItem(type + "_progress") || 0);
 
-if(current >= 2){
-    showToast("Đã hoàn thành mission rồi!");
-    return;
-}
+    // ❌ BỎ ĐOẠN NÀY
+    // let current = Number(localStorage.getItem(type + "_progress") || 0);
+    // if(current >= 2){ return; }
 
     localStorage.removeItem(type + "_start");
     localStorage.removeItem(type + "_delay");
@@ -1753,26 +1760,19 @@ if(current >= 2){
 
         showToast("+1 Spin 🎉");
 
-        // ✅ mỗi mission tự tăng riêng
-        let key = type + "_progress";
+        // ✅ CHỈ dùng server trả về
+        document.getElementById("lootlabsProgress").innerText =
+            (data.lootlabs_progress || 0) + " / 2";
 
-        let current = Number(localStorage.getItem(key) || 0);
-
-        current++;
-
-        if(current > 2) current = 2;
-
-        localStorage.setItem(key, current);
-
-        // ✅ update đúng chỗ
-        updateProgressUI(type, current);
+        document.getElementById("linkvertiseProgress").innerText =
+            (data.linkvertise_progress || 0) + " / 2";
 
     }else{
         showToast(data.message || "Error");
     }
 
     await checkLogin();
-        updateMissionButton();
+    updateMissionButton();
 }
     updateMissionButton();
 checkLogin();
