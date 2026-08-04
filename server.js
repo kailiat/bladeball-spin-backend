@@ -513,7 +513,18 @@ app.get("/me", async (req, res) => {
 
     const { data:user, error } = await supabase
       .from("users")
-      .select("id, username, email, tokens, spin_chances, last_claim_date, lootlabs_progress, linkvertise_progress, last_mission_date")
+      .select(`
+id,
+username,
+email,
+tokens,
+spin_chances,
+last_claim_date,
+lootlabs_progress,
+linkvertise_progress,
+last_mission_date,
+created_at
+`)
       .eq("id", userId)
       .single();
 
@@ -523,6 +534,38 @@ app.get("/me", async (req, res) => {
         error:error.message
       });
     }
+    // 🔥 TOTAL SPINS
+const { count: total_spins } = await supabase
+.from("spin_history")
+.select("*", { count: "exact", head: true })
+.eq("user_id", userId);
+
+// 🔥 TOTAL WON
+const { data: wonData } = await supabase
+.from("spin_history")
+.select("amount")
+.eq("user_id", userId);
+
+let total_won = 0;
+
+if (wonData) {
+  wonData.forEach(i => {
+    total_won += Number(i.amount || 0);
+  });
+}
+// 🔥 TOTAL WITHDRAW
+const { data: withdrawData } = await supabase
+.from("withdraw_requests")
+.select("amount")
+.eq("user_id", userId);
+
+let total_withdraw = 0;
+
+if (withdrawData) {
+  withdrawData.forEach(i => {
+    total_withdraw += Number(i.amount || 0);
+  });
+}
 
     const today = new Date().toISOString().slice(0,10);
 
@@ -541,9 +584,14 @@ app.get("/me", async (req, res) => {
     }
 
     res.json({
-      success:true,
-      user
-    });
+  success:true,
+  user:{
+    ...user,
+    total_spins,
+    total_won,
+    total_withdraw
+  }
+});
 
   } catch(err){
     res.json({
@@ -699,53 +747,69 @@ app.post("/spin", async (req, res) => {
 });
 // Get Spin History
 app.get("/history", async (req, res) => {
+try {
+const token = req.cookies.token;
 
-  try {
+if (!token) {
+  return res.json({
+    success: false,
+    message: "Please login first"
+  });
+}
 
-    const token = req.cookies.token;
+const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    if (!token) {
-      return res.json({
-        success: false,
-        message: "Please login first"
-      });
-    }
+// 🎲 SPIN
+const { data: spins } = await supabase
+  .from("spin_history")
+  .select("*")
+  .eq("user_id", decoded.id);
 
-    const decoded = jwt.verify(
-      token,
-      process.env.JWT_SECRET
-    );
-    
+// 💸 WITHDRAW
+const { data: withdraws } = await supabase
+  .from("withdraw_requests")
+  .select("*")
+  .eq("user_id", decoded.id);
 
-    const { data, error } = await supabase
-      .from("spin_history")
-      .select("*")
-      .eq("user_id", decoded.id)
-      .order("created_at", { ascending: false });
-    console.log("History error:", error);
-console.log("History data:", data);
+let history = [];
 
-    if (error) {
-      return res.json({
-        success: false,
-        error: error.message
-      });
-    }
+// SPIN
+spins.forEach(s => {
+  history.push({
+    type: "spin",
+    reward: s.reward,
+    amount: s.amount,
+    created_at: s.created_at
+  });
+});
 
-    res.json({
-      success: true,
-      history: data
-    });
+// WITHDRAW
+withdraws.forEach(w => {
+  history.push({
+    type: "withdraw",
+    reward: "Withdraw",
+    amount: w.amount,
+    status: w.status,
+    created_at: w.created_at
+  });
+});
 
-  } catch (err) {
+// SORT
+history.sort((a,b)=>
+  new Date(b.created_at) - new Date(a.created_at)
+);
 
-    res.json({
-      success: false,
-      error: err.message
-    });
+res.json({
+  success: true,
+  history
+});
 
-  }
-
+} catch (err) {
+res.json({
+  success: false,
+  error: err.message
+});
+}
 });
 // =============================
 // LIVE FEED
