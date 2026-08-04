@@ -781,7 +781,7 @@ SPIN
         <p>
             Your Balance
             <br>
-            <span id="balanceValue">0</span> ⭐
+            <span id="withdrawBalance">0</span>
         </p>
 
         <p>
@@ -927,6 +927,25 @@ border:1px solid rgba(139,61,255,.35);
 🎲 Spin Chance
 <br>
 <b id="profileSpin">0</b>
+</p>
+    <hr style="border:.5px solid #444">
+
+<p>
+📊 Total Spins
+<br>
+<b id="profileTotalSpin">0</b>
+</p>
+
+<p>
+💰 Total Won
+<br>
+<b id="profileTotalWon">0</b>
+</p>
+
+<p>
+💸 Total Withdraw
+<br>
+<b id="profileWithdraw">0</b>
 </p>
 
 <hr style="border:.5px solid #444">
@@ -1181,7 +1200,12 @@ console.log("USER DATA:", data.user);
 
         // cập nhật balance
         document.getElementById("balanceValue").innerText =
-        data.user.tokens || 0;
+data.user.tokens || 0;
+
+const w = document.getElementById("withdrawBalance");
+if(w){
+    w.innerText = data.user.tokens || 0;
+}
 
 
 
@@ -1247,8 +1271,8 @@ async function showWithdraw(){
     }
 
 
-    document.getElementById("balanceValue").innerText =
-    data.user.tokens || 0;
+    document.getElementById("withdrawBalance").innerText =
+data.user.tokens || 0;
 
 
     document.getElementById("withdrawPopup").style.display="flex";
@@ -1374,24 +1398,45 @@ html="<p>No history yet.</p>";
 
 data.history.forEach(item=>{
 
+if(item.type === "spin"){
+
 html += `
 <div style="
 padding:12px;
 margin-bottom:10px;
 background:#23232d;
 border-radius:12px;
-border:1px solid rgba(139,61,255,.35);
 ">
-🎁 ${item.reward}
-<span style="float:right;color:#ffd54f;">
+🎲 ${item.reward}
+<span style="float:right;color:#00e676;">
 +${item.amount}
 </span>
 </div>
 `;
 
-});
+}
+
+if(item.type === "withdraw"){
+
+html += `
+<div style="
+padding:12px;
+margin-bottom:10px;
+background:#2d2323;
+border-radius:12px;
+">
+💸 Withdraw (${item.status || "pending"})
+<span style="float:right;color:#ff5252;">
+-${item.amount}
+</span>
+</div>
+`;
 
 }
+
+});
+
+
 
 document.getElementById("historyList").innerHTML=html;
 
