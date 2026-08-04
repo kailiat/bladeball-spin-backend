@@ -1196,6 +1196,26 @@ async function checkLogin(){
     // ✅ LOGIN OK
     missionProgress.lootlabs = data.user.lootlabs_progress || 0;
     missionProgress.linkvertise = data.user.linkvertise_progress || 0;
+    // 🔥 FIX DAILY BUTTON
+const btn = document.getElementById("dailyClaimBtn");
+
+if(btn){
+
+    const today = new Date().toISOString().slice(0,10);
+
+    if(data.user.last_claim_date === today){
+
+        btn.innerText = "CLAIMED";
+        btn.disabled = true;
+        btn.style.background = "#555";
+
+    }else{
+
+        btn.innerText = "CLAIM";
+        btn.disabled = false;
+        btn.style.background = "linear-gradient(90deg,#00c853,#00e676)";
+    }
+}
 
     updateProgressUI("lootlabs", missionProgress.lootlabs);
     updateProgressUI("linkvertise", missionProgress.linkvertise);
@@ -1544,26 +1564,6 @@ document.getElementById("balanceValue").innerText = data.balance;
 // ✅ hoặc reload lại user
 await checkLogin();
 
-    const btn = document.getElementById("dailyClaimBtn");
-
-    if(btn){
-
-        const today = new Date().toISOString().slice(0,10);
-
-        if(data.user.last_claim_date === today){
-
-            btn.innerText = "CLAIMED";
-            btn.disabled = true;
-            btn.style.background = "#555";
-
-        }else{
-
-            btn.innerText = "CLAIM";
-            btn.disabled = false;
-            btn.style.background = "linear-gradient(90deg,#00c853,#00e676)";
-        }
-
-    }
 
 } // ✅ BẮT BUỘC PHẢI CÓ DẤU NÀY
         function changeWithdrawType(){
