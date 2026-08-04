@@ -177,139 +177,77 @@ font-weight:bold;
 
 <script>
 
-async function loadWithdraws(){
+const API = "https://bladeball-spin-backend-kpjl.onrender.com";
 
-const res=await
-fetch(
-"https://bladeball-spin-backend-kpjl.onrender.com/admin/withdraws",
-{
-credentials:"include"
-});
+async function callAPI(endpoint, method = "GET", body = null) {
+  const res = await fetch(API + endpoint, {
+    method,
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: body ? JSON.stringify(body) : null
+  });
 
-const data=await res.json();
-  let pending=0;
-let completed=0;
-let rejected=0;
-
-let html="";
-
-data.data.forEach(w=>{
-  if(w.status==="pending") pending++;
-
-if(w.status==="completed") completed++;
-
-if(w.status==="rejected") rejected++;
-
-html+=`
-
-<tr>
-
-<td>${w.id}</td>
-
-<td>${w.users.username}</td>
-
-<td>${w.type}</td>
-
-<td>${w.amount}</td>
-
-<td>${w.roblox_username}</td>
-
-<td>${w.discord_username}</td>
-
-<td class="${w.status}">
-${w.status}
-</td>
-
-<td>
-
-${
-w.status==="pending"
-
-?
-
-`
-<button class="approve"
-onclick="approveWithdraw(${w.id})">
-Approve
-</button>
-
-<button class="reject"
-onclick="rejectWithdraw(${w.id})">
-Reject
-</button>
-`
-
-:
-
-"-"
-
+  return res.json();
 }
+function renderAction(w) {
+  if (w.status !== "pending") return "-";
 
-</td>
+  return `
+    <button class="approve" onclick="handleAction(${w.id}, 'approve')">
+      Approve
+    </button>
 
-</tr>
-
-`;
-
-});
-
-document.getElementById("withdrawTable").innerHTML=html;
-  document.getElementById("pendingCount").innerText=pending;
-
-document.getElementById("completedCount").innerText=completed;
-
-document.getElementById("rejectedCount").innerText=rejected;
-
+    <button class="reject" onclick="handleAction(${w.id}, 'reject')">
+      Reject
+    </button>
+  `;
 }
+async function loadWithdraws() {
+  const data = await callAPI("/admin/withdraws");
 
+  let stats = {
+    pending: 0,
+    completed: 0,
+    rejected: 0
+  };
+
+  const html = data.data.map(w => {
+
+    stats[w.status]++;
+
+    return `
+    <tr>
+      <td>${w.id}</td>
+      <td>${w.users.username}</td>
+      <td>${w.type}</td>
+      <td>${w.amount}</td>
+      <td>${w.roblox_username}</td>
+      <td>${w.discord_username}</td>
+      <td class="${w.status}">${w.status}</td>
+      <td>
+        ${renderAction(w)}
+      </td>
+    </tr>
+    `;
+  }).join("");
+
+  document.getElementById("withdrawTable").innerHTML = html;
+
+  updateStats(stats);
+};
+  async function handleAction(id, action) {
+  await callAPI(`/admin/${action}`, "POST", { id });
+
+  loadWithdraws();
+}
+  function updateStats(stats) {
+  document.getElementById("pendingCount").innerText = stats.pending;
+  document.getElementById("completedCount").innerText = stats.completed;
+  document.getElementById("rejectedCount").innerText = stats.rejected;
+}
 loadWithdraws();
-  async function approveWithdraw(id){
-
-await fetch(
-"https://bladeball-spin-backend-kpjl.onrender.com/admin/approve",
-{
-
-method:"POST",
-
-credentials:"include",
-
-headers:{
-"Content-Type":"application/json"
-},
-
-body:JSON.stringify({
-id
-})
-
-});
-
-loadWithdraws();
-
-}
-  async function rejectWithdraw(id){
-
-await fetch(
-"https://bladeball-spin-backend-kpjl.onrender.com/admin/reject",
-{
-
-method:"POST",
-
-credentials:"include",
-
-headers:{
-"Content-Type":"application/json"
-},
-
-body:JSON.stringify({
-id
-})
-
-});
-
-loadWithdraws();
-
-}
-
 </script>
 
 </body>
