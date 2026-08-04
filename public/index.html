@@ -1633,11 +1633,9 @@ let text="";
 
 data.feed.forEach(item=>{
 
-text += `
-<span class="feed-item">
-🎉 ${item.username} won ${item.reward}
-</span>
-`;
+text += `<span class="feed-item">🎉 ' 
++ item.username + ' won ' + item.reward + 
+'</span>';
 
 });
 
