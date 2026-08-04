@@ -1346,14 +1346,44 @@ error:err.message
 
 });
 app.post("/admin/ban", async (req, res) => {
-  const { user_id } = req.body;
+  try {
+    if(req.cookies.admin !== "true"){
+      return res.json({
+        success:false,
+        message:"Unauthorized"
+      });
+    }
 
-  await db.query(
-    "UPDATE users SET banned = 1 WHERE id = ?",
-    [user_id]
-  );
+    const { user_id } = req.body;
 
-  res.json({ success: true });
+    if (!user_id) {
+      return res.status(400).json({
+        success:false,
+        message: "Missing user_id"
+      });
+    }
+
+    const { error } = await supabase
+      .from("users")
+      .update({ banned: true })
+      .eq("id", user_id);
+
+    if (error) {
+      return res.status(500).json({
+        success:false,
+        error: error.message
+      });
+    }
+
+    res.json({ success: true });
+
+  } catch (err) {
+    console.error("BAN ERROR:", err);
+    res.status(500).json({
+      success:false,
+      error: "Server error"
+    });
+  }
 });
 app.get("/watch", (req, res) => {
   try {
