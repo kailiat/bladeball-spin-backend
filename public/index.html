@@ -23,7 +23,7 @@
     font-weight:bold;
     animation:slide .3s ease;
 }
-
+</style>
 
 @keyframes slide{
 
@@ -504,6 +504,39 @@ transform:translate(-50%,-50%);
     font-size:18px;
 
 }
+    .main-container{
+    display:flex;
+    gap:20px;
+    justify-content:center;
+}
+
+/* MOBILE */
+@media (max-width: 768px){
+
+    .main-container{
+        flex-direction:column;
+        align-items:center;
+    }
+
+    .wheel-box{
+        order:1;
+    }
+
+    .mission-box{
+        order:2;
+        width:100%;
+    }
+
+    .winner-box{
+        order:3;
+        width:100%;
+    }
+
+    #wheelWrapper{
+        transform: scale(0.8);
+    }
+
+}
     .wheel-center{
 
 position:absolute;
@@ -729,9 +762,9 @@ CLAIM
 
     <!-- RIGHT -->
     <div class="winner-box">
-        <h3>🏆 Winners</h3>
-        <div id="feedText"></div>
-    </div>
+    <h3>🏆 Winners</h3>
+    <div id="feedText"></div>
+</div>
 
 </div>
 <script type="module">
@@ -1177,22 +1210,12 @@ html="<p>No history yet.</p>";
 }else{
 
 data.history.forEach(item=>{
-
-html += `
-<div style="
-padding:12px;
-margin-bottom:10px;
-background:#23232d;
-border-radius:12px;
-border:1px solid rgba(139,61,255,.35);
-">
-🎁 ${item.reward}
-<span style="float:right;color:#ffd54f;">
-+${item.amount}
-</span>
-</div>
-`;
-
+    html += `
+    <div class="history-item">
+        🎁 ${item.reward}
+        <span>+${item.amount}</span>
+    </div>
+    `;
 });
 
 }
