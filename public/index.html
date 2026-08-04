@@ -957,6 +957,7 @@ Close
 <script>
 
 let spinning = false;
+let currentRotation = 0; // ✅ THÊM DÒNG NÀY
 
 function updateProgressUI(type, current){
 
@@ -1032,14 +1033,12 @@ label.style.top = y + "px";
 async function spin() {
 
     if (spinning) return;
-
     spinning = true;
 
     const wheel = document.getElementById("wheel");
-    const currentRotation =
-    parseFloat(wheel.dataset.rotation || 0);
 
-    wheel.style.transition = "transform 3s ease-out";
+    // RESET
+    
 
     const startTime = Date.now();
 
@@ -1054,86 +1053,74 @@ async function spin() {
         );
 
         const data = await res.json();
-       
 
-console.log("SERVER:", data);
+        console.log("SERVER:", data);
 
-if(!data.success){
-    showToast(data.message || data.error);
-    spinning = false;
-    return;
-}
+        if(!data.success){
+            showToast(data.message || data.error);
+            spinning = false;
+            return;
+        }
 
-const elapsed = Date.now() - startTime;
+        const elapsed = Date.now() - startTime;
 
+        setTimeout(() => {
 
-// nếu backend có slot thì quay đúng ô
-if(data.reward && data.reward.slot !== undefined){
+            wheel.style.transition = "transform 3s cubic-bezier(0.25, 1, 0.5, 1)";
 
-    const slot = data.reward.slot;
+            let targetDeg;
 
-    const targetDeg =
+            if(data.reward && data.reward.slot !== undefined){
+
+                const slot = data.reward.slot;
+
+                targetDeg =
     currentRotation +
     1800 +
     (360 - (slot * 30 + 15));
 
-wheel.style.transform =
-    `rotate(${targetDeg}deg)`;
+            } else {
 
-wheel.dataset.rotation = targetDeg;
+                targetDeg =
+    currentRotation +
+    1800 + Math.random()*720;
 
-}else{
+            }
 
-    // nếu chưa có slot thì quay random
-    const randomDeg =
-        1800 + Math.random()*720;
+            wheel.style.transform = `rotate(${targetDeg}deg)`;
+            currentRotation = targetDeg % 360;
 
-    wheel.style.transform =
-        `rotate(${randomDeg}deg)`;
+        }, 50);
 
-}
-
-
-const waitTime = Math.max(0,3000-elapsed);
-
-console.log(data);
-
-        
-       
+        const waitTime = Math.max(0,3000-elapsed);
 
         setTimeout(async () => {
 
-    wheel.style.animation = "none";
+            document.getElementById("balanceValue").innerText =
+                data.balance;
 
-    // cập nhật popup
-    document.getElementById("balanceValue").innerText =
-        data.balance;
+            document.getElementById("popupTitle").innerHTML =
+                "Congratulations!";
 
-    document.getElementById("popupTitle").innerHTML =
-        "Congratulations!";
+            document.getElementById("popupReward").innerHTML =
+                `${data.reward.amount} Tokens`;
 
-    document.getElementById("popupReward").innerHTML =
-        `${data.reward.amount} Tokens`;
+            document.getElementById("popup").style.display =
+                "flex";
 
-    document.getElementById("popup").style.display =
-        "flex";
+            await checkLogin();
 
-    // tải lại toàn bộ thông tin user
-    await checkLogin();
+            spinning = false;
 
-    spinning = false;
+        }, waitTime);
 
-}, waitTime);
-        } catch (err) {
+    } catch (err) {
 
-    console.error(err);
+        console.error(err);
+        showToast("❌ Server Error");
+        spinning = false;
 
-    showToast("❌ Server Error");
-
-    spinning = false;
-
-}
-
+    }
 }
 
 function closePopup(){
@@ -1388,7 +1375,7 @@ html="<p>No history yet.</p>";
 data.history.forEach(item=>{
 
 html += `
-<div style="
+<div> style="
 padding:12px;
 margin-bottom:10px;
 background:#23232d;
@@ -1506,13 +1493,8 @@ document.getElementById("profilePopup").style.display="none";
     // random ô để bánh xe vẫn quay đẹp
     const slot = Math.floor(Math.random()*12);
 
-    const targetDeg =
-    currentRotation +
-    1800 +
-    (360 - (slot*30+15));
 
-wheel.style.transform =
-    `rotate(${targetDeg}deg)`;
+wheel.style.transform = `rotate(${targetDeg}deg)`;
 
 wheel.dataset.rotation = targetDeg;
 
