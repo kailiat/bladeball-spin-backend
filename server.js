@@ -13,6 +13,7 @@ const app = express();
 const spinCooldown = new Map();
 const watchSessions = {}; // 🔥 thêm dòng này
 const claimLocks = {};
+const spinningUsers = new Set();
 
 app.use(cors({
   origin:true,
@@ -491,9 +492,9 @@ res.json({
 
 // Check current login user
 app.get("/me", async (req, res) => {
+  let userId = null;
 
   try {
-
     const token = req.cookies.token;
 
     if (!token) {
@@ -503,88 +504,60 @@ app.get("/me", async (req, res) => {
       });
     }
 
-
     const decoded = jwt.verify(
       token,
       process.env.JWT_SECRET
     );
-    const lastSpin = spinCooldown.get(decoded.id);
 
-if(lastSpin && Date.now() - lastSpin < 3000){
-
-return res.json({
-
-success:false,
-
-message:"Please wait"
-
-});
-
-}
-
-
-spinCooldown.set(
-decoded.id,
-Date.now()
-);
-
+    userId = decoded.id;
 
     const { data:user, error } = await supabase
-  .from("users")
-  .select("id, username, email, tokens, spin_chances, last_claim_date, lootlabs_progress, linkvertise_progress, last_mission_date")
-  .eq("id", decoded.id)
-  .single();
-
+      .from("users")
+      .select("id, username, email, tokens, spin_chances, last_claim_date, lootlabs_progress, linkvertise_progress, last_mission_date")
+      .eq("id", userId)
+      .single();
 
     if(error){
-  return res.json({
-    success:false,
-    error:error.message
-  });
-}
+      return res.json({
+        success:false,
+        error:error.message
+      });
+    }
 
-// 👇 DÁN NGAY TẠI ĐÂY
-const today = new Date().toISOString().slice(0,10);
+    const today = new Date().toISOString().slice(0,10);
 
-if(user.last_mission_date !== today){
+    if(user.last_mission_date !== today){
+      await supabase
+        .from("users")
+        .update({
+          lootlabs_progress: 0,
+          linkvertise_progress: 0,
+          last_mission_date: today
+        })
+        .eq("id", userId);
 
-    await supabase
-    .from("users")
-    .update({
-        lootlabs_progress: 0,
-        linkvertise_progress: 0,
-        last_mission_date: today
-    })
-    .eq("id", decoded.id);
-
-    user.lootlabs_progress = 0;
-    user.linkvertise_progress = 0;
-  user.last_mission_date = today;
-}
-
+      user.lootlabs_progress = 0;
+      user.linkvertise_progress = 0;
+    }
 
     res.json({
       success:true,
       user
     });
 
-
   } catch(err){
-
     res.json({
       success:false,
       message:"Invalid token"
     });
-
   }
-
 });
 
 // Spin Wheel
 app.post("/spin", async (req, res) => {
+  let userId = null;
 
   try {
-
     const token = req.cookies.token;
 
     if (!token) {
@@ -594,192 +567,135 @@ app.post("/spin", async (req, res) => {
       });
     }
 
-    // Verify token
     const decoded = jwt.verify(
       token,
       process.env.JWT_SECRET
     );
-    // chống spam spin
 
+    userId = decoded.id;
 
-    // Get prizes
-    const { data: prizes, error } = await supabase
+    // ✅ CHẶN SPAM
+    if (spinningUsers.has(userId)) {
+      return res.json({
+        success: false,
+        message: "Please wait"
+      });
+    }
+
+    spinningUsers.add(userId);
+
+    // 🔥 LẤY USER
+    const { data: userData, error: userError } = await supabase
+      .from("users")
+      .select("*")
+      .eq("id", userId)
+      .single();
+
+    if (userError) {
+      return res.json({
+        success: false,
+        error: userError.message
+      });
+    }
+
+    const today = new Date().toISOString().slice(0,10);
+
+    // ✅ RESET MISSION
+    if (userData.last_mission_date !== today) {
+      await supabase
+        .from("users")
+        .update({
+          lootlabs_progress: 0,
+          linkvertise_progress: 0,
+          last_mission_date: today
+        })
+        .eq("id", userId);
+
+      userData.lootlabs_progress = 0;
+      userData.linkvertise_progress = 0;
+    }
+
+    // ❌ HẾT LƯỢT
+    if (Number(userData.spin_chances || 0) <= 0) {
+      return res.json({
+        success: false,
+        message: "No spin chance"
+      });
+    }
+
+    // 🎯 RANDOM
+    const random = Math.random() * 100;
+
+    const { data: prizes } = await supabase
       .from("prizes")
       .select("*");
 
-    if (error) {
-      return res.json({
-        success: false,
-        error: error.message
-      });
-    }
+    let reward = prizes[0];
+    let cumulative = 0;
 
-    if (!prizes || prizes.length === 0) {
-      return res.json({
-        success: false,
-        message: "No prizes found"
-      });
-    }
-    const rewardSlots = {
-  1: [0],
-  2: [1],
-  3: [2]
-};
-
-    // Random number 1 -> 100
-    const random = Math.floor(Math.random() * 100) + 1;
-
-    let totalChance = 0;
-    let reward = null;
-
-    for (const prize of prizes) {
-
-      totalChance += prize.chance;
-
-      if (random <= totalChance) {
-        reward = prize;
+    for (let p of prizes) {
+      cumulative += Number(p.chance);
+      if (random <= cumulative) {
+        reward = p;
         break;
       }
-
     }
 
-    // Safety
-    if (!reward) {
-      reward = prizes[prizes.length - 1];
-    }
-    const slots = rewardSlots[reward.id] || [0];
+    const slot = reward.slot || 0;
 
-const slot = slots[
-  Math.floor(Math.random() * slots.length)
-];
-// Lấy dữ liệu user hiện tại
-const { data: userData, error: userError } = await supabase
-  .from("users")
-  .select("*")
-  .eq("id", decoded.id)
-  .single();
-    if (userError) {
-  return res.json({
-    success:false,
-    error:userError.message
-  });
-}
-const today = new Date().toISOString().slice(0,10);
+    // 💰 CỘNG TOKEN
+    const newBalance =
+      Number(userData.tokens || 0) + Number(reward.amount);
 
-// ✅ RESET MISSION MỖI NGÀY
-if(userData.last_mission_date !== today){
+    const newSpin =
+      Number(userData.spin_chances || 0) - 1;
 
     await supabase
-    .from("users")
-    .update({
-        lootlabs_progress: 0,
-        linkvertise_progress: 0,
-        last_mission_date: today
-    })
-    .eq("id", decoded.id);
+      .from("users")
+      .update({
+        tokens: newBalance,
+        spin_chances: newSpin
+      })
+      .eq("id", userId);
 
-    // update lại biến
-    userData.lootlabs_progress = 0;
-    userData.linkvertise_progress = 0;
-}
-
-// kiểm tra lượt quay
-if(Number(userData.spin_chances || 0) <= 0){
-
-  return res.json({
-    success:false,
-    message:"No spin chance"
-  });
-
-}
-
-if (userError) {
-  return res.json({
-    success: false,
-    error: userError.message
-  });
-}
-
-// Cộng Token
-const newBalance =
-  Number(userData.tokens || 0) + Number(reward.amount);
-
-
-const newSpin =
-  Number(userData.spin_chances || 0) - 1;
-
-
-// Update Token + giảm lượt quay
-await supabase
-  .from("users")
-  .update({
-    tokens: newBalance,
-    spin_chances: newSpin
-  })
-  .eq("id", decoded.id);
-
-// Lưu lịch sử quay
-await supabase
-.from("spin_history")
-.insert({
-    user_id: decoded.id,
-    reward: reward.name,
-    amount: reward.amount,
-    spin_date: new Date().toISOString().slice(0,10)
-});
+    // 🧾 HISTORY
     await supabase
-.from("live_feed")
-.insert({
-    username: decoded.username,
-    reward: reward.name,
-    amount: reward.amount,
-    is_fake: false
-});
-    console.log("========== SPIN ==========");
-console.log("Random:", random);
-console.log("Reward:", reward);
-console.log("Amount:", reward.amount);
-console.log("Balance:", newBalance);
-console.log("==========================");
-    res.json({
+      .from("spin_history")
+      .insert({
+        user_id: userId,
+        reward: reward.name,
+        amount: reward.amount,
+        spin_date: today
+      });
 
-  success: true,
+    // 📡 LIVE FEED
+    await supabase
+      .from("live_feed")
+      .insert({
+        username: decoded.username,
+        reward: reward.name,
+        amount: reward.amount,
+        is_fake: false
+      });
 
-  message: "Spin successful",
-
-  random,
-
-  reward: {
-    id: reward.id,
-    name: reward.name,
-    amount: reward.amount,
-    chance: reward.chance,
-    slot: slot
-  },
-
-  balance: newBalance,
-  spin_chances: newSpin,
-
-  user: {
-
-    id: decoded.id,
-    username: decoded.username
-
-  }
-
-});
-
-  } catch (err) {
-
-    res.json({
-
-      success: false,
-      error: err.message
-
+    return res.json({
+      success: true,
+      random,
+      reward,
+      balance: newBalance,
+      spin_chances: newSpin
     });
 
+  } catch (err) {
+    return res.json({
+      success: false,
+      error: err.message
+    });
+  } finally {
+    if (userId) {
+      spinningUsers.delete(userId);
+    }
   }
-
 });
 // Get Spin History
 app.get("/history", async (req, res) => {
@@ -799,6 +715,7 @@ app.get("/history", async (req, res) => {
       token,
       process.env.JWT_SECRET
     );
+    
 
     const { data, error } = await supabase
       .from("spin_history")
