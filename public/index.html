@@ -1768,6 +1768,45 @@ checkLogin();
 <div id="toast" class="toast">
   <div id="toast-message"></div>
 </div>
+    <script>
+
+// ===== FIX LOGIN + UI =====
+const token = localStorage.getItem("token");
+
+// reset UI nếu chưa login
+if(!token){
+    document.querySelectorAll(".progress-text").forEach(el=>{
+        el.innerText = "0/2";
+    });
+
+    document.querySelectorAll(".progress-bar").forEach(el=>{
+        el.style.width = "0%";
+    });
+
+    document.querySelectorAll("button").forEach(btn=>{
+        if(btn.innerText.toLowerCase().includes("claim")){
+            btn.innerText = "WATCH";
+        }
+    });
+}
+
+
+// ===== CHẶN CLICK KHI CHƯA LOGIN =====
+document.querySelectorAll("button").forEach(btn=>{
+    btn.addEventListener("click", function(e){
+
+        const token = localStorage.getItem("token");
+
+        if(!token){
+            alert("Please login first");
+            e.preventDefault();
+            return;
+        }
+
+    });
+});
+
+</script>
 </body>
 
 </html>
