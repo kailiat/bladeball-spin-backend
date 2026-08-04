@@ -1438,16 +1438,12 @@ border-radius:12px;
 
 
 
-document.getElementById("historyList").innerHTML=html;
-
-document.getElementById("historyPopup").style.display="flex";
-
-}
+document.getElementById("historyList").innerHTML = html;
+document.getElementById("historyPopup").style.display = "flex";
+} // ✅ đóng function showHistory
 
 function closeHistory(){
-
-document.getElementById("historyPopup").style.display="none";
-
+    document.getElementById("historyPopup").style.display = "none";
 }
 async function showProfile(){
 
@@ -1614,50 +1610,33 @@ showToast("Item withdraw coming soon");
 }
     let currentFeed = "";
     async function loadLiveFeed(){
+    try{
+        const res = await fetch(
+            "https://bladeball-spin-backend-kpjl.onrender.com/live-feed",
+            { credentials:"include" }
+        );
 
-try{
+        const data = await res.json();
 
-const res = await fetch(
-"https://bladeball-spin-backend-kpjl.onrender.com/live-feed",
-{
-credentials:"include"
-}
-);
+        if(data.success){
 
-const data = await res.json();
+            let text = "";
 
+            data.feed.forEach(item=>{
+                text += '<span class="feed-item">🎉 ' 
+                + item.username + ' won ' + item.reward + 
+                '</span>';
+            });
 
-if(data.success){
+            if(text !== currentFeed){
+                currentFeed = text;
+                document.getElementById("feedText").innerHTML = text;
+            }
+        }
 
-let text="";
-
-data.feed.forEach(item=>{
-
-text += `<span class="feed-item">🎉 ' 
-+ item.username + ' won ' + item.reward + 
-'</span>';
-
-});
-
-
-if(text !== currentFeed){
-
-    currentFeed = text;
-
-    document.getElementById("feedText").innerHTML = text;
-
-}
-
-
-}
-
-
-}catch(err){
-
-console.log(err);
-
-}
-
+    }catch(err){
+        console.log(err);
+    }
 }
 
 
