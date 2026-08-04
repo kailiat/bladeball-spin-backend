@@ -163,6 +163,11 @@ table{
   border-radius:15px;
   overflow:hidden;
 }
+  .banned{
+  color:red !important;
+  text-decoration: line-through;
+  font-weight:bold;
+}
 
 </style>
 
@@ -225,7 +230,14 @@ async function callAPI(endpoint, method = "GET", body = null) {
     body: body ? JSON.stringify(body) : null
   });
 
-  return res.json();
+  const text = await res.text();
+
+  try {
+    return JSON.parse(text);
+  } catch (e) {
+    console.error("API lỗi:", text); // 🔥 xem lỗi thật ở đây
+    throw new Error("API không trả JSON");
+  }
 }
 function renderAction(w) {
   if (w.status !== "pending") return "-";
@@ -237,10 +249,6 @@ function renderAction(w) {
 
   <button class="reject" onclick="handleAction(${w.id}, 'reject')">
     Reject
-  </button>
-
-  <button class="ban" onclick="handleBan(${w.user_id})">
-    Ban
   </button>
 `;
 }
@@ -259,7 +267,8 @@ async function loadWithdraws() {
 );
 
 const html = filtered.map(w => {
-  let isSus = (w.users.spin || 0) > 5000;
+  let isSus = (w.users.spin || 0) > 500 ||
+   w.amount > 1000;
 
     stats[w.status]++;
 
@@ -269,7 +278,9 @@ ${w.status === 'pending' ? 'row-pending' : ''}
 ${isSus ? 'row-hack' : ''}
 ">
       <td>${w.id}</td>
-      <td onclick="openUser(${w.user_id})" style="cursor:pointer; color:#8b3dff;">
+      <td onclick="openUser(${w.user_id})"
+    class="${w.users.banned ? 'banned' : ''}"
+    style="cursor:pointer; color:#8b3dff;">
   ${w.users.username}
 </td>
       <td>${w.type}</td>
@@ -312,8 +323,15 @@ setInterval(loadWithdraws, 10000);
   loadWithdraws();
 }
   function openUser(userId){
-  const confirmBan = confirm("Bạn muốn BAN user này?");
-  if(confirmBan){
+  const action = prompt(
+`User ID: ${userId}
+
+1 = Ban
+2 = Cancel
+`
+  );
+
+  if(action == "1"){
     handleBan(userId);
   }
 }
