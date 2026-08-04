@@ -314,13 +314,7 @@ ${isSus ? 'row-hack' : ''}
 }
 loadWithdraws();
 setInterval(loadWithdraws, 10000);
-  async function handleBan(userId) {
-  if (!confirm("Bạn chắc muốn BAN user này?")) return;
-
-  await callAPI("/admin/ban", "POST", { user_id: userId });
-
-  loadWithdraws();
-}
+  
   function openUser(userId){
   const action = prompt(
 `User ID: ${userId}
