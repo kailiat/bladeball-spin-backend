@@ -653,26 +653,21 @@ const slot = slots[
   Math.floor(Math.random() * slots.length)
 ];
 // Lấy dữ liệu user hiện tại
-// 1. LẤY USER TRƯỚC
 const { data: userData, error: userError } = await supabase
+  if(userData.banned){
+  return res.json({
+    success:false,
+    message:"You are banned"
+  });
+}
   .from("users")
   .select("*")
   .eq("id", decoded.id)
   .single();
-
-// 2. CHECK ERROR
-if (userError) {
+    if (userError) {
   return res.json({
-    success: false,
-    error: userError.message
-  });
-}
-
-// 3. CHECK BAN (PHẢI ĐẶT Ở ĐÂY)
-if (userData.banned) {
-  return res.json({
-    success: false,
-    message: "You are banned"
+    success:false,
+    error:userError.message
   });
 }
 const today = new Date().toISOString().slice(0,10);
@@ -728,6 +723,7 @@ await supabase
     spin_chances: newSpin,
     total_spins: (userData.total_spins || 0) + 1
   })
+  .eq("id", decoded.id);
   .eq("id", decoded.id);
 
 // Lưu lịch sử quay
@@ -1313,9 +1309,9 @@ message:"Already processed"
 }
 
 // Lấy user
-const { data, error } = await supabase
-  .from("users")
-  .select("*")
+const { data:user } = await supabase
+.from("users")
+.select("*")
 .eq("id", withdraw.user_id)
 .single();
 
@@ -1359,10 +1355,20 @@ error:err.message
 });
 app.post("/admin/ban", async (req, res) => {
   try {
+    if(req.cookies.admin !== "true"){
+      return res.json({
+        success:false,
+        message:"Unauthorized"
+      });
+    }
+
     const { user_id } = req.body;
 
     if (!user_id) {
-      return res.json({ success: false, message: "Missing user_id" });
+      return res.status(400).json({
+        success:false,
+        message: "Missing user_id"
+      });
     }
 
     const { error } = await supabase
@@ -1371,15 +1377,20 @@ app.post("/admin/ban", async (req, res) => {
       .eq("id", user_id);
 
     if (error) {
-      console.error(error);
-      return res.json({ success: false, message: "DB error" });
+      return res.status(500).json({
+        success:false,
+        error: error.message
+      });
     }
 
     res.json({ success: true });
 
   } catch (err) {
     console.error("BAN ERROR:", err);
-    res.status(500).json({ success: false, message: "Server error" });
+    res.status(500).json({
+      success:false,
+      error: "Server error"
+    });
   }
 });
 app.get("/watch", (req, res) => {
