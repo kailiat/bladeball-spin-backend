@@ -1040,7 +1040,8 @@ async function spin() {
     spinning = true;
 
     const wheel = document.getElementById("wheel");
-    
+    const currentRotation =
+    parseFloat(wheel.dataset.rotation || 0);
 
     wheel.style.transition = "transform 3s ease-out";
 
@@ -1063,7 +1064,6 @@ console.log("SERVER:", data);
 
 if(!data.success){
     showToast(data.message || data.error);
-
     spinning = false;
     return;
 }
@@ -1077,34 +1077,69 @@ if(data.reward && data.reward.slot !== undefined){
     const slot = data.reward.slot;
 
     const targetDeg =
+    currentRotation +
     1800 +
     (360 - (slot * 30 + 15));
 
-    // reset trước khi quay
-    wheel.style.transition = "none";
-wheel.style.transform = "rotate(0deg)";
+wheel.style.transform =
+    `rotate(${targetDeg}deg)`;
 
-requestAnimationFrame(() => {
-    requestAnimationFrame(() => {
-        wheel.style.transition = "transform 3s ease-out";
-        wheel.style.transform = `rotate(${targetDeg}deg)`;
-    });
-});
+wheel.dataset.rotation = targetDeg;
 
 }else{
 
+    // nếu chưa có slot thì quay random
     const randomDeg =
         1800 + Math.random()*720;
 
-    wheel.style.transition = "none";
-    wheel.style.transform = "rotate(0deg)";
-
-    setTimeout(()=>{
-        wheel.style.transition = "transform 3s ease-out";
-        wheel.style.transform = `rotate(${randomDeg}deg)`;
-    },50);
+    wheel.style.transform =
+        `rotate(${randomDeg}deg)`;
 
 }
+
+
+const waitTime = Math.max(0,3000-elapsed);
+
+console.log(data);
+
+        
+       
+
+        setTimeout(async () => {
+
+    wheel.style.animation = "none";
+
+    // cập nhật popup
+    document.getElementById("balanceValue").innerText =
+        data.balance;
+
+    document.getElementById("popupTitle").innerHTML =
+        "Congratulations!";
+
+    document.getElementById("popupReward").innerHTML =
+        `${data.reward.amount} Tokens`;
+
+    document.getElementById("popup").style.display =
+        "flex";
+
+    // tải lại toàn bộ thông tin user
+    await checkLogin();
+
+    spinning = false;
+
+}, waitTime);
+        } catch (err) {
+
+    console.error(err);
+
+    showToast("❌ Server Error");
+
+    spinning = false;
+
+}
+
+}
+
 function closePopup(){
 
     document.getElementById("popup").style.display = "none";
@@ -1479,13 +1514,14 @@ document.getElementById("profilePopup").style.display="none";
     const slot = Math.floor(Math.random()*12);
 
     const targetDeg =
-1800 +
-(360 - (slot * 30 + 15));
+    currentRotation +
+    1800 +
+    (360 - (slot*30+15));
 
 wheel.style.transform =
     `rotate(${targetDeg}deg)`;
 
-wheel.dataset.rotation = 0;
+wheel.dataset.rotation = targetDeg;
 
     setTimeout(()=>{
 
