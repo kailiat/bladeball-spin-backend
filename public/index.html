@@ -1169,39 +1169,37 @@ async function checkLogin(){
 
     const data = await res.json();
 
-    console.log("USER DATA:", data.user);
-
+    // ❌ CHƯA LOGIN
     if(!data.success){
+
+        // reset toàn bộ UI
+        missionProgress.lootlabs = 0;
+        missionProgress.linkvertise = 0;
+
+        document.getElementById("lootlabsProgress").innerText = "0 / 2";
+        document.getElementById("linkvertiseProgress").innerText = "0 / 2";
+
+        document.getElementById("lootlabsBar").style.width = "0%";
+        document.getElementById("linkvertiseBar").style.width = "0%";
+
+        // ❗ XÓA TRẠNG THÁI ADS
+        localStorage.removeItem("lootlabs_start");
+        localStorage.removeItem("lootlabs_delay");
+        localStorage.removeItem("linkvertise_start");
+        localStorage.removeItem("linkvertise_delay");
+
+        updateMissionButton();
+
         return;
     }
 
-    const btn = document.getElementById("dailyClaimBtn");
-
-    if(btn){
-        const today = new Date().toISOString().slice(0,10);
-
-        if(data.user.last_claim_date === today){
-            btn.innerText = "CLAIMED";
-            btn.disabled = true;
-            btn.style.background = "#555";
-        }else{
-            btn.innerText = "CLAIM";
-            btn.disabled = false;
-            btn.style.background = "linear-gradient(90deg,#00c853,#00e676)";
-        }
-    }
-
-    // progress
+    // ✅ LOGIN OK
     missionProgress.lootlabs = data.user.lootlabs_progress || 0;
     missionProgress.linkvertise = data.user.linkvertise_progress || 0;
 
-    document.getElementById("lootlabsProgress").innerText =
-        missionProgress.lootlabs + " / 2";
+    updateProgressUI("lootlabs", missionProgress.lootlabs);
+    updateProgressUI("linkvertise", missionProgress.linkvertise);
 
-    document.getElementById("linkvertiseProgress").innerText =
-        missionProgress.linkvertise + " / 2";
-
-    // user UI
     document.getElementById("balanceValue").innerText =
         data.user.tokens || 0;
 
@@ -1224,9 +1222,10 @@ async function logout(){
         }
     );
 
+    // 🔥 XÓA TRẠNG THÁI ADS
+    localStorage.clear();
 
     location.reload();
-
 }
     
 async function showWithdraw(){
@@ -1652,12 +1651,11 @@ setInterval(loadLiveFeed,20000);
 
         const progress = missionProgress[type];
 
-        // ✅ DONE
-        if(progress >= 2){
-            btn.innerText = "DONE";
-            btn.disabled = true;
-            btn.style.background = "#444";
-            btn.onclick = null;
+        // 🔥 nếu chưa login → luôn WATCH
+        if(progress === undefined){
+            btn.innerText = "WATCH";
+            btn.disabled = false;
+            btn.onclick = () => startMission(type);
             return;
         }
 
@@ -1702,6 +1700,15 @@ setInterval(loadLiveFeed,20000);
     setTimeout(updateMissionButton, 1000);
 }
     async function claimReward(type){
+        const resCheck = await fetch("https://bladeball-spin-backend-kpjl.onrender.com/me", {
+    credentials: "include"
+});
+const check = await resCheck.json();
+
+if(!check.success){
+    showToast("Please login first");
+    return;
+}
 
     // ❌ BỎ ĐOẠN NÀY
     // let current = Number(localStorage.getItem(type + "_progress") || 0);
@@ -1741,11 +1748,9 @@ setInterval(loadLiveFeed,20000);
 missionProgress.linkvertise = data.linkvertise_progress || 0;
 
         // ✅ CHỈ dùng server trả về
-        document.getElementById("lootlabsProgress").innerText =
-            (data.lootlabs_progress || 0) + " / 2";
-
-        document.getElementById("linkvertiseProgress").innerText =
-            (data.linkvertise_progress || 0) + " / 2";
+        // 🔥 FIX: update UI + progress bar
+updateProgressUI("lootlabs", missionProgress.lootlabs);
+updateProgressUI("linkvertise", missionProgress.linkvertise);
 
     }else{
         showToast(data.message || "Error");
@@ -1756,13 +1761,7 @@ missionProgress.linkvertise = data.linkvertise_progress || 0;
 }
     updateMissionButton();
 checkLogin();
-    ["lootlabs","linkvertise"].forEach(type => {
-
-    let current = missionProgress[type] || 0;
-
-    updateProgressUI(type, current);
-
-});
+    
 </script>
 
 <div id="toast" class="toast">
@@ -1770,41 +1769,7 @@ checkLogin();
 </div>
     <script>
 
-// ===== FIX LOGIN + UI =====
-const token = localStorage.getItem("token");
 
-// reset UI nếu chưa login
-if(!token){
-    document.querySelectorAll(".progress-text").forEach(el=>{
-        el.innerText = "0/2";
-    });
-
-    document.querySelectorAll(".progress-bar").forEach(el=>{
-        el.style.width = "0%";
-    });
-
-    document.querySelectorAll("button").forEach(btn=>{
-        if(btn.innerText.toLowerCase().includes("claim")){
-            btn.innerText = "WATCH";
-        }
-    });
-}
-
-
-// ===== CHẶN CLICK KHI CHƯA LOGIN =====
-document.querySelectorAll("button").forEach(btn=>{
-    btn.addEventListener("click", function(e){
-
-        const token = localStorage.getItem("token");
-
-        if(!token){
-            alert("Please login first");
-            e.preventDefault();
-            return;
-        }
-
-    });
-});
 
 </script>
 </body>
