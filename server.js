@@ -654,12 +654,6 @@ const slot = slots[
 ];
 // Lấy dữ liệu user hiện tại
 const { data: userData, error: userError } = await supabase
-  if(userData.banned){
-  return res.json({
-    success:false,
-    message:"You are banned"
-  });
-}
   .from("users")
   .select("*")
   .eq("id", decoded.id)
@@ -720,10 +714,8 @@ await supabase
   .from("users")
   .update({
     tokens: newBalance,
-    spin_chances: newSpin,
-    total_spins: (userData.total_spins || 0) + 1
+    spin_chances: newSpin
   })
-  .eq("id", decoded.id);
   .eq("id", decoded.id);
 
 // Lưu lịch sử quay
@@ -1201,8 +1193,8 @@ try{
 const { data, error } = await supabase
 .from("withdraw_requests")
 .select(`
-  *,
-  users(username, banned, spin_chances, total_spins)
+*,
+users(username)
 `)
 .order("created_at",{ascending:false});
 
@@ -1352,46 +1344,6 @@ error:err.message
 
 }
 
-});
-app.post("/admin/ban", async (req, res) => {
-  try {
-    if(req.cookies.admin !== "true"){
-      return res.json({
-        success:false,
-        message:"Unauthorized"
-      });
-    }
-
-    const { user_id } = req.body;
-
-    if (!user_id) {
-      return res.status(400).json({
-        success:false,
-        message: "Missing user_id"
-      });
-    }
-
-    const { error } = await supabase
-      .from("users")
-      .update({ banned: true })
-      .eq("id", user_id);
-
-    if (error) {
-      return res.status(500).json({
-        success:false,
-        error: error.message
-      });
-    }
-
-    res.json({ success: true });
-
-  } catch (err) {
-    console.error("BAN ERROR:", err);
-    res.status(500).json({
-      success:false,
-      error: "Server error"
-    });
-  }
 });
 app.get("/watch", (req, res) => {
   try {
