@@ -267,8 +267,7 @@ async function loadWithdraws() {
 );
 
 const html = filtered.map(w => {
-  let isSus = (w.users.spin || 0) > 500 ||
-   w.amount > 1000;
+  let isSus = (w.users.spin_chances || 0) > 50 || w.amount > 1000;
 
     stats[w.status]++;
 
