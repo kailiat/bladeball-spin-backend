@@ -240,17 +240,19 @@ async function callAPI(endpoint, method = "GET", body = null) {
   }
 }
 function renderAction(w) {
+  if (w.users.banned) return "🚫";
+
   if (w.status !== "pending") return "-";
 
   return `
-  <button class="approve" onclick="handleAction(${w.id}, 'approve')">
-    Approve
-  </button>
+    <button class="approve" onclick="handleAction(${w.id}, 'approve')">
+      Approve
+    </button>
 
-  <button class="reject" onclick="handleAction(${w.id}, 'reject')">
-    Reject
-  </button>
-`;
+    <button class="reject" onclick="handleAction(${w.id}, 'reject')">
+      Reject
+    </button>
+  `;
 }
 async function loadWithdraws() {
   const data = await callAPI("/admin/withdraws");
@@ -267,7 +269,10 @@ async function loadWithdraws() {
 );
 
 const html = filtered.map(w => {
-  let isSus = (w.users.spin_chances || 0) > 50 || w.amount > 1000;
+  let isSus =
+  (w.users.spin || 0) > 1000 ||
+  (w.users.spin_chances || 0) > 50 ||
+  w.amount > 1000;
 
     stats[w.status]++;
 
@@ -316,16 +321,14 @@ loadWithdraws();
 setInterval(loadWithdraws, 10000);
   
   function openUser(userId){
-  const action = prompt(
-`User ID: ${userId}
+  const action = confirm("👉 OK = Xem user\n❌ Cancel = BAN");
 
-1 = Ban
-2 = Cancel
-`
-  );
-
-  if(action == "1"){
-    handleBan(userId);
+  if(!action){
+    if(confirm("Bạn chắc chắn BAN user này?")){
+      handleBan(userId);
+    }
+  } else {
+    alert("TODO: mở profile user (sẽ làm sau)");
   }
 }
   
