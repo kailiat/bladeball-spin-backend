@@ -1416,7 +1416,7 @@ border-radius:12px;
 
 }
 
-if(item.type === "withdraw"){
+else if(item.type === "withdraw"){
 
 html += `
 <div style="
@@ -1797,7 +1797,7 @@ checkLogin();
     Number(localStorage.getItem(type + "_progress") || 0);
 
     updateProgressUI(type, current);
-    }
+    
 });
 </script>
 
