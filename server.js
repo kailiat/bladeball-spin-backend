@@ -1355,20 +1355,10 @@ error:err.message
 });
 app.post("/admin/ban", async (req, res) => {
   try {
-    if(req.cookies.admin !== "true"){
-      return res.json({
-        success:false,
-        message:"Unauthorized"
-      });
-    }
-
     const { user_id } = req.body;
 
     if (!user_id) {
-      return res.status(400).json({
-        success:false,
-        message: "Missing user_id"
-      });
+      return res.json({ success: false, message: "Missing user_id" });
     }
 
     const { error } = await supabase
@@ -1377,20 +1367,15 @@ app.post("/admin/ban", async (req, res) => {
       .eq("id", user_id);
 
     if (error) {
-      return res.status(500).json({
-        success:false,
-        error: error.message
-      });
+      console.error(error);
+      return res.json({ success: false, message: "DB error" });
     }
 
     res.json({ success: true });
 
   } catch (err) {
     console.error("BAN ERROR:", err);
-    res.status(500).json({
-      success:false,
-      error: "Server error"
-    });
+    res.status(500).json({ success: false, message: "Server error" });
   }
 });
 app.get("/watch", (req, res) => {
