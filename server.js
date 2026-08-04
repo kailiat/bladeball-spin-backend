@@ -653,12 +653,14 @@ const slot = slots[
   Math.floor(Math.random() * slots.length)
 ];
 // Lấy dữ liệu user hiện tại
+// 1. LẤY USER TRƯỚC
 const { data: userData, error: userError } = await supabase
   .from("users")
   .select("*")
   .eq("id", decoded.id)
   .single();
 
+// 2. CHECK ERROR
 if (userError) {
   return res.json({
     success: false,
@@ -666,7 +668,7 @@ if (userError) {
   });
 }
 
-// ✅ CHECK BAN PHẢI ĐẶT SAU KHI LẤY DATA
+// 3. CHECK BAN (PHẢI ĐẶT Ở ĐÂY)
 if (userData.banned) {
   return res.json({
     success: false,
