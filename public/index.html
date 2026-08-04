@@ -781,7 +781,7 @@ SPIN
         <p>
             Your Balance
             <br>
-            <span id="withdrawBalance">0</span>
+            <span id="balanceValue">0</span> ⭐
         </p>
 
         <p>
@@ -927,25 +927,6 @@ border:1px solid rgba(139,61,255,.35);
 🎲 Spin Chance
 <br>
 <b id="profileSpin">0</b>
-</p>
-    <hr style="border:.5px solid #444">
-
-<p>
-📊 Total Spins
-<br>
-<b id="profileTotalSpin">0</b>
-</p>
-
-<p>
-💰 Total Won
-<br>
-<b id="profileTotalWon">0</b>
-</p>
-
-<p>
-💸 Total Withdraw
-<br>
-<b id="profileWithdraw">0</b>
 </p>
 
 <hr style="border:.5px solid #444">
@@ -1200,12 +1181,7 @@ console.log("USER DATA:", data.user);
 
         // cập nhật balance
         document.getElementById("balanceValue").innerText =
-data.user.tokens || 0;
-
-const w = document.getElementById("withdrawBalance");
-if(w){
-    w.innerText = data.user.tokens || 0;
-}
+        data.user.tokens || 0;
 
 
 
@@ -1271,8 +1247,8 @@ async function showWithdraw(){
     }
 
 
-    document.getElementById("withdrawBalance").innerText =
-data.user.tokens || 0;
+    document.getElementById("balanceValue").innerText =
+    data.user.tokens || 0;
 
 
     document.getElementById("withdrawPopup").style.display="flex";
@@ -1398,52 +1374,35 @@ html="<p>No history yet.</p>";
 
 data.history.forEach(item=>{
 
-if(item.type === "spin"){
-
 html += `
 <div style="
 padding:12px;
 margin-bottom:10px;
 background:#23232d;
 border-radius:12px;
+border:1px solid rgba(139,61,255,.35);
 ">
-🎲 ${item.reward}
-<span style="float:right;color:#00e676;">
+🎁 ${item.reward}
+<span style="float:right;color:#ffd54f;">
 +${item.amount}
 </span>
 </div>
 `;
 
-}
-
-else if(item.type === "withdraw"){
-
-html += `
-<div style="
-padding:12px;
-margin-bottom:10px;
-background:#2d2323;
-border-radius:12px;
-">
-💸 Withdraw (${item.status || "pending"})
-<span style="float:right;color:#ff5252;">
--${item.amount}
-</span>
-</div>
-`;
-
-}
-
 });
 
+}
 
+document.getElementById("historyList").innerHTML=html;
 
-document.getElementById("historyList").innerHTML = html;
-document.getElementById("historyPopup").style.display = "flex";
-} // ✅ đóng function showHistory
+document.getElementById("historyPopup").style.display="flex";
+
+}
 
 function closeHistory(){
-    document.getElementById("historyPopup").style.display = "none";
+
+document.getElementById("historyPopup").style.display="none";
+
 }
 async function showProfile(){
 
@@ -1610,33 +1569,52 @@ showToast("Item withdraw coming soon");
 }
     let currentFeed = "";
     async function loadLiveFeed(){
-    try{
-        const res = await fetch(
-            "https://bladeball-spin-backend-kpjl.onrender.com/live-feed",
-            { credentials:"include" }
-        );
 
-        const data = await res.json();
+try{
 
-        if(data.success){
+const res = await fetch(
+"https://bladeball-spin-backend-kpjl.onrender.com/live-feed",
+{
+credentials:"include"
+}
+);
 
-            let text = "";
+const data = await res.json();
 
-            data.feed.forEach(item=>{
-                text += '<span class="feed-item">🎉 ' 
-                + item.username + ' won ' + item.reward + 
-                '</span>';
-            });
 
-            if(text !== currentFeed){
-                currentFeed = text;
-                document.getElementById("feedText").innerHTML = text;
-            }
-        }
+if(data.success){
 
-    }catch(err){
-        console.log(err);
-    }
+let text="";
+
+data.feed.forEach(item=>{
+
+text += `
+<span class="feed-item">
+🎉 ${item.username} won ${item.reward}
+</span>
+`;
+
+});
+
+
+if(text !== currentFeed){
+
+    currentFeed = text;
+
+    document.getElementById("feedText").innerHTML = text;
+
+}
+
+
+}
+
+
+}catch(err){
+
+console.log(err);
+
+}
+
 }
 
 
@@ -1647,19 +1625,37 @@ setInterval(loadLiveFeed,20000);
 
     function updateMissionButton(){
 
-    ["lootlabs","linkvertise"].forEach(type => {
+    const missions = ["lootlabs","linkvertise"];
+
+    missions.forEach(type => {
+
+        const btn = document.getElementById(type + "Btn");
+        if(!btn) return;
+
+        const progress =
+        Number(localStorage.getItem(type + "_progress") || 0);
+
+        // ✅ DONE
+        if(progress >= 2){
+            btn.innerText = "DONE";
+            btn.disabled = true;
+            btn.style.background = "#444";
+            btn.onclick = null;
+            return;
+        }
 
         const start = Number(localStorage.getItem(type + "_start"));
         const delay = Number(localStorage.getItem(type + "_delay"));
 
-        const btn = document.getElementById(type + "Btn");
-
         btn.classList.remove("claim","watch");
 
+        // ✅ CHƯA WATCH
         if(!start || !delay){
+
             btn.innerText = "WATCH";
             btn.disabled = false;
             btn.classList.add("watch");
+
             btn.onclick = () => startMission(type);
             return;
         }
@@ -1667,12 +1663,18 @@ setInterval(loadLiveFeed,20000);
         const now = Date.now();
         const passed = now - start;
 
+        // ✅ ĐỦ THỜI GIAN → CLAIM
         if(passed >= delay){
+
             btn.innerText = "CLAIM";
             btn.disabled = false;
             btn.classList.add("claim");
+
             btn.onclick = () => claimReward(type);
+
         }else{
+
+            // ✅ ĐANG ĐỢI
             btn.innerText = "WAIT";
             btn.disabled = true;
             btn.classList.add("watch");
@@ -1741,7 +1743,8 @@ if(current >= 2){
 
     await checkLogin();
         updateMissionButton();
-        
+}
+    updateMissionButton();
 checkLogin();
     ["lootlabs","linkvertise"].forEach(type => {
 
@@ -1749,7 +1752,7 @@ checkLogin();
     Number(localStorage.getItem(type + "_progress") || 0);
 
     updateProgressUI(type, current);
-    
+
 });
 </script>
 
