@@ -654,6 +654,12 @@ const slot = slots[
 ];
 // Lấy dữ liệu user hiện tại
 const { data: userData, error: userError } = await supabase
+  if(userData.banned){
+  return res.json({
+    success:false,
+    message:"You are banned"
+  });
+}
   .from("users")
   .select("*")
   .eq("id", decoded.id)
@@ -714,8 +720,10 @@ await supabase
   .from("users")
   .update({
     tokens: newBalance,
-    spin_chances: newSpin
+    spin_chances: newSpin,
+    total_spins: (userData.total_spins || 0) + 1
   })
+  .eq("id", decoded.id);
   .eq("id", decoded.id);
 
 // Lưu lịch sử quay
@@ -1193,8 +1201,8 @@ try{
 const { data, error } = await supabase
 .from("withdraw_requests")
 .select(`
-*,
-users(username)
+  *,
+  users(username, banned, spin_chances, total_spins)
 `)
 .order("created_at",{ascending:false});
 
