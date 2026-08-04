@@ -331,6 +331,21 @@ setInterval(loadWithdraws, 10000);
     alert("TODO: mở profile user (sẽ làm sau)");
   }
 }
+  async function handleBan(userId){
+  try{
+    const res = await callAPI("/admin/ban", "POST", {
+      user_id: userId
+    });
+
+    alert(res.message || "Banned!");
+
+    loadWithdraws(); // reload lại bảng
+
+  }catch(err){
+    alert("Ban lỗi!");
+    console.error(err);
+  }
+}
   
 </script>
 
