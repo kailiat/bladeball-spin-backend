@@ -654,20 +654,23 @@ const slot = slots[
 ];
 // Lấy dữ liệu user hiện tại
 const { data: userData, error: userError } = await supabase
-  if(userData.banned){
-  return res.json({
-    success:false,
-    message:"You are banned"
-  });
-}
   .from("users")
   .select("*")
   .eq("id", decoded.id)
   .single();
-    if (userError) {
+
+if (userError) {
   return res.json({
-    success:false,
-    error:userError.message
+    success: false,
+    error: userError.message
+  });
+}
+
+// ✅ CHECK BAN PHẢI ĐẶT SAU KHI LẤY DATA
+if (userData.banned) {
+  return res.json({
+    success: false,
+    message: "You are banned"
   });
 }
 const today = new Date().toISOString().slice(0,10);
@@ -723,7 +726,6 @@ await supabase
     spin_chances: newSpin,
     total_spins: (userData.total_spins || 0) + 1
   })
-  .eq("id", decoded.id);
   .eq("id", decoded.id);
 
 // Lưu lịch sử quay
@@ -1309,9 +1311,9 @@ message:"Already processed"
 }
 
 // Lấy user
-const { data:user } = await supabase
-.from("users")
-.select("*")
+const { data, error } = await supabase
+  .from("users")
+  .select("*")
 .eq("id", withdraw.user_id)
 .single();
 
