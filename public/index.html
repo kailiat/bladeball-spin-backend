@@ -1064,6 +1064,11 @@ console.log("SERVER:", data);
 
 if(!data.success){
     showToast(data.message || data.error);
+
+    // 🔥 RESET WHEEL
+    wheel.style.transition = "none";
+    wheel.style.transform = `rotate(${currentRotation}deg)`;
+
     spinning = false;
     return;
 }
@@ -1107,7 +1112,10 @@ console.log(data);
 
         setTimeout(async () => {
 
-    wheel.style.animation = "none";
+    // 🔥 reset để lần sau quay lại được
+    wheel.style.transition = "none";
+
+    wheel.dataset.rotation = wheel.dataset.rotation || 0;
 
     // cập nhật popup
     document.getElementById("balanceValue").innerText =
