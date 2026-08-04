@@ -1164,40 +1164,11 @@ function closePopup(){
 async function checkLogin(){
 
     const res = await fetch("https://bladeball-spin-backend-kpjl.onrender.com/me", {
-        credentials: "include"
-    });
+    credentials: "include"
+});
 
-    const data = await res.json();
-
-    // ❌ CHƯA LOGIN
-    if(!data.success){
-
-        // reset toàn bộ UI
-        missionProgress.lootlabs = 0;
-        missionProgress.linkvertise = 0;
-
-        document.getElementById("lootlabsProgress").innerText = "0 / 2";
-        document.getElementById("linkvertiseProgress").innerText = "0 / 2";
-
-        document.getElementById("lootlabsBar").style.width = "0%";
-        document.getElementById("linkvertiseBar").style.width = "0%";
-
-        // ❗ XÓA TRẠNG THÁI ADS
-        localStorage.removeItem("lootlabs_start");
-        localStorage.removeItem("lootlabs_delay");
-        localStorage.removeItem("linkvertise_start");
-        localStorage.removeItem("linkvertise_delay");
-
-        updateMissionButton();
-
-        return;
-    }
-
-    // ✅ LOGIN OK
-    missionProgress.lootlabs = data.user.lootlabs_progress || 0;
-    missionProgress.linkvertise = data.user.linkvertise_progress || 0;
-    // 🔥 FIX DAILY BUTTON
-const btn = document.getElementById("dailyClaimBtn");
+const data = await res.json();
+    const btn = document.getElementById("dailyClaimBtn");
 
 if(btn){
 
@@ -1215,23 +1186,62 @@ if(btn){
         btn.disabled = false;
         btn.style.background = "linear-gradient(90deg,#00c853,#00e676)";
     }
+
+}
+    missionProgress.lootlabs = data.user.lootlabs_progress || 0;
+missionProgress.linkvertise = data.user.linkvertise_progress || 0;
+    document.getElementById("lootlabsProgress").innerText =
+        (data.user.lootlabs_progress || 0) + " / 2";
+
+    document.getElementById("linkvertiseProgress").innerText =
+        (data.user.linkvertise_progress || 0) + " / 2";
+
+    // 👉 cập nhật nút WATCH / DONE
+    updateMissionButton();
+    
 }
 
-    updateProgressUI("lootlabs", missionProgress.lootlabs);
-    updateProgressUI("linkvertise", missionProgress.linkvertise);
+// 👇 THÊM DÒNG NÀY
+console.log("USER DATA:", data.user);
 
-    document.getElementById("balanceValue").innerText =
+
+    if(data.success){
+
+
+        // cập nhật balance
+        document.getElementById("balanceValue").innerText =
         data.user.tokens || 0;
 
-    document.getElementById("userBox").innerHTML = `
-        <h3>👤 ${data.user.username}</h3>
-        <h3>💰 Balance: ${data.user.tokens || 0} Tokens</h3>
-        <h3>🎲 Spin Chance: ${data.user.spin_chances || 0}</h3>
-        <button onclick="logout()">Logout</button>
-    `;
 
-    updateMissionButton();
-}
+
+        document.getElementById("userBox").innerHTML = `
+
+        <h3>👤 ${data.user.username}</h3>
+
+        <h3>
+        💰 Balance: ${data.user.tokens || 0} Tokens
+        </h3>
+        <h3>
+🎲 Spin Chance: ${data.user.spin_chances || 0}
+</h3>
+
+
+        <button onclick="logout()">
+            Logout
+        </button>
+
+        `;
+                // Daily login đã nhận hôm nay chưa
+
+
+
+        }
+
+    }
+
+
+  
+
 async function logout(){
 
     await fetch(
@@ -1242,10 +1252,9 @@ async function logout(){
         }
     );
 
-    // 🔥 XÓA TRẠNG THÁI ADS
-    localStorage.clear();
 
     location.reload();
+
 }
     
 async function showWithdraw(){
@@ -1564,6 +1573,26 @@ document.getElementById("balanceValue").innerText = data.balance;
 // ✅ hoặc reload lại user
 await checkLogin();
 
+    const btn = document.getElementById("dailyClaimBtn");
+
+    if(btn){
+
+        const today = new Date().toISOString().slice(0,10);
+
+        if(data.user.last_claim_date === today){
+
+            btn.innerText = "CLAIMED";
+            btn.disabled = true;
+            btn.style.background = "#555";
+
+        }else{
+
+            btn.innerText = "CLAIM";
+            btn.disabled = false;
+            btn.style.background = "linear-gradient(90deg,#00c853,#00e676)";
+        }
+
+    }
 
 } // ✅ BẮT BUỘC PHẢI CÓ DẤU NÀY
         function changeWithdrawType(){
@@ -1651,11 +1680,12 @@ setInterval(loadLiveFeed,20000);
 
         const progress = missionProgress[type];
 
-        // 🔥 nếu chưa login → luôn WATCH
-        if(progress === undefined){
-            btn.innerText = "WATCH";
-            btn.disabled = false;
-            btn.onclick = () => startMission(type);
+        // ✅ DONE
+        if(progress >= 2){
+            btn.innerText = "DONE";
+            btn.disabled = true;
+            btn.style.background = "#444";
+            btn.onclick = null;
             return;
         }
 
@@ -1700,15 +1730,6 @@ setInterval(loadLiveFeed,20000);
     setTimeout(updateMissionButton, 1000);
 }
     async function claimReward(type){
-        const resCheck = await fetch("https://bladeball-spin-backend-kpjl.onrender.com/me", {
-    credentials: "include"
-});
-const check = await resCheck.json();
-
-if(!check.success){
-    showToast("Please login first");
-    return;
-}
 
     // ❌ BỎ ĐOẠN NÀY
     // let current = Number(localStorage.getItem(type + "_progress") || 0);
@@ -1748,9 +1769,11 @@ if(!check.success){
 missionProgress.linkvertise = data.linkvertise_progress || 0;
 
         // ✅ CHỈ dùng server trả về
-        // 🔥 FIX: update UI + progress bar
-updateProgressUI("lootlabs", missionProgress.lootlabs);
-updateProgressUI("linkvertise", missionProgress.linkvertise);
+        document.getElementById("lootlabsProgress").innerText =
+            (data.lootlabs_progress || 0) + " / 2";
+
+        document.getElementById("linkvertiseProgress").innerText =
+            (data.linkvertise_progress || 0) + " / 2";
 
     }else{
         showToast(data.message || "Error");
@@ -1761,17 +1784,18 @@ updateProgressUI("linkvertise", missionProgress.linkvertise);
 }
     updateMissionButton();
 checkLogin();
-    
+    ["lootlabs","linkvertise"].forEach(type => {
+
+    let current = missionProgress[type] || 0;
+
+    updateProgressUI(type, current);
+
+});
 </script>
 
 <div id="toast" class="toast">
   <div id="toast-message"></div>
 </div>
-    <script>
-
-
-
-</script>
 </body>
 
 </html>
