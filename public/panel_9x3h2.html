@@ -123,6 +123,14 @@ color:#ff4d4d;
 font-weight:bold;
 
 }
+  .ban{
+  background:#f59e0b;
+  color:black;
+}
+
+.row-pending{
+  background:#2a1f1f !important;
+}
 
 </style>
 
@@ -131,49 +139,45 @@ font-weight:bold;
 <body>
 
 <h1>🎁 Withdraw Requests</h1>
-  <div class="stats">
 
-<div class="card">
-<h2 id="pendingCount">0</h2>
-<p>Pending</p>
-</div>
+<input id="search" placeholder="Search user..." oninput="loadWithdraws()">
 
-<div class="card">
-<h2 id="completedCount">0</h2>
-<p>Completed</p>
-</div>
+<div class="stats">
+  <div class="card">
+    <h2 id="pendingCount">0</h2>
+    <p>Pending</p>
+  </div>
 
-<div class="card">
-<h2 id="rejectedCount">0</h2>
-<p>Rejected</p>
-</div>
+  <div class="card">
+    <h2 id="completedCount">0</h2>
+    <p>Completed</p>
+  </div>
 
+  <div class="card">
+    <h2 id="rejectedCount">0</h2>
+    <p>Rejected</p>
+  </div>
 </div>
 
 <table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>User</th>
+      <th>Type</th>
+      <th>Amount</th>
+      <th>Roblox</th>
+      <th>Discord</th>
+      <th>Status</th>
+      <th>Spin</th>
+      <th>Action</th>
+    </tr>
+  </thead>
 
-<thead>
-
-<tr>
-
-<th>ID</th>
-<th>User</th>
-<th>Type</th>
-<th>Amount</th>
-<th>Roblox</th>
-<th>Discord</th>
-<th>Status</th>
-<th>Action</th>
-
-</tr>
-
-</thead>
-
-<tbody id="withdrawTable">
-
-</tbody>
-
+  <tbody id="withdrawTable"></tbody>
 </table>
+
+</body>
 
 <script>
 
@@ -195,17 +199,22 @@ function renderAction(w) {
   if (w.status !== "pending") return "-";
 
   return `
-    <button class="approve" onclick="handleAction(${w.id}, 'approve')">
-      Approve
-    </button>
+  <button class="approve" onclick="handleAction(${w.id}, 'approve')">
+    Approve
+  </button>
 
-    <button class="reject" onclick="handleAction(${w.id}, 'reject')">
-      Reject
-    </button>
-  `;
+  <button class="reject" onclick="handleAction(${w.id}, 'reject')">
+    Reject
+  </button>
+
+  <button class="ban" onclick="handleBan(${w.user_id})">
+    Ban
+  </button>
+`;
 }
 async function loadWithdraws() {
   const data = await callAPI("/admin/withdraws");
+  const keyword = document.getElementById("search")?.value.toLowerCase() || "";
 
   let stats = {
     pending: 0,
@@ -213,12 +222,16 @@ async function loadWithdraws() {
     rejected: 0
   };
 
-  const html = data.data.map(w => {
+  const filtered = data.data.filter(w =>
+  w.users.username.toLowerCase().includes(keyword)
+);
+
+const html = filtered.map(w => {
 
     stats[w.status]++;
 
     return `
-    <tr>
+<tr class="${w.status === 'pending' ? 'row-pending' : ''}">
       <td>${w.id}</td>
       <td>${w.users.username}</td>
       <td>${w.type}</td>
@@ -226,9 +239,10 @@ async function loadWithdraws() {
       <td>${w.roblox_username}</td>
       <td>${w.discord_username}</td>
       <td class="${w.status}">${w.status}</td>
-      <td>
-        ${renderAction(w)}
-      </td>
+<td>${w.users.spin || 0}</td>
+<td>
+  ${renderAction(w)}
+</td>
     </tr>
     `;
   }).join("");
@@ -238,6 +252,9 @@ async function loadWithdraws() {
   updateStats(stats);
 };
   async function handleAction(id, action) {
+
+  if (!confirm(`Bạn chắc muốn ${action}?`)) return;
+
   await callAPI(`/admin/${action}`, "POST", { id });
 
   loadWithdraws();
@@ -248,6 +265,14 @@ async function loadWithdraws() {
   document.getElementById("rejectedCount").innerText = stats.rejected;
 }
 loadWithdraws();
+  async function handleBan(userId) {
+  if (!confirm("Bạn chắc muốn BAN user này?")) return;
+
+  await callAPI("/admin/ban", "POST", { user_id: userId });
+
+  loadWithdraws();
+}
+  
 </script>
 
 </body>
