@@ -1345,6 +1345,16 @@ error:err.message
 }
 
 });
+app.post("/admin/ban", async (req, res) => {
+  const { user_id } = req.body;
+
+  await db.query(
+    "UPDATE users SET banned = 1 WHERE id = ?",
+    [user_id]
+  );
+
+  res.json({ success: true });
+});
 app.get("/watch", (req, res) => {
   try {
     const token = req.cookies.token;
