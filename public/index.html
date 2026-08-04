@@ -957,10 +957,6 @@ Close
 <script>
 
 let spinning = false;
-    let missionProgress = {
-    lootlabs: 0,
-    linkvertise: 0
-};
 
 function updateProgressUI(type, current){
 
@@ -1187,18 +1183,6 @@ if(btn){
         btn.style.background = "linear-gradient(90deg,#00c853,#00e676)";
     }
 
-}
-    missionProgress.lootlabs = data.user.lootlabs_progress || 0;
-missionProgress.linkvertise = data.user.linkvertise_progress || 0;
-    document.getElementById("lootlabsProgress").innerText =
-        (data.user.lootlabs_progress || 0) + " / 2";
-
-    document.getElementById("linkvertiseProgress").innerText =
-        (data.user.linkvertise_progress || 0) + " / 2";
-
-    // 👉 cập nhật nút WATCH / DONE
-    updateMissionButton();
-    
 }
 
 // 👇 THÊM DÒNG NÀY
@@ -1678,7 +1662,8 @@ setInterval(loadLiveFeed,20000);
         const btn = document.getElementById(type + "Btn");
         if(!btn) return;
 
-        const progress = missionProgress[type];
+        const progress =
+        Number(localStorage.getItem(type + "_progress") || 0);
 
         // ✅ DONE
         if(progress >= 2){
@@ -1730,10 +1715,12 @@ setInterval(loadLiveFeed,20000);
     setTimeout(updateMissionButton, 1000);
 }
     async function claimReward(type){
+        let current = Number(localStorage.getItem(type + "_progress") || 0);
 
-    // ❌ BỎ ĐOẠN NÀY
-    // let current = Number(localStorage.getItem(type + "_progress") || 0);
-    // if(current >= 2){ return; }
+if(current >= 2){
+    showToast("Đã hoàn thành mission rồi!");
+    return;
+}
 
     localStorage.removeItem(type + "_start");
     localStorage.removeItem(type + "_delay");
@@ -1765,28 +1752,34 @@ setInterval(loadLiveFeed,20000);
     if(data.success){
 
         showToast("+1 Spin 🎉");
-        missionProgress.lootlabs = data.lootlabs_progress || 0;
-missionProgress.linkvertise = data.linkvertise_progress || 0;
 
-        // ✅ CHỈ dùng server trả về
-        document.getElementById("lootlabsProgress").innerText =
-            (data.lootlabs_progress || 0) + " / 2";
+        // ✅ mỗi mission tự tăng riêng
+        let key = type + "_progress";
 
-        document.getElementById("linkvertiseProgress").innerText =
-            (data.linkvertise_progress || 0) + " / 2";
+        let current = Number(localStorage.getItem(key) || 0);
+
+        current++;
+
+        if(current > 2) current = 2;
+
+        localStorage.setItem(key, current);
+
+        // ✅ update đúng chỗ
+        updateProgressUI(type, current);
 
     }else{
         showToast(data.message || "Error");
     }
 
     await checkLogin();
-    updateMissionButton();
+        updateMissionButton();
 }
     updateMissionButton();
 checkLogin();
     ["lootlabs","linkvertise"].forEach(type => {
 
-    let current = missionProgress[type] || 0;
+    let current =
+    Number(localStorage.getItem(type + "_progress") || 0);
 
     updateProgressUI(type, current);
 
