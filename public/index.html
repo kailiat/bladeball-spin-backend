@@ -1670,37 +1670,19 @@ setInterval(loadLiveFeed,20000);
 
     function updateMissionButton(){
 
-    const missions = ["lootlabs","linkvertise"];
-
-    missions.forEach(type => {
-
-        const btn = document.getElementById(type + "Btn");
-        if(!btn) return;
-
-        const progress =
-        Number(localStorage.getItem(type + "_progress") || 0);
-
-        // ✅ DONE
-        if(progress >= 2){
-            btn.innerText = "DONE";
-            btn.disabled = true;
-            btn.style.background = "#444";
-            btn.onclick = null;
-            return;
-        }
+    ["lootlabs","linkvertise"].forEach(type => {
 
         const start = Number(localStorage.getItem(type + "_start"));
         const delay = Number(localStorage.getItem(type + "_delay"));
 
+        const btn = document.getElementById(type + "Btn");
+
         btn.classList.remove("claim","watch");
 
-        // ✅ CHƯA WATCH
         if(!start || !delay){
-
             btn.innerText = "WATCH";
             btn.disabled = false;
             btn.classList.add("watch");
-
             btn.onclick = () => startMission(type);
             return;
         }
@@ -1708,18 +1690,12 @@ setInterval(loadLiveFeed,20000);
         const now = Date.now();
         const passed = now - start;
 
-        // ✅ ĐỦ THỜI GIAN → CLAIM
         if(passed >= delay){
-
             btn.innerText = "CLAIM";
             btn.disabled = false;
             btn.classList.add("claim");
-
             btn.onclick = () => claimReward(type);
-
         }else{
-
-            // ✅ ĐANG ĐỢI
             btn.innerText = "WAIT";
             btn.disabled = true;
             btn.classList.add("watch");
