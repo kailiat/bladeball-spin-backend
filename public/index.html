@@ -1159,10 +1159,10 @@ function closePopup(){
     async function startMission(type){
 
     // 👉 gọi server để lưu session
-    fetch(
-        `https://bladeball-spin-backend-kpjl.onrender.com/watch?provider=${type}`,
-        { credentials:"include" }
-    );
+    window.open(
+    `https://bladeball-spin-backend-kpjl.onrender.com/watch?provider=${type}`,
+    "_blank"
+);
 
     // 👉 mở link ads THẬT
     if(type === "lootlabs"){
@@ -1212,6 +1212,13 @@ if(btn){
 
 // 👇 THÊM DÒNG NÀY
 console.log("USER DATA:", data.user);
+    // ✅ SYNC BUTTON THEO SERVER
+updateMissionButton("lootlabs", data.user.lootlabs_progress);
+updateMissionButton("linkvertise", data.user.linkvertise_progress);
+
+// ✅ SYNC PROGRESS BAR
+updateProgressUI("lootlabs", data.user.lootlabs_progress);
+updateProgressUI("linkvertise", data.user.linkvertise_progress);
 
 
     if(data.success){
@@ -1665,9 +1672,16 @@ loadLiveFeed();
 setInterval(loadLiveFeed,20000);
 
 
-    function updateMissionButton(type) {
+    function updateMissionButton(type, progress) {
 
     const btn = document.getElementById(type + "Btn");
+
+    if (progress >= 2) {
+        btn.innerText = "DONE";
+        btn.disabled = true;
+        btn.className = "claim";
+        return;
+    }
 
     const start = localStorage.getItem(type + "_start");
     const delay = localStorage.getItem(type + "_delay");
@@ -1675,6 +1689,7 @@ setInterval(loadLiveFeed,20000);
     if (!start || !delay) {
         btn.innerText = "WATCH";
         btn.className = "watch";
+        btn.disabled = false;
         btn.onclick = () => startMission(type);
         return;
     }
@@ -1685,11 +1700,12 @@ setInterval(loadLiveFeed,20000);
     if (remaining <= 0) {
         btn.innerText = "CLAIM";
         btn.className = "claim";
+        btn.disabled = false;
         btn.onclick = () => claimReward(type);
     } else {
         btn.innerText = "WAIT...";
         btn.className = "watch";
-        btn.onclick = null;
+        btn.disabled = true;
     }
 }
     async function claimReward(type){
@@ -1714,6 +1730,8 @@ setInterval(loadLiveFeed,20000);
     }
 
     showToast("+1 Spin 🎉");
+        localStorage.removeItem(type + "_start");
+localStorage.removeItem(type + "_delay");
 
     // ✅ LẤY PROGRESS TỪ SERVER
     const newProgress =
@@ -1770,11 +1788,7 @@ loadWinners();
 
 // auto refresh 10s
 setInterval(loadWinners,10000);
-    // 🔥 INIT khi load trang (fix F5 reset)
-setInterval(() => {
-    updateMissionButton("lootlabs");
-    updateMissionButton("linkvertise");
-}, 1000);
+
 
 // chạy ngay lần đầu
 updateMissionButton("lootlabs");
