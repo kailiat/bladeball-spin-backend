@@ -729,7 +729,7 @@ app.post("/spin", async (req, res) => {
     return res.json({
       success: true,
       random,
-      reward,
+      reward: reward.label || `${reward.amount} Tokens`,
       balance: newBalance,
       spin_chances: newSpin
     });
