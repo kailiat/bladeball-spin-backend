@@ -437,13 +437,10 @@ button:hover{
     border:1px solid rgba(139,61,255,.3);
     font-size:14px;
 }
-    #winnerList::-webkit-scrollbar{
-    width:6px;
-}
-
-#winnerList::-webkit-scrollbar-thumb{
-    background:#8b3dff;
-    border-radius:10px;
+    #winnerList{
+    flex:1; /* 👈 chiếm phần còn lại */
+    overflow-y:auto; /* 👈 CHO CUỘN */
+    padding-right:5px;
 }
 @keyframes scroll{
 
