@@ -937,9 +937,8 @@ value="1">
 </div>
     <div id="historyPopup" class="popup">
 
-    <div class="popup-box">
-
-        <h2>📜 Spin History</h2>
+    <div id="historyPopup" class="popup-box" style="display:none;">
+    <h2>📜 History</h2>
 
         <div id="historyList"
         style="
@@ -1854,6 +1853,52 @@ setInterval(() => {
 
 function closeRules(){
     document.getElementById("rulesPopup").style.display = "none";
+}
+    // MỞ POPUP
+function showHistory() {
+    document.getElementById("historyPopup").style.display = "flex";
+    loadHistory(); // 🔥 gọi API
+}
+
+// ĐÓNG
+function closeHistory() {
+    document.getElementById("historyPopup").style.display = "none";
+}
+
+// LOAD DATA TỪ SERVER
+async function loadHistory() {
+    const list = document.getElementById("historyList");
+    list.innerHTML = "Loading...";
+
+    try {
+        const res = await fetch("/history", {
+            credentials: "include"
+        });
+
+        const data = await res.json();
+
+        if (!data.success) {
+            list.innerHTML = "No data";
+            return;
+        }
+
+        list.innerHTML = "";
+
+        data.history.forEach(item => {
+            const div = document.createElement("div");
+
+            if (item.type === "spin") {
+                div.innerHTML = `🎲 ${item.reward} (+${item.amount})`;
+            } else {
+                div.innerHTML = `💸 Withdraw -${item.amount} (${item.status})`;
+            }
+
+            list.appendChild(div);
+        });
+
+    } catch (err) {
+        list.innerHTML = "Error loading history";
+    }
 }
 </script>
 <!-- ⭐ RULES BUTTON -->
