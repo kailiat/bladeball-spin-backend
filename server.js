@@ -721,7 +721,7 @@ app.post("/spin", async (req, res) => {
       .from("live_feed")
       .insert({
         username: decoded.username,
-        reward: reward.name,
+        reward: reward.label || reward.name,
         amount: reward.amount,
         is_fake: false
       });
