@@ -1488,8 +1488,8 @@ document.getElementById("profilePopup").style.display="none";
         1800 +
         (360 - (slot * 30 + 15));
 
-    wheel.style.transition = "transform 3s ease-out";
-    wheel.style.transform = `rotate(${targetDeg}deg)`;
+    wheel.style.transition = "none";
+wheel.style.animation = "spinForever 1s linear infinite";
 
     currentRotation = targetDeg;
 
