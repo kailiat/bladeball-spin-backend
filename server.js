@@ -657,13 +657,7 @@ if (userData.banned === true) {
 }
 
     const today = new Date().toISOString().slice(0,10);
-    if(userData.banned){
-  return res.json({
-    success:false,
-    banned:true,
-    message:"You are banned"
-  });
-}
+    
 
     // ✅ RESET MISSION
     if (userData.last_mission_date !== today) {
