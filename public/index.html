@@ -442,6 +442,32 @@ button:hover{
     overflow-y:auto; /* 👈 CHO CUỘN */
     padding-right:5px;
 }
+    /* ⭐ NÚT RULES */
+.rules-btn{
+    position: fixed;
+    bottom: 25px;
+    left: 25px; /* đổi trái cho khỏi đè nút khác */
+
+    width: 55px;
+    height: 55px;
+
+    border-radius: 50%;
+    background: linear-gradient(135deg,#ffd700,#ff9800);
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    font-size:24px;
+    cursor:pointer;
+
+    box-shadow: 0 0 15px rgba(255,165,0,0.7);
+    z-index: 999;
+}
+
+.rules-btn:hover{
+    transform: scale(1.15) rotate(10deg);
+}
 @keyframes scroll{
 
 from{
@@ -736,6 +762,10 @@ CLAIM
 </div>
 
 <div class="wheel-container">
+    <!-- ⭐ RULE BUTTON -->
+<div class="rules-button" onclick="showRules()">
+    ⭐
+</div>
 
     <div class="arrow">▼</div>
 
@@ -1804,8 +1834,49 @@ setInterval(() => {
     updateMissionButton("linkvertise", Number(linkProgress));
 
 }, 1000);
-</script>
+    function openRules(){
+    document.getElementById("rulesPopup").style.display = "flex";
+}
 
+function closeRules(){
+    document.getElementById("rulesPopup").style.display = "none";
+}
+</script>
+<!-- ⭐ RULES BUTTON -->
+<div class="rules-btn" onclick="openRules()">
+    ⭐
+</div>
+
+<!-- 📜 RULES POPUP -->
+<div id="rulesPopup" class="popup">
+    <div class="popup-box">
+
+        <h2>📜 Event Rules</h2>
+
+        <p style="text-align:left;line-height:1.6">
+
+        Welcome! We're really glad you're here.<br><br>
+
+        This site gives away free tokens & items.<br>
+        You can spin every day (max 5 spins).<br><br>
+
+        <b>Rules:</b><br>
+        - No bug abuse, cheat, spam<br>
+        - Violations = permanent ban + lose all rewards<br><br>
+
+        <b>Withdraw:</b><br>
+        - Discord is optional but recommended<br>
+        - Wrong username = we are not responsible<br>
+        - No Discord = slower delivery<br><br>
+
+        Good luck 🍀
+
+        </p>
+
+        <button onclick="closeRules()">Close</button>
+
+    </div>
+</div>
 <div id="toast" class="toast">
   <div id="toast-message"></div>
 </div>
