@@ -648,7 +648,7 @@ app.post("/spin", async (req, res) => {
     }
 
     const today = new Date().toISOString().slice(0,10);
-    if(user.banned){
+    if(userData.banned){
   return res.json({
     success:false,
     banned:true,
@@ -1386,7 +1386,7 @@ app.post("/admin/ban", async (req,res)=>{
   }
 
 });
-app.get("/watch", (req, res) => {
+app.get("/watch", async (req, res) => {
   try {
     const token = req.cookies.token;
 
