@@ -758,6 +758,20 @@ if (!token) {
 }
 
 const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  // 🔥 CHECK BAN
+const { data: bannedUser } = await supabase
+  .from("users")
+  .select("banned")
+  .eq("id", decoded.id)
+  .single();
+
+if(bannedUser?.banned){
+  return res.json({
+    success:false,
+    banned:true,
+    message:"You are banned"
+  });
+}
 
 // 🎲 SPIN
 const { data: spins } = await supabase
@@ -1326,6 +1340,44 @@ error:err.message
 }
 
 });
+// =============================
+// ADMIN - BAN USER
+// =============================
+app.post("/admin/ban", async (req,res)=>{
+
+  if(req.cookies.admin !== "true"){
+    return res.json({
+      success:false,
+      message:"Unauthorized"
+    });
+  }
+
+  try{
+
+    const { user_id } = req.body;
+
+    await supabase
+      .from("users")
+      .update({
+        banned:true
+      })
+      .eq("id", user_id);
+
+    res.json({
+      success:true,
+      message:"User banned!"
+    });
+
+  }catch(err){
+
+    res.json({
+      success:false,
+      error:err.message
+    });
+
+  }
+
+});
 app.get("/watch", (req, res) => {
   try {
     const token = req.cookies.token;
@@ -1335,6 +1387,20 @@ app.get("/watch", (req, res) => {
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    // 🔥 CHECK BAN
+const { data: bannedUser } = await supabase
+  .from("users")
+  .select("banned")
+  .eq("id", decoded.id)
+  .single();
+
+if(bannedUser?.banned){
+  return res.json({
+    success:false,
+    banned:true,
+    message:"You are banned"
+  });
+}
 
     const provider = req.query.provider;
 
@@ -1378,6 +1444,20 @@ if (!token) {
 }
 
 const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  // 🔥 CHECK BAN
+const { data: bannedUser } = await supabase
+  .from("users")
+  .select("banned")
+  .eq("id", decoded.id)
+  .single();
+
+if(bannedUser?.banned){
+  return res.json({
+    success:false,
+    banned:true,
+    message:"You are banned"
+  });
+}
 
 // 🔒 CHẶN SPAM CLICK
 if(claimLocks[decoded.id]){
