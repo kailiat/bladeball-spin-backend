@@ -1587,7 +1587,7 @@ const user = users.find(u=>u.id === i.user_id);
 
 return {
   username: user?.username || "Unknown",
-  reward: `${i.amount} Tokens`,
+  reward: i.amount > 0 ? `${i.amount} Tokens` : i.reward,
   amount: i.amount
 };
 
