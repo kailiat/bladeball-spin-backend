@@ -1156,14 +1156,15 @@ function closePopup(){
     document.getElementById("popup").style.display = "none";
 }
 
-    function startMission(type) {
+    async function startMission(type){
 
-    const now = Date.now();
-    const delay = (40 + Math.random() * 20) * 1000;
+    // 👉 gọi server để lưu session
+    fetch(
+        `https://bladeball-spin-backend-kpjl.onrender.com/watch?provider=${type}`,
+        { credentials:"include" }
+    );
 
-    localStorage.setItem(type + "_start", now);
-    localStorage.setItem(type + "_delay", delay);
-
+    // 👉 mở link ads THẬT
     if(type === "lootlabs"){
         window.open("https://loot-link.com/s?Io2URNwK", "_blank");
     }
@@ -1171,6 +1172,15 @@ function closePopup(){
     if(type === "linkvertise"){
         window.open("https://direct-link.net/4248703/FxVrNlMWnooH", "_blank");
     }
+
+    // 👉 lưu thời gian LOCAL để chạy WAIT
+    const now = Date.now();
+    const delay = (40 + Math.random() * 20) * 1000;
+
+    localStorage.setItem(type + "_start", now);
+    localStorage.setItem(type + "_delay", delay);
+
+    updateMissionButton();
 }
 async function checkLogin(){
 
@@ -1655,7 +1665,15 @@ loadLiveFeed();
 setInterval(loadLiveFeed,20000);
 
 
-    function updateMissionButton(){
+    async function updateMissionButton(){
+
+    const res = await fetch(
+        "https://bladeball-spin-backend-kpjl.onrender.com/me",
+        { credentials:"include" }
+    );
+
+    const data = await res.json();
+    if(!data.success) return;
 
     const missions = ["lootlabs","linkvertise"];
 
@@ -1664,8 +1682,11 @@ setInterval(loadLiveFeed,20000);
         const btn = document.getElementById(type + "Btn");
         if(!btn) return;
 
+        // ✅ LẤY PROGRESS TỪ SERVER
         const progress =
-        Number(localStorage.getItem(type + "_progress") || 0);
+            type === "lootlabs"
+            ? data.user.lootlabs_progress
+            : data.user.linkvertise_progress;
 
         // ✅ DONE
         if(progress >= 2){
@@ -1681,13 +1702,11 @@ setInterval(loadLiveFeed,20000);
 
         btn.classList.remove("claim","watch");
 
-        // ✅ CHƯA WATCH
+        // 🔥 CHƯA WATCH
         if(!start || !delay){
-
             btn.innerText = "WATCH";
             btn.disabled = false;
             btn.classList.add("watch");
-
             btn.onclick = () => startMission(type);
             return;
         }
@@ -1695,22 +1714,19 @@ setInterval(loadLiveFeed,20000);
         const now = Date.now();
         const passed = now - start;
 
-        // ✅ ĐỦ THỜI GIAN → CLAIM
-        if(passed >= delay){
-
-            btn.innerText = "CLAIM";
-            btn.disabled = false;
-            btn.classList.add("claim");
-
-            btn.onclick = () => claimReward(type);
-
-        }else{
-
-            // ✅ ĐANG ĐỢI
+        // 🔥 WAIT
+        if(passed < delay){
             btn.innerText = "WAIT";
             btn.disabled = true;
             btn.classList.add("watch");
+            return;
         }
+
+        // 🔥 CLAIM
+        btn.innerText = "CLAIM";
+        btn.disabled = false;
+        btn.classList.add("claim");
+        btn.onclick = () => claimReward(type);
 
     });
 
