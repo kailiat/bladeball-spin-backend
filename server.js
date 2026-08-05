@@ -648,7 +648,7 @@ app.post("/spin", async (req, res) => {
     }
 
     const today = new Date().toISOString().slice(0,10);
-    if(userData.banned){
+    if(userData.banned == 1){
   return res.json({
     success:false,
     banned:true,
