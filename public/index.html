@@ -62,20 +62,22 @@ h1 {
     height:460px;
 
     display:flex;
+    flex-direction:column; /* ✅ THÊM */
     justify-content:center;
     align-items:center;
 
-    margin-top:30px;      /* hạ xuống */
+    margin-top:-40px; /* ✅ kéo lên */
 }
     .main-layout{
-    width:1400px;
-    margin:30px auto;
+    width:1200px; /* giảm */
+    margin:20px auto;
 
     display:flex;
     justify-content:center;
-    align-items:flex-start;
 
-    gap:150px;
+    align-items:center;
+
+    gap:50px; /* ❗ từ 100 → 50 */
 }
 
 .mission-panel{
@@ -400,6 +402,11 @@ button:hover{
     background: linear-gradient(90deg,#00c853,#00e676);
     box-shadow: 0 0 20px rgba(0,255,120,.6);
 }
+    .spin-buttons{
+    display:flex;
+    gap:20px;
+    margin-top:25px;
+}
 
 @keyframes scroll{
 
@@ -696,42 +703,18 @@ CLAIM
 
 <div class="wheel-container">
 
-<div class="arrow">
-▼
-</div>
+    <div class="arrow">▼</div>
 
-
-<div id="wheel" class="wheel">
-
-    <div class="wheel-center">
-        ⭐
+    <div id="wheel" class="wheel">
+        <div class="wheel-center">⭐</div>
+        <div id="wheelLabels"></div>
     </div>
-    <div id="wheelLabels"></div>
-    <div id="missionBox" style="margin-top:20px;">
-</div>
 
-</div>
-</div>
-
-
-</div>
-
-
-<div
-style="
-display:flex;
-justify-content:center;
-gap:20px;
-margin-top:25px;
-">
-
-<button onclick="spin()">
-SPIN
-</button>
-
-<button onclick="testSpin()">
-🎲 Test Spin
-</button>
+    <!-- ✅ BUTTON ĐẶT Ở ĐÂY -->
+    <div class="spin-buttons">
+        <button onclick="spin()">SPIN</button>
+        <button onclick="testSpin()">🎲 Test Spin</button>
+    </div>
 
 </div>
 <div class="menu">
