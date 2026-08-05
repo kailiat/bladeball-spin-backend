@@ -1551,6 +1551,63 @@ try {
     });
 }
 });
+// =============================
+// WINNERS LIST
+// =============================
+app.get("/winners", async (req,res)=>{
+
+try{
+
+// lấy lịch sử spin
+const { data, error } = await supabase
+.from("spin_history")
+.select("*")
+.order("created_at",{ascending:false})
+.limit(30);
+
+if(error){
+return res.json({
+success:false,
+error:error.message
+});
+}
+
+// lấy danh sách user
+const userIds = data.map(i=>i.user_id);
+
+const { data: users } = await supabase
+.from("users")
+.select("id, username")
+.in("id", userIds);
+
+// map username
+const winners = data.map(i=>{
+
+const user = users.find(u=>u.id === i.user_id);
+
+return {
+username: user?.username || "Unknown",
+reward: i.reward,
+amount: i.amount
+};
+
+});
+
+res.json({
+success:true,
+winners
+});
+
+}catch(err){
+
+res.json({
+success:false,
+error:err.message
+});
+
+}
+
+});
 const PORT = process.env.PORT || 3000;
 
 
