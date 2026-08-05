@@ -635,25 +635,26 @@ app.post("/spin", async (req, res) => {
 
     // 🔥 LẤY USER
     const { data: userData, error: userError } = await supabase
-      .from("users")
-      .select("*")
-      .eq("id", userId)
-      .single();
-    // 🚫 CHECK BAN
-if(userData.banned){
-    return res.json({
-        success: false,
-        banned: true,
-        message: "You are banned"
-    });
+  .from("users")
+  .select("*")
+  .eq("id", userId)
+  .single();
+
+if (userError || !userData) {
+  return res.json({
+    success: false,
+    error: userError?.message || "User not found"
+  });
 }
 
-    if (userError) {
-      return res.json({
-        success: false,
-        error: userError.message
-      });
-    }
+// 🚫 CHECK BAN (SAU KHI CHẮC CHẮN CÓ USER)
+if (userData.banned === true) {
+  return res.json({
+    success: false,
+    banned: true,
+    message: "You are banned"
+  });
+}
 
     const today = new Date().toISOString().slice(0,10);
     if(userData.banned){
