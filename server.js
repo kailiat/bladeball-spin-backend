@@ -711,7 +711,7 @@ app.post("/spin", async (req, res) => {
       .from("spin_history")
       .insert({
         user_id: userId,
-        reward: reward.name,
+        reward: reward.label || reward.name,
         amount: reward.amount,
         spin_date: today
       });
