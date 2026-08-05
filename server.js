@@ -1581,13 +1581,15 @@ const { data: users } = await supabase
 .in("id", userIds);
 
 // map username
-const winners = data.map(i=>{
+const winners = data
+.filter(i => i.amount > 0 || i.label) // giữ item
+.map(i => {
 
 const user = users.find(u=>u.id === i.user_id);
 
 return {
   username: user?.username || "Unknown",
-  reward: i.amount > 0 ? `${i.amount} Tokens` : i.reward,
+  reward: i.label || `${i.amount} Tokens`,
   amount: i.amount
 };
 
