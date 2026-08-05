@@ -939,22 +939,22 @@ value="1">
 
     <div class="popup-box">
 
-    <h2>📜 History</h2>
+        <h2>📜 Spin History</h2>
 
-    <div style="display:flex; gap:10px; justify-content:center; margin-bottom:10px;">
-        <button onclick="loadSpinHistory()">🎯 Spins</button>
-        <button onclick="loadWithdrawHistory()">💸 Withdraw</button>
+        <div id="historyList"
+        style="
+        max-height:300px;
+        overflow-y:auto;
+        text-align:left;
+        margin:20px 0;
+        ">
+        </div>
+
+        <button onclick="closeHistory()">
+            Close
+        </button>
+
     </div>
-
-    <div id="historyList" style="max-height:300px; overflow-y:auto; text-align:left;">
-        Loading...
-    </div>
-
-    <br>
-
-    <button onclick="closeHistory()">Close</button>
-
-   </div>
 
 </div>
     <div id="profilePopup" class="popup">
@@ -1854,59 +1854,6 @@ setInterval(() => {
 
 function closeRules(){
     document.getElementById("rulesPopup").style.display = "none";
-}
-    function loadSpinHistory() {
-
-    const list = document.getElementById("historyList");
-
-    list.innerHTML = "";
-
-    const spins = allHistory.filter(i => i.type === "spin");
-
-    spins.forEach(item => {
-
-        list.innerHTML += `
-        <div style="padding:10px;border-bottom:1px solid #333;">
-            🎁 ${item.reward} 
-            <span style="float:right;color:gold;">+${item.amount}</span>
-        </div>
-        `;
-
-    });
-}
-    function loadWithdrawHistory() {
-
-    const list = document.getElementById("historyList");
-
-    list.innerHTML = "";
-
-    const withdraws = allHistory.filter(i => i.type === "withdraw");
-
-    withdraws.forEach(item => {
-
-        let color = "gray";
-        let text = "Pending";
-
-        if (item.status === "completed") {
-            color = "lime";
-            text = "Completed";
-        }
-
-        if (item.status === "rejected") {
-            color = "red";
-            text = "Rejected";
-        }
-
-        list.innerHTML += `
-        <div style="padding:10px;border-bottom:1px solid #333;">
-            💸 Withdraw ${item.amount} Tokens
-            <span style="float:right;color:${color};">
-                ${text}
-            </span>
-        </div>
-        `;
-
-    });
 }
 </script>
 <!-- ⭐ RULES BUTTON -->
