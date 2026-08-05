@@ -330,6 +330,8 @@ button:hover{
     box-shadow:0 0 40px rgba(124,60,255,.8);
 
     animation:popupShow .35s;
+    max-height: 80vh;
+overflow-y: auto;
 
 }
 
@@ -467,6 +469,14 @@ button:hover{
 
 .rules-btn:hover{
     transform: scale(1.15) rotate(10deg);
+}
+    /* ⭐ to hơn trên điện thoại */
+@media (max-width: 768px) {
+    .rules-button {
+        width: 60px !important;
+        height: 60px !important;
+        font-size: 26px !important;
+    }
 }
 @keyframes scroll{
 
