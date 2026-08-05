@@ -4,10 +4,14 @@
 <title>Register</title>
 
 <style>
+*{
+    box-sizing:border-box;
+}
+
 body{
     background: radial-gradient(circle at top,#1a1a2e,#0f0f1a);
     color:white;
-    font-family:Arial;
+    font-family: 'Segoe UI', sans-serif;
     display:flex;
     justify-content:center;
     align-items:center;
@@ -15,31 +19,66 @@ body{
     margin:0;
 }
 
+/* Glow background */
+body::before{
+    content:"";
+    position:absolute;
+    width:400px;
+    height:400px;
+    background:#8b3dff;
+    filter:blur(150px);
+    opacity:.2;
+    top:-100px;
+    right:-100px;
+}
+
+/* Box */
 .box{
-    background:#1c1c24;
+    backdrop-filter: blur(20px);
+    background: rgba(28,28,36,0.6);
     padding:40px;
     border-radius:20px;
-    width:320px;
+    width:340px;
     text-align:center;
     border:1px solid rgba(139,61,255,.3);
-    box-shadow:0 0 25px rgba(139,61,255,.25);
+    box-shadow:0 0 40px rgba(139,61,255,.25);
+    animation: fadeIn .6s ease;
+}
+
+@keyframes fadeIn{
+    from{opacity:0; transform:translateY(20px)}
+    to{opacity:1; transform:translateY(0)}
 }
 
 h1{
     margin-bottom:25px;
+    font-weight:600;
+}
+
+/* Inputs */
+.input-group{
+    position:relative;
 }
 
 input{
     width:100%;
     padding:14px;
-    margin:10px 0;
+    margin:12px 0;
     border-radius:12px;
-    border:none;
+    border:1px solid transparent;
     background:#2a2a35;
     color:white;
     font-size:15px;
+    transition:.3s;
 }
 
+input:focus{
+    outline:none;
+    border:1px solid #8b3dff;
+    box-shadow:0 0 10px rgba(139,61,255,.5);
+}
+
+/* Button */
 button{
     width:100%;
     padding:14px;
@@ -50,18 +89,22 @@ button{
     color:white;
     font-size:16px;
     cursor:pointer;
+    transition:.3s;
 }
 
 button:hover{
-    opacity:.9;
+    transform:translateY(-2px);
+    box-shadow:0 10px 20px rgba(139,61,255,.3);
 }
 
+/* Link */
 a{
     color:#aaa;
     font-size:14px;
     display:block;
-    margin-top:15px;
+    margin-top:18px;
     text-decoration:none;
+    transition:.3s;
 }
 
 a:hover{
