@@ -442,6 +442,62 @@ button:hover{
     overflow-y:auto; /* 👈 CHO CUỘN */
     padding-right:5px;
 }
+    .auth-box{
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+    
+    background: #1e1e2f;
+    padding: 30px;
+    border-radius: 20px;
+    
+    width: 300px;
+    text-align: center;
+    
+    box-shadow: 0 0 25px rgba(0,0,0,0.5);
+    z-index: 9999;
+}
+
+.auth-box h2{
+    margin-bottom: 20px;
+}
+
+.auth-box input{
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 12px;
+    
+    border-radius: 10px;
+    border: none;
+    outline: none;
+    
+    background: #2c2c3c;
+    color: white;
+}
+
+.auth-box button{
+    width: 100%;
+    padding: 12px;
+    
+    border: none;
+    border-radius: 10px;
+    
+    background: linear-gradient(90deg,#8b3dff,#5f00ff);
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.auth-box p{
+    margin-top: 15px;
+    color: #aaa;
+    cursor: pointer;
+}
+
+.auth-box p:hover{
+    color: white;
+}
 @keyframes scroll{
 
 from{
@@ -962,6 +1018,23 @@ border:1px solid rgba(139,61,255,.35);
 <button onclick="closeProfile()">
 Close
 </button>
+        <div id="authBox" class="auth-box">
+
+    <h2 id="authTitle">Login</h2>
+
+    <input id="authAccount" placeholder="Username or Email">
+
+    <input id="authPassword" type="password" placeholder="Password">
+
+    <button onclick="submitAuth()" id="authBtn">
+        Login
+    </button>
+
+    <p id="authSwitch" onclick="toggleAuth()">
+        Don't have an account? Register
+    </p>
+
+</div>
 
 </div>
 
@@ -1825,6 +1898,74 @@ loadWinners();
 
 // auto refresh 10s
 setInterval(loadWinners,10000);
+    let isLogin = true;
+
+function toggleAuth(){
+
+    isLogin = !isLogin;
+
+    document.getElementById("authTitle").innerText =
+        isLogin ? "Login" : "Register";
+
+    document.getElementById("authBtn").innerText =
+        isLogin ? "Login" : "Register";
+
+    document.getElementById("authSwitch").innerText =
+        isLogin
+        ? "Don't have an account? Register"
+        : "Already have an account? Login";
+}
+
+async function submitAuth(){
+
+    const account =
+        document.getElementById("authAccount").value.trim();
+
+    const password =
+        document.getElementById("authPassword").value.trim();
+
+    if(!account || !password){
+        showToast("Please fill all fields");
+        return;
+    }
+
+    const url = isLogin
+    ? "https://bladeball-spin-backend-kpjl.onrender.com/login"
+    : "https://bladeball-spin-backend-kpjl.onrender.com/register";
+
+    try{
+
+        const res = await fetch(url,{
+            method:"POST",
+            credentials:"include",
+            headers:{
+                "Content-Type":"application/json"
+            },
+            body: JSON.stringify({
+                account,
+                password
+            })
+        });
+
+        const data = await res.json();
+
+        if(!data.success){
+            showToast(data.message || data.error);
+            return;
+        }
+
+        showToast(data.message);
+
+        // Ẩn login box
+        document.getElementById("authBox").style.display = "none";
+
+        // Load user
+        await checkLogin();
+
+    }catch(err){
+        showToast("Server error");
+    }
+}
 </script>
 
 <div id="toast" class="toast">
