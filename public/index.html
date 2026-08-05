@@ -1100,7 +1100,7 @@ async function spin() {
                 "Congratulations!";
 
             document.getElementById("popupReward").innerHTML =
-                `${data.reward.amount} Tokens`;
+data.reward.label || `${data.reward.amount} Tokens`;
 
             document.getElementById("popup").style.display =
                 "flex";
