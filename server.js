@@ -707,14 +707,18 @@ app.post("/spin", async (req, res) => {
       .eq("id", userId);
 
     // 🧾 HISTORY
-    await supabase
-      .from("spin_history")
-      .insert({
-        user_id: userId,
-        reward: reward.label || reward.name,
-        amount: reward.amount,
-        spin_date: today
-      });
+    const { error: spinError } = await supabase
+  .from("spin_history")
+  .insert({
+    user_id: userId,
+    reward: reward.label || reward.name,
+    amount: reward.amount,
+    spin_date: today
+  });
+
+if (spinError) {
+  console.log("SPIN INSERT ERROR:", spinError.message);
+}
 
     // 📡 LIVE FEED
     await supabase
