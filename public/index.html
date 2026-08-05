@@ -1503,7 +1503,7 @@ wheel.style.animation = "spinForever 1s linear infinite";
             "🎲 TEST JACKPOT";
 
         document.getElementById("popupReward").innerHTML =
-            reward + " Tokens";
+    reward.label || (reward.amount + " Tokens");
 
         document.getElementById("popup").style.display =
             "flex";
