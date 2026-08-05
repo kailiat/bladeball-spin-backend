@@ -1586,9 +1586,9 @@ const winners = data.map(i=>{
 const user = users.find(u=>u.id === i.user_id);
 
 return {
-username: user?.username || "Unknown",
-reward: i.reward,
-amount: i.amount
+  username: user?.username || "Unknown",
+  reward: `${i.amount} Tokens`,
+  amount: i.amount
 };
 
 });
