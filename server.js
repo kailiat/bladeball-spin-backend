@@ -707,25 +707,21 @@ app.post("/spin", async (req, res) => {
       .eq("id", userId);
 
     // 🧾 HISTORY
-    const { error: spinError } = await supabase
-  .from("spin_history")
-  .insert({
-    user_id: userId,
-    reward: reward.label || reward.name,
-    amount: reward.amount,
-    spin_date: today
-  });
-
-if (spinError) {
-  console.log("SPIN INSERT ERROR:", spinError.message);
-}
+    await supabase
+      .from("spin_history")
+      .insert({
+        user_id: userId,
+        reward: reward.label || reward.name,
+        amount: reward.amount,
+        spin_date: today
+      });
 
     // 📡 LIVE FEED
     await supabase
       .from("live_feed")
       .insert({
         username: decoded.username,
-        reward: reward.label || reward.name,
+        reward: reward.name,
         amount: reward.amount,
         is_fake: false
       });
@@ -779,12 +775,12 @@ let history = [];
 
 // SPIN
 spins.forEach(s => {
-history.push({
-type: "spin",
-reward: s.reward,
-amount: s.amount,
-created_at: s.spin_date || s.created_at
-});
+  history.push({
+    type: "spin",
+    reward: s.reward,
+    amount: s.amount,
+    created_at: s.created_at
+  });
 });
 
 // WITHDRAW
