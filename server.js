@@ -586,6 +586,7 @@ if (withdrawData) {
 
     res.json({
   success:true,
+  banned: user.banned, // 🔥 THÊM DÒNG NÀY
   user:{
     ...user,
     total_spins,
