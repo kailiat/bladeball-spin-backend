@@ -639,6 +639,14 @@ app.post("/spin", async (req, res) => {
       .select("*")
       .eq("id", userId)
       .single();
+    // 🚫 CHECK BAN
+if(userData.banned){
+    return res.json({
+        success: false,
+        banned: true,
+        message: "You are banned"
+    });
+}
 
     if (userError) {
       return res.json({
@@ -648,7 +656,7 @@ app.post("/spin", async (req, res) => {
     }
 
     const today = new Date().toISOString().slice(0,10);
-    if(userData.banned == 1){
+    if(userData.banned){
   return res.json({
     success:false,
     banned:true,
