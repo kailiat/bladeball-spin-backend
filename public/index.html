@@ -410,6 +410,29 @@ button:hover{
     margin-top:15px;
     justify-content:center;
 }
+    .winner-panel{
+    width:300px;
+    background:#121217;
+    border:1px solid rgba(139,61,255,.4);
+    border-radius:20px;
+    padding:20px;
+    box-shadow:0 0 20px rgba(139,61,255,.3);
+}
+
+.winner-panel h2{
+    font-family:'Orbitron';
+    color:#ffd54f;
+    margin-bottom:15px;
+}
+
+.winner-item{
+    background:#1d1d24;
+    padding:10px;
+    margin-bottom:10px;
+    border-radius:10px;
+    border:1px solid rgba(139,61,255,.3);
+    font-size:14px;
+}
 
 @keyframes scroll{
 
@@ -712,6 +735,7 @@ CLAIM
         <div class="wheel-center">⭐</div>
         <div id="wheelLabels"></div>
     </div>
+    
 
     <!-- ✅ BUTTON ĐẶT Ở ĐÂY -->
     <div class="spin-buttons">
@@ -722,6 +746,18 @@ CLAIM
     <button onclick="showWithdraw()">🎁 Withdraw</button>
     <button onclick="showHistory()">📜 History</button>
 </div>
+
+</div>
+    <!-- RIGHT: WINNERS -->
+    <div class="winner-panel">
+
+        <h2>🏆 TOP WINNERS</h2>
+
+        <div id="winnerList">
+            Loading...
+        </div>
+
+    </div>
 
 </div>
 
@@ -1742,6 +1778,45 @@ checkLogin();
     updateProgressUI(type, current);
 
 });
+    async function loadWinners(){
+
+    try{
+
+        const res = await fetch(
+        "https://bladeball-spin-backend-kpjl.onrender.com/winners"
+        );
+
+        const data = await res.json();
+
+        if(!data.success) return;
+
+        let html = "";
+
+        data.winners.forEach(w=>{
+
+            html += `
+            <div class="winner-item">
+            👤 ${w.username}
+            <br>
+            🎁 ${w.reward}
+            </div>
+            `;
+
+        });
+
+        document.getElementById("winnerList").innerHTML = html;
+
+    }catch(err){
+        console.log(err);
+    }
+
+}
+
+// load lần đầu
+loadWinners();
+
+// auto refresh 10s
+setInterval(loadWinners,10000);
 </script>
 
 <div id="toast" class="toast">
