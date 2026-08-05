@@ -519,6 +519,7 @@ username,
 email,
 tokens,
 spin_chances,
+banned,
 last_claim_date,
 lootlabs_progress,
 linkvertise_progress,
@@ -647,6 +648,13 @@ app.post("/spin", async (req, res) => {
     }
 
     const today = new Date().toISOString().slice(0,10);
+    if(user.banned){
+  return res.json({
+    success:false,
+    banned:true,
+    message:"You are banned"
+  });
+}
 
     // ✅ RESET MISSION
     if (userData.last_mission_date !== today) {
