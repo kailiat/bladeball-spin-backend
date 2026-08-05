@@ -1239,8 +1239,11 @@ async function checkLogin(){
 });
 
 const data = await res.json();
-    if(data.banned){
-    showBan();
+
+// 🚨 CHECK BAN
+if(data.banned){
+    alert("🚫 You are banned");
+    document.body.innerHTML = "<h1 style='color:red'>YOU ARE BANNED</h1>";
     return;
 }
     const btn = document.getElementById("dailyClaimBtn");
