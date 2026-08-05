@@ -649,7 +649,7 @@ if (userError || !userData) {
 }
 
 // 🚫 CHECK BAN (SAU KHI CHẮC CHẮN CÓ USER)
-if (userData.banned === true) {
+if (userData.banned) {
   return res.json({
     success: false,
     banned: true,
@@ -1371,7 +1371,7 @@ app.post("/admin/ban", async (req,res)=>{
     await supabase
       .from("users")
       .update({
-        banned:true
+        banned: 1
       })
       .eq("id", user_id);
 
