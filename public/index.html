@@ -1063,7 +1063,8 @@ async function spin() {
 
         setTimeout(() => {
 
-            wheel.style.transition = "transform 3s cubic-bezier(0.25, 1, 0.5, 1)";
+            wheel.style.transition = "none";
+wheel.style.animation = "spinForever 1s linear infinite";
 
             let targetDeg;
 
@@ -1122,7 +1123,17 @@ data.reward.label || `${data.reward.amount} Tokens`;
 
 function closePopup(){
 
+    const wheel = document.getElementById("wheel");
+
+    // ❌ dừng quay vô hạn
+    wheel.style.animation = "none";
+
+    // ✔ optional: giữ nguyên góc hiện tại
+    const computed = window.getComputedStyle(wheel).transform;
+    wheel.style.transform = computed;
+
     document.getElementById("popup").style.display = "none";
+}
 
 }
     function startMission(type) {
