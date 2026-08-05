@@ -1791,8 +1791,18 @@ setInterval(loadWinners,10000);
 
 
 // chạy ngay lần đầu
-updateMissionButton("lootlabs");
-updateMissionButton("linkvertise");
+setInterval(() => {
+
+    const lootProgress =
+        document.getElementById("lootlabsProgress").innerText.split("/")[0];
+
+    const linkProgress =
+        document.getElementById("linkvertiseProgress").innerText.split("/")[0];
+
+    updateMissionButton("lootlabs", Number(lootProgress));
+    updateMissionButton("linkvertise", Number(linkProgress));
+
+}, 1000);
 </script>
 
 <div id="toast" class="toast">
