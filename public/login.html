@@ -1,93 +1,116 @@
 <!DOCTYPE html>
 <html>
-
 <head>
-
 <title>Login</title>
+
+<style>
+body{
+    background: radial-gradient(circle at top,#1a1a2e,#0f0f1a);
+    color:white;
+    font-family:Arial;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+    margin:0;
+}
+
+.box{
+    background:#1c1c24;
+    padding:40px;
+    border-radius:20px;
+    width:320px;
+    text-align:center;
+    border:1px solid rgba(139,61,255,.3);
+    box-shadow:0 0 25px rgba(139,61,255,.25);
+}
+
+h1{
+    margin-bottom:25px;
+}
+
+input{
+    width:100%;
+    padding:14px;
+    margin:10px 0;
+    border-radius:12px;
+    border:none;
+    background:#2a2a35;
+    color:white;
+    font-size:15px;
+}
+
+button{
+    width:100%;
+    padding:14px;
+    margin-top:15px;
+    border:none;
+    border-radius:12px;
+    background:linear-gradient(90deg,#8b3dff,#5f00ff);
+    color:white;
+    font-size:16px;
+    cursor:pointer;
+}
+
+button:hover{
+    opacity:.9;
+}
+
+a{
+    color:#aaa;
+    font-size:14px;
+    display:block;
+    margin-top:15px;
+    text-decoration:none;
+}
+
+a:hover{
+    color:white;
+}
+</style>
 
 </head>
 
+<body>
 
-<body style="background:#111;color:white;text-align:center;padding-top:80px;font-family:Arial">
-
+<div class="box">
 
 <h1>🔐 Login</h1>
 
+<input id="account" placeholder="Username or Email">
+<input id="password" type="password" placeholder="Password">
 
-<input id="account" placeholder="Username"
-style="padding:15px;">
+<button onclick="login()">Login</button>
 
+<a href="/register.html">Create account</a>
 
-<br><br>
-
-
-<input id="password" 
-type="password"
-placeholder="Password"
-style="padding:15px;">
-
-
-<br><br>
-
-
-<button onclick="login()">
-Login
-</button>
-
-
+</div>
 
 <script>
 
-
 async function login(){
 
-
-const res = await fetch(
-"/login",
-{
-
+const res = await fetch("/login",{
 method:"POST",
-
-headers:{
-"Content-Type":"application/json"
-},
-
+headers:{ "Content-Type":"application/json" },
 credentials:"include",
-
 body:JSON.stringify({
-
-account:
-document.getElementById("account").value,
-
-password:
-document.getElementById("password").value
-
+account: document.getElementById("account").value,
+password: document.getElementById("password").value
 })
-
 });
-
 
 const data = await res.json();
 
-
-
 alert(data.message);
 
-
-
 if(data.success){
-
 location.href="/";
-
 }
 
-
 }
-
 
 </script>
 
-
 </body>
-
 </html>
