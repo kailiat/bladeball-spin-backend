@@ -1115,6 +1115,11 @@ async function spin() {
         );
 
         const data = await res.json();
+        if(data.banned){
+    showBan();
+    spinning = false;
+    return;
+}
 
         console.log("SERVER:", data);
 
@@ -1234,6 +1239,10 @@ async function checkLogin(){
 });
 
 const data = await res.json();
+    if(data.banned){
+    showBan();
+    return;
+}
     const btn = document.getElementById("dailyClaimBtn");
 
 if(btn){
@@ -1445,6 +1454,10 @@ credentials:"include"
 );
 
 const data = await res.json();
+    if(data.banned){
+    showBan();
+    return;
+}
 
 if(!data.success){
 
