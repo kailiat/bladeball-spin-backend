@@ -772,6 +772,28 @@ CLAIM
 </div>
 
 <div class="wheel-container">
+    <div id="withdrawHistoryPopup" class="popup-box" style="display:none;">
+
+    <div class="popup-box">
+
+        <h2>💸 Withdraw History</h2>
+
+        <div id="withdrawHistoryList"
+        style="
+        max-height:300px;
+        overflow-y:auto;
+        text-align:left;
+        margin:20px 0;
+        ">
+        </div>
+
+        <button onclick="closeWithdrawHistory()">
+            Close
+        </button>
+
+    </div>
+
+</div>
     <!-- ⭐ RULE BUTTON -->
 <div class="rules-button" onclick="showRules()">
     ⭐
@@ -792,7 +814,8 @@ CLAIM
     </div>
     <div class="menu">
     <button onclick="showWithdraw()">🎁 Withdraw</button>
-    <button onclick="showHistory()">📜 History</button>
+    <button onclick="showHistory()">📜 Spin History</button>
+<button onclick="showWithdrawHistory()">💸 Withdraw History</button>
 </div>
 
 </div>
@@ -1485,14 +1508,22 @@ border:1px solid rgba(139,61,255,.35);
 
 document.getElementById("historyList").innerHTML=html;
 
-document.getElementById("historyPopup").style.display="flex";
-
+function showHistory() {
+    document.getElementById("historyPopup").style.display = "flex";
 }
 
-function closeHistory(){
+function closeHistory() {
+    document.getElementById("historyPopup").style.display = "none";
+}
 
-document.getElementById("historyPopup").style.display="none";
+// ✅ DÁN NGAY ĐÂY
+function showWithdrawHistory() {
+    document.getElementById("withdrawHistoryPopup").style.display = "flex";
+    loadWithdrawHistory();
+}
 
+function closeWithdrawHistory() {
+    document.getElementById("withdrawHistoryPopup").style.display = "none";
 }
 async function showProfile(){
 
@@ -1854,6 +1885,54 @@ setInterval(() => {
 
 function closeRules(){
     document.getElementById("rulesPopup").style.display = "none";
+}
+    async function loadWithdrawHistory() {
+
+    const list = document.getElementById("withdrawHistoryList");
+    list.innerHTML = "Loading...";
+
+    const res = await fetch(
+"https://bladeball-spin-backend-kpjl.onrender.com/history",
+{
+    credentials: "include"
+});
+
+    const data = await res.json();
+
+    list.innerHTML = "";
+
+    if (!data.success) {
+        list.innerHTML = "Error loading";
+        return;
+    }
+
+    const withdraws = data.history.filter(i => i.type === "withdraw");
+
+    if (withdraws.length === 0) {
+        list.innerHTML = "No withdraw yet";
+        return;
+    }
+
+    withdraws.forEach(item => {
+
+        const div = document.createElement("div");
+
+        let color = "white";
+
+        if (item.status === "completed") color = "lime";
+        if (item.status === "rejected") color = "red";
+
+        div.innerHTML = `
+            💸 -${item.amount} tokens 
+            <span style="color:${color}">
+                (${item.status})
+            </span>
+        `;
+
+        list.appendChild(div);
+
+    });
+
 }
 </script>
 <!-- ⭐ RULES BUTTON -->
