@@ -711,7 +711,7 @@ app.post("/spin", async (req, res) => {
       .from("spin_history")
       .insert({
         user_id: userId,
-        reward: reward.label || reward.name,
+        reward: reward.label || reward.name || `${reward.amount} Tokens`,
         amount: reward.amount,
         spin_date: today
       });
@@ -1582,17 +1582,15 @@ const { data: users } = await supabase
 
 // map username
 const winners = data
-.filter(i => i.amount > 0 || i.label) // giữ item
+.filter(i => i.amount > 0 || i.reward) // 🔥 sửa ở đây
 .map(i => {
-
-const user = users.find(u=>u.id === i.user_id);
+const user = users.find(u => u.id === i.user_id);
 
 return {
-  username: user?.username || "Unknown",
-  reward: i.reward || `${i.amount} Tokens`,
-  amount: i.amount
+username: user?.username || "Unknown",
+reward: i.reward, // 🔥 luôn ưu tiên reward
+amount: i.amount
 };
-
 });
 
 res.json({
