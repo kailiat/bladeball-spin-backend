@@ -711,7 +711,7 @@ app.post("/spin", async (req, res) => {
       .from("spin_history")
       .insert({
         user_id: userId,
-        reward: reward.label || reward.name || `${reward.amount} Tokens`,
+        reward: reward.label || reward.name,
         amount: reward.amount,
         spin_date: today
       });
@@ -721,7 +721,7 @@ app.post("/spin", async (req, res) => {
       .from("live_feed")
       .insert({
         username: decoded.username,
-        reward: reward.label || `${reward.amount} Tokens`,
+        reward: reward.name,
         amount: reward.amount,
         is_fake: false
       });
@@ -729,7 +729,7 @@ app.post("/spin", async (req, res) => {
     return res.json({
       success: true,
       random,
-      resultText.innerText = data.reward;
+      reward,
       balance: newBalance,
       spin_chances: newSpin
     });
@@ -1582,15 +1582,17 @@ const { data: users } = await supabase
 
 // map username
 const winners = data
-.filter(i => i.amount > 0 || i.reward) // 🔥 sửa ở đây
+.filter(i => i.amount > 0 || i.label) // giữ item
 .map(i => {
-const user = users.find(u => u.id === i.user_id);
+
+const user = users.find(u=>u.id === i.user_id);
 
 return {
-username: user?.username || "Unknown",
-reward: i.reward, // 🔥 luôn ưu tiên reward
-amount: i.amount
+  username: user?.username || "Unknown",
+  reward: i.reward || `${i.amount} Tokens`,
+  amount: i.amount
 };
+
 });
 
 res.json({
