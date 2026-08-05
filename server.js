@@ -779,12 +779,12 @@ let history = [];
 
 // SPIN
 spins.forEach(s => {
-  history.push({
-    type: "spin",
-    reward: s.reward,
-    amount: s.amount,
-    created_at: s.created_at
-  });
+history.push({
+type: "spin",
+reward: s.reward,
+amount: s.amount,
+created_at: s.spin_date || s.created_at
+});
 });
 
 // WITHDRAW
