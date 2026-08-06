@@ -1423,6 +1423,39 @@ app.post("/admin/ban", async (req,res)=>{
   }
 
 });
+// =============================
+// ADMIN - UNBAN USER
+// =============================
+app.post("/admin/unban", async (req,res)=>{
+  if(req.cookies.admin !== "true"){
+    return res.json({
+      success:false,
+      message:"Unauthorized"
+    });
+  }
+
+  try{
+    const { user_id } = req.body;
+
+    await supabase
+      .from("users")
+      .update({
+        banned: 0
+      })
+      .eq("id", user_id);
+
+    res.json({
+      success:true,
+      message:"User unbanned!"
+    });
+
+  }catch(err){
+    res.json({
+      success:false,
+      error:err.message
+    });
+  }
+});
 app.get("/watch", async (req, res) => {
   try {
     const token = req.cookies.token;
