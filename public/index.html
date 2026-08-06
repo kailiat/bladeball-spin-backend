@@ -1093,6 +1093,7 @@ label.style.top = y + "px";
 });
 
 async function spin() {
+    document.getElementById("spinSound").play();
 
     if (spinning) return;
     spinning = true;
@@ -1175,6 +1176,7 @@ data.reward.label || `${data.reward.amount} Tokens`;
 
             document.getElementById("popup").style.display =
                 "flex";
+            document.getElementById("winSound").play();
 
             await checkLogin();
             await loadWinners();
@@ -1876,6 +1878,14 @@ function closeRules(){
 
   document.body.style.pointerEvents = "none";
 }
+    window.addEventListener("click", () => {
+    const bg = document.getElementById("bgSound");
+
+    if (bg && bg.paused) {
+        bg.volume = 0.3;
+        bg.play().catch(()=>{});
+    }
+}, { once: true });
 </script>
 <!-- ⭐ RULES BUTTON -->
 <div class="rules-btn" onclick="openRules()">
@@ -1943,6 +1953,9 @@ z-index:9999;
     <p>You cannot use this website.</p>
   </div>
 </div>
+    <audio id="spinSound" src="/sounds/spin.mp3"></audio>
+<audio id="winSound" src="/sounds/win.mp3"></audio>
+<audio id="bgSound" src="/sounds/bg.mp3" loop></audio>
 </body>
 
 </html>
