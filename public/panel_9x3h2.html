@@ -333,7 +333,12 @@ table{
   .filter(u =>
     u.username.toLowerCase().includes(keyword)
   )
-  .sort((a, b) => b.tokens - a.tokens) // 🔥 THÊM DÒNG NÀY
+  .sort((a, b) => {
+  if (b.tokens !== a.tokens) {
+    return b.tokens - a.tokens;
+  }
+  return b.spin_chances - a.spin_chances;
+}) // 🔥 THÊM DÒNG NÀY
   .map(u => {
 
     return `
