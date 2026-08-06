@@ -1156,21 +1156,21 @@ app.get("/admin/dashboard", async (req, res) => {
 
         });
 
-        res.json({
+        const online = Math.floor(Math.random()*15)+5;
 
-            success:true,
-
-            stats:{
-                users:userCount||0,
-                tokens:totalTokens,
-                spins:spinCount||0,
-                withdraws:withdraws.length,
-                pending,
-                completed,
-                rejected
-            }
-
-        });
+res.json({
+    success:true,
+    stats:{
+        users:userCount||0,
+        tokens:totalTokens,
+        spins:spinCount||0,
+        withdraws:withdraws.length,
+        pending,
+        completed,
+        rejected,
+        online // 👈 THÊM DÒNG NÀY
+    }
+});
 
     }catch(err){
 
