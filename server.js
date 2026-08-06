@@ -971,10 +971,10 @@ if(type==="token"){
 const withdrawAmount = Number(amount);
 
 
-if(withdrawAmount < 5){
+if(withdrawAmount < 30){
 return res.json({
 success:false,
-message:"Minimum 5 tokens"
+message:"Minimum 30 tokens"
 });
 }
 
