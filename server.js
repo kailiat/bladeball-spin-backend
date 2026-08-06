@@ -1808,9 +1808,19 @@ app.get("/admin/users", async (req, res) => {
   try{
 
     const { data, error } = await supabase
-      .from("users")
-      .select("id, username, email, tokens, spin_chances, created_at, banned")
-      .order("created_at", { ascending:false });
+  .from("users")
+  .select(`
+    id,
+    username,
+    email,
+    tokens,
+    spin_chances,
+    lootlabs_progress,
+    linkvertise_progress,
+    created_at,
+    banned
+  `)
+  .order("created_at", { ascending:false });
 
     if(error){
       return res.json({
