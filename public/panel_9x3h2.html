@@ -323,6 +323,7 @@ table{
 }
   async function loadUsers(){
   const res = await callAPI("/admin/users");
+    console.log("DATA USERS:", res.users);
 
   if(!res.success) return;
 
