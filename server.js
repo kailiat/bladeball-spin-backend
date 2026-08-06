@@ -605,6 +605,7 @@ if (withdrawData) {
 
 // Spin Wheel
 app.post("/spin", async (req, res) => {
+  const spinCooldown = new Map();
   
   let userId = null;
 
@@ -641,11 +642,19 @@ if (todaySpins >= 10) {
 
     // ✅ CHẶN SPAM
     if (spinningUsers.has(userId)) {
-      return res.json({
-        success: false,
-        message: "Please wait"
-      });
-    }
+
+  await supabase
+    .from("users")
+    .update({
+      suspect_score: (userData.suspect_score || 0) + 1
+    })
+    .eq("id", userId);
+
+  return res.json({
+    success: false,
+    message: "Already spinning"
+  });
+}
 
     spinningUsers.add(userId);
 
