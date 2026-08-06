@@ -895,7 +895,7 @@ CLAIM
         <p>
 Minimum Withdrawal
 <br>
-<b>30 Tokens</b>
+<b>35 Tokens</b>
 </p>
         <p style="font-size:13px; color:#aaa; margin:10px 0; line-height:1.4;">
         ⚠️ <b>Note:</b> Please double-check your Roblox username before submitting.<br>
@@ -2159,24 +2159,19 @@ Start Now
 </div>
 </div>
    <script>
-function closeEventPopup(){
-  document.getElementById("eventPopup").style.display = "none";
-}
-
-// chỉ hiện 1 lần / ngày
 window.onload = () => {
   const seen = localStorage.getItem("event_seen");
 
   if(!seen){
-    setTimeout(()=>{
-      document.getElementById("eventPopup").style.display = "flex";
-    }, 500);
-
-    localStorage.setItem("event_seen", "true");
-  } else {
-    document.getElementById("eventPopup").style.display = "none";
+    document.getElementById("eventPopup").style.display = "flex";
   }
 };
+
+// ❗ CHỈ set khi bấm nút
+function closeEventPopup(){
+  document.getElementById("eventPopup").style.display = "none";
+  localStorage.setItem("event_seen", "true");
+}
 </script>
 </body>
 
