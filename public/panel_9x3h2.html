@@ -7,6 +7,15 @@
 <title>BladeBall Admin</title>
 
 <style>
+  .row-warn{
+  background:#3a2a1a !important;
+  border-left:5px solid orange;
+}
+
+.row-hack{
+  background:#3a1a1a !important;
+  border-left:5px solid red;
+}
 
 body{
 
@@ -275,17 +284,23 @@ async function loadWithdraws() {
 );
 
 const html = filtered.map(w => {
-  let isSus =
-  (w.users.spin || 0) > 1000 ||
-  (w.users.spin_chances || 0) > 50 ||
-  w.amount > 1000;
+  let spin = Number(w.users.spin_chances || 0);
+
+let level = "";
+
+if(spin >= 1000){
+  level = "hack";
+}else if(spin >= 500){
+  level = "warn";
+}
 
     stats[w.status]++;
 
     return `
 <tr class="
 ${w.status === 'pending' ? 'row-pending' : ''}
-${isSus ? 'row-hack' : ''}
+${level === 'hack' ? 'row-hack' : ''}
+${level === 'warn' ? 'row-warn' : ''}
 ">
       <td>${w.id}</td>
       <td onclick="openUser(${w.user_id})"
@@ -391,6 +406,20 @@ loadDashboard();
 
 // reload mỗi 10s
 setInterval(loadDashboard, 10000);
+  function openUser(user){
+  document.getElementById("userPopup").style.display = "block";
+
+  document.getElementById("uTokens").innerText = user.tokens || 0;
+  document.getElementById("uSpins").innerText = user.spin_chances || 0;
+  document.getElementById("uWon").innerText = user.total_win || 0;
+  document.getElementById("uWithdraw").innerText = user.total_withdraw || 0;
+  document.getElementById("uCreated").innerText =
+    user.created_at ? new Date(user.created_at).toLocaleString() : "N/A";
+}
+
+function closeUser(){
+  document.getElementById("userPopup").style.display = "none";
+}
   
 </script>
 <div id="userPopup" style="
