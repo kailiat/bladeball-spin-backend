@@ -1768,6 +1768,45 @@ app.get("/admin/user/:id", async (req, res) => {
   }
 
 });
+// =============================
+// ADMIN - GET ALL USERS
+// =============================
+app.get("/admin/users", async (req, res) => {
+
+  if(req.cookies.admin !== "true"){
+    return res.json({
+      success:false,
+      message:"Unauthorized"
+    });
+  }
+
+  try{
+
+    const { data, error } = await supabase
+      .from("users")
+      .select("id, username, email, tokens, spin_chances, created_at, banned")
+      .order("created_at", { ascending:false });
+
+    if(error){
+      return res.json({
+        success:false,
+        error:error.message
+      });
+    }
+
+    res.json({
+      success:true,
+      users:data
+    });
+
+  }catch(err){
+    res.json({
+      success:false,
+      error:err.message
+    });
+  }
+
+});
 const PORT = process.env.PORT || 3000;
 
 
