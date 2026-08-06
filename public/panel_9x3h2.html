@@ -332,6 +332,7 @@ table{
   .filter(u =>
     u.username.toLowerCase().includes(keyword)
   )
+  .sort((a, b) => b.tokens - a.tokens) // 🔥 THÊM DÒNG NÀY
   .map(u => {
 
     return `
@@ -474,8 +475,10 @@ setInterval(loadWithdraws, 10000);
     const s = res.stats;
 
     document.getElementById("uName").innerText = u.username;
-    document.getElementById("uTokens").innerText = u.tokens;
-    document.getElementById("uSpins").innerText = s.total_spins;
+    currentUserId = userId;
+
+document.getElementById("editTokens").value = u.tokens;
+document.getElementById("editSpins").value = u.spin_chances;
     document.getElementById("uWon").innerText = s.total_won;
     document.getElementById("uWithdraw").innerText = s.total_withdraw;
     document.getElementById("uCreated").innerText = u.created_at;
@@ -533,7 +536,19 @@ setInterval(loadDashboard, 10000);
 function closeUser(){
   document.getElementById("userPopup").style.display = "none";
 }
-  
+  async function saveUser(){
+  const tokens = document.getElementById("editTokens").value;
+  const spins = document.getElementById("editSpins").value;
+
+  await callAPI("/admin/update-user", "POST", {
+    user_id: currentUserId,
+    tokens,
+    spin_chances: spins
+  });
+
+  alert("Saved!");
+  loadUsers();
+}
 </script>
 <div id="userPopup" style="
 position:fixed;
@@ -550,8 +565,13 @@ z-index:9999;
   <div style="background:#111;padding:30px;border-radius:15px;width:400px">
     <h2 id="uName">User</h2>
 
-    <p>💰 Tokens: <span id="uTokens"></span></p>
-    <p>🎯 Spins: <span id="uSpins"></span></p>
+    <p>💰 Tokens: 
+  <input id="editTokens">
+</p>
+
+<p>🎯 Spins: 
+  <input id="editSpins">
+</p>
     <p>🏆 Won: <span id="uWon"></span></p>
     <p>💸 Withdraw: <span id="uWithdraw"></span></p>
     <p>📅 Created: <span id="uCreated"></span></p>
@@ -559,6 +579,9 @@ z-index:9999;
     <br>
 
     <button onclick="handleBan(currentUserId)" class="ban">🚫 Ban</button>
+    <button onclick="saveUser()" style="background:#4ade80;">
+  💾 Save
+</button>
 
 <button onclick="closeUser()">Close</button>
   </div>
