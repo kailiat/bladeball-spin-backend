@@ -308,6 +308,7 @@ table{
 </body>
 
 <script>
+  let currentUserId = null;
   function showTab(tab){
 
   document.getElementById("withdrawTab").style.display = "none";
@@ -484,7 +485,7 @@ document.getElementById("editSpins").value = u.spin_chances;
     document.getElementById("uCreated").innerText = u.created_at;
 
     // 👇 lưu userId để dùng cho button
-    window.currentUserId = userId;
+    
 
     document.getElementById("userPopup").style.display = "flex";
 
@@ -533,22 +534,6 @@ loadDashboard();
 setInterval(loadDashboard, 10000);
   showTab("withdraw");
 
-function closeUser(){
-  document.getElementById("userPopup").style.display = "none";
-}
-  async function saveUser(){
-  const tokens = document.getElementById("editTokens").value;
-  const spins = document.getElementById("editSpins").value;
-
-  await callAPI("/admin/update-user", "POST", {
-    user_id: currentUserId,
-    tokens,
-    spin_chances: spins
-  });
-
-  alert("Saved!");
-  loadUsers();
-}
 </script>
 <div id="userPopup" style="
 position:fixed;
