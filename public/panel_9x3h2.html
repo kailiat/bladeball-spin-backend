@@ -267,17 +267,18 @@ table{
 
 <table>
   <thead>
-  <tr>
-    <th>ID</th>
-    <th>Username</th>
-    <th>Tokens</th>
-    <th>Spin</th>
-    <th>Lootlabs</th>
-    <th>Linkvertise</th>
-    <th>Created</th>
-    <th>Status</th>
-  </tr>
-</thead>
+    <tr>
+      <th>ID</th>
+      <th>User</th>
+      <th>Type</th>
+      <th>Amount</th>
+      <th>Roblox</th>
+      <th>Discord</th>
+      <th>Status</th>
+      <th>Spin</th>
+      <th>Action</th>
+    </tr>
+  </thead>
 
   <tbody id="withdrawTable"></tbody>
 </table>
@@ -348,10 +349,8 @@ table{
         ${u.username}
       </td>
       <td>${u.tokens}</td>
-<td>${u.spin_chances}</td>
-<td>${u.lootlabs_progress || 0}</td>
-<td>${u.linkvertise_progress || 0}</td>
-<td>${u.created_at}</td>
+      <td>${u.spin_chances}</td>
+      <td>${u.created_at}</td>
       <td>${u.banned ? '🚫 BANNED' : 'ACTIVE'}</td>
     </tr>
     `;
