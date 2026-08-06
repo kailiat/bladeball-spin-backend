@@ -521,6 +521,23 @@ function closeUser(){
     alert("Ban lỗi!");
   }
 }
+  async function handleUnban(userId){
+  if(!confirm("Unban user này?")) return;
+
+  try{
+    const res = await callAPI("/admin/unban", "POST", {
+      user_id: userId
+    });
+
+    alert(res.message || "Unbanned!");
+    closeUser();
+    loadUsers();
+    loadWithdraws();
+
+  }catch(err){
+    alert("Unban lỗi!");
+  }
+}
 
 
 // 👇 VIẾT RIÊNG RA NGOÀI
@@ -586,6 +603,10 @@ z-index:9999;
     <br>
 
     <button onclick="handleBan(currentUserId)" class="ban">🚫 Ban</button>
+
+<button onclick="handleUnban(currentUserId)" style="background:#4ade80;">
+  🔓 Unban
+</button>
     <button onclick="saveUser()" style="background:#4ade80;">
   💾 Save
 </button>
