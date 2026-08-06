@@ -470,20 +470,22 @@ function closeUser(){
   document.getElementById("userPopup").style.display = "none";
 }
   async function handleBan(userId){
+  if(!confirm("Chắc chắn BAN user này?")) return;
+
   try{
     const res = await callAPI("/admin/ban", "POST", {
       user_id: userId
     });
 
     alert(res.message || "Banned!");
-
+    closeUser();
+    loadUsers();
     loadWithdraws();
 
   }catch(err){
     alert("Ban lỗi!");
-    console.error(err);
   }
-} // ✅ ĐÓNG Ở ĐÂY
+}
 
 
 // 👇 VIẾT RIÊNG RA NGOÀI
