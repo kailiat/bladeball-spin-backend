@@ -1515,7 +1515,7 @@ const decoded = jwt.verify(token, process.env.JWT_SECRET);
 const today = new Date().toISOString().slice(0,10);
 
 // 🔥 ĐẾM SPIN NHẬN HÔM NAY (FIX Ở ĐÂY)
-const { data: user } = await supabase
+const { data: userData } = await supabase
   .from("users")
   .select("*")
   .eq("id", decoded.id)
@@ -1574,7 +1574,7 @@ const { data: user } = await supabase
   .single();
 
 // ❗ CHECK PROGRESS
-if (user[type + "_progress"] >= 2) {
+if (userData[type + "_progress"] >= 2) {
   delete claimLocks[decoded.id];
   return res.json({
     success:false,
@@ -1583,8 +1583,8 @@ if (user[type + "_progress"] >= 2) {
 }
 
 // ✅ CỘNG
-const newProgress = Number(user[type + "_progress"] || 0) + 1;
-const newSpin = Number(user.spin_chances || 0) + 1;
+const newProgress = Number(userData[type + "_progress"] || 0) + 1;
+const newSpin = Number(userData.spin_chances || 0) + 1;
 
 await supabase
   .from("users")
@@ -1602,7 +1602,7 @@ return res.json({
   success:true,
   spin_chances: newSpin,
   lootlabs_progress:
-    type === "lootlabs" ? newProgress : user.lootlabs_progress,
+    type === "lootlabs" ? newProgress : userData.lootlabs_progress,
   linkvertise_progress:
     type === "linkvertise" ? newProgress : user.linkvertise_progress
 });
