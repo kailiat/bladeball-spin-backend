@@ -688,18 +688,6 @@ if (userData.banned) {
       userData.lootlabs_progress = 0;
       userData.linkvertise_progress = 0;
     }
-    // 🚨 AUTO DETECT HACK
-if (userData.spin_chances > 100) {
-  await supabase
-    .from("users")
-    .update({ banned: 1 })
-    .eq("id", userId);
-
-  return res.json({
-    success: false,
-    message: "Cheat detected. You are banned."
-  });
-}
 
     // ❌ HẾT LƯỢT
     if (Number(userData.spin_chances || 0) <= 0) {
