@@ -1522,8 +1522,8 @@ const { data: userData } = await supabase
   .single();
 
 const totalEarned =
-  (user.lootlabs_progress || 0) +
-  (user.linkvertise_progress || 0);
+  (userData.lootlabs_progress || 0) +
+  (userData.linkvertise_progress || 0);
 
 if (totalEarned >= 5) {
   return res.json({
@@ -1567,11 +1567,7 @@ if (!["lootlabs","linkvertise"].includes(type)) {
 }
 
 // 🔥 LẤY USER
-const { data: user } = await supabase
-  .from("users")
-  .select("*")
-  .eq("id", decoded.id)
-  .single();
+
 
 // ❗ CHECK PROGRESS
 if (userData[type + "_progress"] >= 2) {
@@ -1604,7 +1600,7 @@ return res.json({
   lootlabs_progress:
     type === "lootlabs" ? newProgress : userData.lootlabs_progress,
   linkvertise_progress:
-    type === "linkvertise" ? newProgress : user.linkvertise_progress
+  type === "linkvertise" ? newProgress : userData.linkvertise_progress
 });
 
 } catch (err) {
