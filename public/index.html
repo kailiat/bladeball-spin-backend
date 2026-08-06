@@ -958,6 +958,28 @@ value="1">
     </div>
 
 </div>
+    <div id="withdrawHistoryPopup" class="popup">
+
+    <div class="popup-box">
+
+        <h2>💸 Withdraw History</h2>
+
+        <div id="withdrawHistoryList"
+        style="
+        max-height:300px;
+        overflow-y:auto;
+        text-align:left;
+        margin:20px 0;
+        ">
+        </div>
+
+        <button onclick="closeWithdrawHistory()">
+            Close
+        </button>
+
+    </div>
+
+</div>
     <div id="profilePopup" class="popup">
 
     <div class="popup-box">
@@ -1897,6 +1919,74 @@ function closeRules(){
     btn.disabled = false;
     btn.style.opacity = 1;
   }
+}
+    async function showWithdrawHistory(){
+
+const res = await fetch(
+"https://bladeball-spin-backend-kpjl.onrender.com/history",
+{
+credentials:"include"
+}
+);
+
+const data = await res.json();
+
+if(!data.success){
+showToast(data.message);
+return;
+}
+
+let html = "";
+
+const withdraws = data.history.filter(h => h.type === "withdraw");
+
+if(withdraws.length === 0){
+html = "<p>No withdraw yet.</p>";
+}else{
+
+withdraws.forEach(w=>{
+
+let color = "#ffd54f";
+let statusText = "Pending";
+
+if(w.status === "completed"){
+color = "#00e676";
+statusText = "Completed";
+}
+
+if(w.status === "rejected"){
+color = "#ff5252";
+statusText = "Rejected";
+}
+
+html += `
+<div style="
+padding:12px;
+margin-bottom:10px;
+background:#23232d;
+border-radius:12px;
+border:1px solid rgba(139,61,255,.35);
+">
+💸 Withdraw ${w.amount} Tokens
+<br>
+<span style="color:${color};font-weight:bold;">
+${statusText}
+</span>
+</div>
+`;
+
+});
+
+}
+
+document.getElementById("withdrawHistoryList").innerHTML = html;
+
+document.getElementById("withdrawHistoryPopup").style.display="flex";
+
+}
+
+function closeWithdrawHistory(){
+document.getElementById("withdrawHistoryPopup").style.display="none";
 }
 </script>
 <!-- ⭐ RULES BUTTON -->
