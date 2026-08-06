@@ -1515,15 +1515,15 @@ const decoded = jwt.verify(token, process.env.JWT_SECRET);
 const today = new Date().toISOString().slice(0,10);
 
 // 🔥 ĐẾM SPIN NHẬN HÔM NAY (FIX Ở ĐÂY)
-const { data: userCheck } = await supabase
+const { data: user } = await supabase
   .from("users")
-  .select("lootlabs_progress, linkvertise_progress")
+  .select("*")
   .eq("id", decoded.id)
   .single();
 
 const totalEarned =
-  (userCheck.lootlabs_progress || 0) +
-  (userCheck.linkvertise_progress || 0);
+  (user.lootlabs_progress || 0) +
+  (user.linkvertise_progress || 0);
 
 if (totalEarned >= 5) {
   return res.json({
@@ -1531,7 +1531,6 @@ if (totalEarned >= 5) {
     message: "You reached daily earn limit (5 spins)"
   });
 }
-
 // 🔥 CHECK BAN
 const { data: bannedUser } = await supabase
   .from("users")
