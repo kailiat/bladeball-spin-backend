@@ -1201,7 +1201,14 @@ const { data, error } = await supabase
 .from("withdraw_requests")
 .select(`
 *,
-users(username)
+users(
+  id,
+  username,
+  tokens,
+  spin_chances,
+  created_at,
+  banned
+)
 `)
 .order("created_at",{ascending:false});
 
@@ -1700,6 +1707,65 @@ error:err.message
 });
 
 }
+
+});
+// =============================
+// ADMIN - USER PROFILE
+// =============================
+app.get("/admin/user/:id", async (req, res) => {
+
+  if(req.cookies.admin !== "true"){
+    return res.json({ success:false });
+  }
+
+  try{
+
+    const userId = req.params.id;
+
+    // user info
+    const { data:user } = await supabase
+      .from("users")
+      .select("*")
+      .eq("id", userId)
+      .single();
+
+    // total spins
+    const { count: total_spins } = await supabase
+      .from("spin_history")
+      .select("*", { count:"exact", head:true })
+      .eq("user_id", userId);
+
+    // total won
+    const { data: won } = await supabase
+      .from("spin_history")
+      .select("amount")
+      .eq("user_id", userId);
+
+    let total_won = 0;
+    won?.forEach(i => total_won += Number(i.amount || 0));
+
+    // total withdraw
+    const { data: wd } = await supabase
+      .from("withdraw_requests")
+      .select("amount")
+      .eq("user_id", userId);
+
+    let total_withdraw = 0;
+    wd?.forEach(i => total_withdraw += Number(i.amount || 0));
+
+    res.json({
+      success:true,
+      user,
+      stats:{
+        total_spins,
+        total_won,
+        total_withdraw
+      }
+    });
+
+  }catch(err){
+    res.json({ success:false, error:err.message });
+  }
 
 });
 const PORT = process.env.PORT || 3000;
