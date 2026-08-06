@@ -185,10 +185,13 @@ table{
 <body>
 
 <h1>🎁 Withdraw Requests</h1>
-
+<div style="margin-top:20px;">
+  <button onclick="showTab('withdraw')">💸 Withdraw</button>
+  <button onclick="showTab('users')">👤 Users</button>
+</div>
 <input id="search" placeholder="Search user..." oninput="loadWithdraws()">
+  <div class="stats">
 
-<div class="stats">
   <div class="card">
     <h2 id="pendingCount">0</h2>
     <p>Pending</p>
@@ -209,7 +212,11 @@ table{
     <h2 id="onlineCount">0</h2>
     <p>Online</p>
   </div>
+
+
 </div>
+
+<div id="withdrawTab">
 
 <table>
   <thead>
@@ -228,10 +235,75 @@ table{
 
   <tbody id="withdrawTable"></tbody>
 </table>
+</div>
+  <div id="usersTab" style="display:none; margin-top:20px;">
 
+  <h1>👤 All Users</h1>
+
+  <input id="searchUser" placeholder="Search user..." oninput="loadUsers()">
+
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Username</th>
+        <th>Tokens</th>
+        <th>Spin</th>
+        <th>Created</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+
+    <tbody id="usersTable"></tbody>
+  </table>
+
+</div>
 </body>
 
 <script>
+  function showTab(tab){
+
+  document.getElementById("withdrawTab").style.display = "none";
+  document.getElementById("usersTab").style.display = "none";
+
+  document.getElementById(tab + "Tab").style.display = "block";
+
+  if(tab === "users"){
+    loadUsers();
+  }
+
+}
+  async function loadUsers(){
+  const res = await callAPI("/admin/users");
+
+  if(!res.success) return;
+
+  const keyword =
+    document.getElementById("searchUser")?.value.toLowerCase() || "";
+
+  const html = res.users
+  .filter(u =>
+    u.username.toLowerCase().includes(keyword)
+  )
+  .map(u => {
+
+    return `
+    <tr onclick="openUser(${u.id})" style="cursor:pointer;">
+      <td>${u.id}</td>
+      <td class="${u.banned ? 'banned' : ''}">
+        ${u.username}
+      </td>
+      <td>${u.tokens}</td>
+      <td>${u.spin_chances}</td>
+      <td>${u.created_at}</td>
+      <td>${u.banned ? '🚫 BANNED' : 'ACTIVE'}</td>
+    </tr>
+    `;
+
+  }).join("");
+
+  document.getElementById("usersTable").innerHTML = html;
+}
 
 const API = "https://bladeball-spin-backend-kpjl.onrender.com";
 
@@ -313,7 +385,7 @@ ${level === 'warn' ? 'row-warn' : ''}
       <td>${w.roblox_username}</td>
       <td>${w.discord_username}</td>
       <td class="${w.status}">${w.status}</td>
-<td>${w.users.spin || 0}</td>
+<td>${w.users.spin_chances || 0}</td>
 <td>
   ${renderAction(w)}
 </td>
@@ -413,7 +485,7 @@ loadDashboard();
 
 // reload mỗi 10s
 setInterval(loadDashboard, 10000);
-  
+  showTab("withdraw");
 
 function closeUser(){
   document.getElementById("userPopup").style.display = "none";
