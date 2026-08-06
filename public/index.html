@@ -787,7 +787,7 @@ CLAIM
 
     <!-- ✅ BUTTON ĐẶT Ở ĐÂY -->
     <div class="spin-buttons">
-        <button onclick="spin()">SPIN</button>
+        <button id="spinBtn" onclick="spin()">SPIN</button>
         <button onclick="testSpin()">🎲 Test Spin</button>
     </div>
     <div class="menu">
@@ -1886,6 +1886,17 @@ function closeRules(){
         bg.play().catch(()=>{});
     }
 }, { once: true });
+    function updateSpinButton(spin_chances){
+  const btn = document.getElementById("spinBtn");
+
+  if(spin_chances <= 0){
+    btn.disabled = true;
+    btn.style.opacity = 0.5;
+  }else{
+    btn.disabled = false;
+    btn.style.opacity = 1;
+  }
+}
 </script>
 <!-- ⭐ RULES BUTTON -->
 <div class="rules-btn" onclick="openRules()">
