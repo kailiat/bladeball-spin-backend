@@ -533,7 +533,23 @@ loadDashboard();
 // reload mỗi 10s
 setInterval(loadDashboard, 10000);
   showTab("withdraw");
+<script>
+async function saveUser(){
+  const tokens = document.getElementById("editTokens")?.value;
+  const spins = document.getElementById("editSpins")?.value;
 
+  console.log("Saving...", tokens, spins);
+
+  await callAPI("/admin/update-user", "POST", {
+    user_id: currentUserId,
+    tokens,
+    spin_chances: spins
+  });
+
+  alert("Saved!");
+  loadUsers();
+}
+</script>
 </script>
 <div id="userPopup" style="
 position:fixed;
