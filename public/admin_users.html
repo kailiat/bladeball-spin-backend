@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Admin - Users</title>
+
+<style>
+body{
+  background:#0b0b0d;
+  color:white;
+  font-family:Poppins;
+  padding:20px;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+}
+
+th, td{
+  padding:12px;
+  border-bottom:1px solid #333;
+  text-align:center;
+}
+
+th{
+  background:#1d1d24;
+}
+
+tr:hover{
+  background:#1a1a22;
+}
+
+.banned{
+  color:red;
+  font-weight:bold;
+}
+</style>
+
+</head>
+
+<body>
+
+<h1>👥 ALL USERS</h1>
+
+<table>
+<thead>
+<tr>
+  <th>ID</th>
+  <th>Username</th>
+  <th>Tokens</th>
+  <th>Spin Chance</th> <!-- ✅ CÁI BẠN CẦN -->
+  <th>Created</th>
+  <th>Status</th>
+</tr>
+</thead>
+
+<tbody id="userTable">
+</tbody>
+
+</table>
+
+<script>
+
+async function loadUsers(){
+
+  const res = await fetch("/admin/users", {
+    credentials:"include"
+  });
+
+  const data = await res.json();
+
+  if(!data.success){
+    alert("Unauthorized");
+    return;
+  }
+
+  let html = "";
+
+  data.users.forEach(u => {
+
+    html += `
+      <tr>
+        <td>${u.id}</td>
+        <td>${u.username || "-"}</td>
+        <td>${u.tokens}</td>
+        <td>${u.spin_chances}</td>
+        <td>${u.created_at}</td>
+        <td class="${u.banned ? 'banned' : ''}">
+          ${u.banned ? 'BANNED' : 'ACTIVE'}
+        </td>
+      </tr>
+    `;
+
+  });
+
+  document.getElementById("userTable").innerHTML = html;
+
+}
+
+loadUsers();
+
+</script>
+
+</body>
+</html>
