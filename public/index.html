@@ -1923,7 +1923,7 @@ function closeRules(){
     async function showWithdrawHistory(){
 
 const res = await fetch(
-"https://bladeball-spin-backend-kpjl.onrender.com/history",
+"https://bladeball-spin-backend-kpjl.onrender.com/withdraw-history",
 {
 credentials:"include"
 }
@@ -1938,25 +1938,23 @@ return;
 
 let html = "";
 
-const withdraws = data.history.filter(h => h.type === "withdraw");
-
-if(withdraws.length === 0){
+if(data.withdraws.length === 0){
 html = "<p>No withdraw yet.</p>";
 }else{
 
-withdraws.forEach(w=>{
+data.withdraws.forEach(w=>{
 
 let color = "#ffd54f";
-let statusText = "Pending";
+let statusText = "⏳ Pending";
 
 if(w.status === "completed"){
 color = "#00e676";
-statusText = "Completed";
+statusText = "✅ Completed";
 }
 
 if(w.status === "rejected"){
 color = "#ff5252";
-statusText = "Rejected";
+statusText = "❌ Rejected";
 }
 
 html += `
@@ -1984,7 +1982,6 @@ document.getElementById("withdrawHistoryList").innerHTML = html;
 document.getElementById("withdrawHistoryPopup").style.display="flex";
 
 }
-
 function closeWithdrawHistory(){
 document.getElementById("withdrawHistoryPopup").style.display="none";
 }
