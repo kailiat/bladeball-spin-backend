@@ -7,6 +7,28 @@
 <title>BladeBall Admin</title>
 
 <style>
+  .popup-actions{
+  display:flex;
+  gap:10px;
+  margin-top:20px;
+}
+
+.popup-actions button{
+  flex:1;
+  padding:12px;
+  border-radius:10px;
+  font-weight:bold;
+}
+
+.ban{
+  background:#ff4d4d;
+  color:white;
+}
+
+.close{
+  background:#333;
+  color:white;
+}
   .row-warn{
   background:#3a2a1a !important;
   border-left:5px solid orange;
@@ -416,15 +438,6 @@ setInterval(loadWithdraws, 10000);
   async function openUser(userId){
   try{
 
-    const action = confirm("👉 OK = Xem profile\n❌ Cancel = BAN");
-
-    if(!action){
-      if(confirm("Bạn chắc chắn BAN user này?")){
-        handleBan(userId);
-      }
-      return;
-    }
-
     const res = await callAPI(`/admin/user/${userId}`);
 
     if(!res.success){
@@ -441,6 +454,9 @@ setInterval(loadWithdraws, 10000);
     document.getElementById("uWon").innerText = s.total_won;
     document.getElementById("uWithdraw").innerText = s.total_withdraw;
     document.getElementById("uCreated").innerText = u.created_at;
+
+    // 👇 lưu userId để dùng cho button
+    window.currentUserId = userId;
 
     document.getElementById("userPopup").style.display = "flex";
 
@@ -515,7 +531,9 @@ z-index:9999;
 
     <br>
 
-    <button onclick="closeUser()">Close</button>
+    <button onclick="handleBan(currentUserId)" class="ban">🚫 Ban</button>
+
+<button onclick="closeUser()">Close</button>
   </div>
 </div>
 </body>
