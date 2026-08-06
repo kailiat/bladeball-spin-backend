@@ -1872,6 +1872,45 @@ res.json({
 });
 }
 });
+app.get("/withdraw-history", async (req, res) => {
+  try {
+
+    const token = req.cookies.token;
+
+    if (!token) {
+      return res.json({
+        success: false,
+        message: "Please login"
+      });
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    const { data, error } = await supabase
+      .from("withdraw_requests")
+      .select("*")
+      .eq("user_id", decoded.id)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      return res.json({
+        success: false,
+        error: error.message
+      });
+    }
+
+    res.json({
+      success: true,
+      withdraws: data
+    });
+
+  } catch (err) {
+    res.json({
+      success: false,
+      error: err.message
+    });
+  }
+});
 const PORT = process.env.PORT || 3000;
 
 
