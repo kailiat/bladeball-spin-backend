@@ -1499,41 +1499,43 @@ if(bannedUser?.banned){
 });
 
 app.post("/claim-mission", async (req, res) => {
-  const today = new Date().toISOString().slice(0,10);
+try {
+const token = req.cookies.token;
 
-// 🔥 ĐẾM SPIN NHẬN HÔM NAY
+if (!token) {
+  return res.json({
+    success: false,
+    message: "Please login first"
+  });
+}
+
+// ✅ PHẢI ĐẶT TRƯỚC
+const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+const today = new Date().toISOString().slice(0,10);
+
+// 🔥 ĐẾM SPIN NHẬN HÔM NAY (FIX Ở ĐÂY)
 const { count: earnedToday } = await supabase
   .from("spin_history")
   .select("*", { count: "exact", head: true })
   .eq("user_id", decoded.id)
   .eq("spin_date", today);
 
-// ❌ QUÁ 5 SPIN NHẬN
 if (earnedToday >= 5) {
   return res.json({
     success: false,
-    message: "You reached daily earn limit (5 spins). Come back tomorrow!"
+    message: "You reached daily earn limit (5 spins)"
   });
 }
-try {
-const token = req.cookies.token;
 
-if (!token) {
-    return res.json({
-        success: false,
-        message: "Please login first"
-    });
-}
-
-const decoded = jwt.verify(token, process.env.JWT_SECRET);
-  // 🔥 CHECK BAN
+// 🔥 CHECK BAN
 const { data: bannedUser } = await supabase
   .from("users")
   .select("banned")
   .eq("id", decoded.id)
   .single();
 
-if(bannedUser?.banned){
+if (bannedUser?.banned) {
   return res.json({
     success:false,
     banned:true,
@@ -1541,111 +1543,72 @@ if(bannedUser?.banned){
   });
 }
 
-// 🔒 CHẶN SPAM CLICK
-if(claimLocks[decoded.id]){
-    return res.json({
-        success:false,
-        message:"Too fast"
-    });
+// 🔒 CHỐNG SPAM
+if (claimLocks[decoded.id]) {
+  return res.json({
+    success:false,
+    message:"Too fast"
+  });
 }
 
-// 🔒 LOCK USER
 claimLocks[decoded.id] = true;
 
 const { type } = req.body;
 
 if (!["lootlabs","linkvertise"].includes(type)) {
-    delete claimLocks[decoded.id];
-    return res.json({
-        success: false,
-        message: "Invalid type"
-    });
+  delete claimLocks[decoded.id];
+  return res.json({
+    success:false,
+    message:"Invalid type"
+  });
 }
 
 // 🔥 LẤY USER
-const { data: user, error } = await supabase
-    .from("users")
-    .select("*")
-    .eq("id", decoded.id)
-    .single();
+const { data: user } = await supabase
+  .from("users")
+  .select("*")
+  .eq("id", decoded.id)
+  .single();
 
-if (error) {
-    delete claimLocks[decoded.id];
-    return res.json({
-        success: false,
-        error: error.message
-    });
+// ❗ CHECK PROGRESS
+if (user[type + "_progress"] >= 2) {
+  delete claimLocks[decoded.id];
+  return res.json({
+    success:false,
+    message:"Mission completed"
+  });
 }
 
-const today = new Date().toISOString().slice(0,10);
-
-// ✅ RESET NGÀY
-if(user.last_mission_date !== today){
-    await supabase
-    .from("users")
-    .update({
-        lootlabs_progress: 0,
-        linkvertise_progress: 0,
-        last_mission_date: today
-    })
-    .eq("id", decoded.id);
-
-    user.lootlabs_progress = 0;
-    user.linkvertise_progress = 0;
-}
-
-// ❗ CHẶN HOÀN THÀNH RỒI
-if(user[type + "_progress"] >= 2){
-    delete claimLocks[decoded.id];
-    return res.json({
-        success:false,
-        message:"Mission completed"
-    });
-}
-
-// ❗ CHECK SESSION (ANTI FAKE WATCH)
-
-
-// ✅ TĂNG PROGRESS (ANTI RACE)
-const current = Number(user[type + "_progress"] || 0);
-
-if(current >= 2){
-    delete claimLocks[decoded.id];
-    return res.json({ success:false });
-}
-
-const newProgress = current + 1;
+// ✅ CỘNG
+const newProgress = Number(user[type + "_progress"] || 0) + 1;
 const newSpin = Number(user.spin_chances || 0) + 1;
 
-// ✅ UPDATE DB
 await supabase
-.from("users")
-.update({
+  .from("users")
+  .update({
     [type + "_progress"]: newProgress,
     spin_chances: newSpin
-})
-.eq("id", decoded.id);
+  })
+  .eq("id", decoded.id);
 
-// 🔓 MỞ LOCK SAU 2s
 setTimeout(() => {
-    delete claimLocks[decoded.id];
+  delete claimLocks[decoded.id];
 }, 2000);
 
 return res.json({
-    success:true,
-    spin_chances: newSpin,
-    lootlabs_progress:
-        type === "lootlabs" ? newProgress : user.lootlabs_progress,
-    linkvertise_progress:
-        type === "linkvertise" ? newProgress : user.linkvertise_progress
+  success:true,
+  spin_chances: newSpin,
+  lootlabs_progress:
+    type === "lootlabs" ? newProgress : user.lootlabs_progress,
+  linkvertise_progress:
+    type === "linkvertise" ? newProgress : user.linkvertise_progress
 });
 
 } catch (err) {
 console.log("CLAIM ERROR:", err);
-
 return res.json({
-    success: false,
-    message: "Server error"
+  success:false,
+  error: err.message
 });
 }
 });
