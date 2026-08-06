@@ -372,7 +372,20 @@ setInterval(loadWithdraws, 10000);
     alert("Ban lỗi!");
     console.error(err);
   }
+  async function loadDashboard(){
+  const res = await callAPI("/admin/dashboard");
+
+  if(!res.success) return;
+
+  document.getElementById("onlineCount").innerText =
+    res.stats.online;
 }
+
+// chạy ngay
+loadDashboard();
+
+// reload mỗi 10s
+setInterval(loadDashboard, 10000);
   
 </script>
 <div id="userPopup" style="
