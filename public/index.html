@@ -2055,6 +2055,76 @@ z-index:9999;
     <audio id="spinSound" src="/sounds/spin.mp3"></audio>
 <audio id="winSound" src="/sounds/win.mp3"></audio>
 <audio id="bgSound" src="/sounds/bg.mp3" loop></audio>
+    <div id="eventPopup" style="
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,0.8);
+display:flex;
+align-items:center;
+justify-content:center;
+z-index:9999;
+">
+
+<div style="
+background:#111;
+padding:25px;
+border-radius:12px;
+max-width:400px;
+text-align:left;
+color:white;
+">
+
+<h2>🎉 BLADE BALL GIVEAWAY</h2>
+
+<p style="line-height:1.6">
+
+🔥 100% SPIN = ALWAYS WIN <br><br>
+
+🎁 Every spin gives real rewards<br>
+💰 Withdraw when you reach minimum<br><br>
+
+⚡ Try it yourself:<br>
+Spin → Collect → Withdraw<br><br>
+
+📅 Daily missions reset every day<br>
+Farm FREE spins easily!<br><br>
+
+⏳ Limited event — join now 🚀
+
+</p>
+
+<button onclick="closeEventPopup()" style="
+width:100%;
+padding:10px;
+background:#6c5ce7;
+border:none;
+color:white;
+border-radius:6px;
+">
+Start Now
+</button>
+
+</div>
+</div>
+    <script>
+function closeEventPopup(){
+  document.getElementById("eventPopup").style.display = "none";
+}
+
+// chỉ hiện 1 lần / ngày
+window.onload = () => {
+  const seen = localStorage.getItem("event_seen");
+  if(!seen){
+    document.getElementById("eventPopup").style.display = "flex";
+    localStorage.setItem("event_seen", "true");
+  }else{
+    document.getElementById("eventPopup").style.display = "none";
+  }
+};
+</script>
 </body>
 
 </html>
