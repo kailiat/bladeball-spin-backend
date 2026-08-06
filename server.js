@@ -605,22 +605,7 @@ if (withdrawData) {
 
 // Spin Wheel
 app.post("/spin", async (req, res) => {
-  const today = new Date().toISOString().slice(0,10);
-
-// 🔥 ĐẾM SPIN HÔM NAY
-const { count: todaySpins } = await supabase
-  .from("spin_history")
-  .select("*", { count: "exact", head: true })
-  .eq("user_id", userId)
-  .eq("spin_date", today);
-
-// ❌ QUÁ 10 LẦN
-if (todaySpins >= 10) {
-  return res.json({
-    success: false,
-    message: "You reached daily spin limit (10). Come back tomorrow!"
-  });
-}
+  
   let userId = null;
 
   try {
@@ -639,6 +624,20 @@ if (todaySpins >= 10) {
     );
 
     userId = decoded.id;
+    const today = new Date().toISOString().slice(0,10);
+
+const { count: todaySpins } = await supabase
+  .from("spin_history")
+  .select("*", { count: "exact", head: true })
+  .eq("user_id", userId)
+  .eq("spin_date", today);
+
+if (todaySpins >= 10) {
+  return res.json({
+    success: false,
+    message: "You reached daily spin limit (10). Come back tomorrow!"
+  });
+}
 
     // ✅ CHẶN SPAM
     if (spinningUsers.has(userId)) {
