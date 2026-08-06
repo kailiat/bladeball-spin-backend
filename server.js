@@ -605,6 +605,22 @@ if (withdrawData) {
 
 // Spin Wheel
 app.post("/spin", async (req, res) => {
+  const today = new Date().toISOString().slice(0,10);
+
+// 🔥 ĐẾM SPIN HÔM NAY
+const { count: todaySpins } = await supabase
+  .from("spin_history")
+  .select("*", { count: "exact", head: true })
+  .eq("user_id", userId)
+  .eq("spin_date", today);
+
+// ❌ QUÁ 10 LẦN
+if (todaySpins >= 10) {
+  return res.json({
+    success: false,
+    message: "You reached daily spin limit (10). Come back tomorrow!"
+  });
+}
   let userId = null;
 
   try {
@@ -674,6 +690,18 @@ if (userData.banned) {
       userData.lootlabs_progress = 0;
       userData.linkvertise_progress = 0;
     }
+    // 🚨 AUTO DETECT HACK
+if (userData.spin_chances > 100) {
+  await supabase
+    .from("users")
+    .update({ banned: 1 })
+    .eq("id", userId);
+
+  return res.json({
+    success: false,
+    message: "Cheat detected. You are banned."
+  });
+}
 
     // ❌ HẾT LƯỢT
     if (Number(userData.spin_chances || 0) <= 0) {
@@ -1452,6 +1480,22 @@ if(bannedUser?.banned){
 });
 
 app.post("/claim-mission", async (req, res) => {
+  const today = new Date().toISOString().slice(0,10);
+
+// 🔥 ĐẾM SPIN NHẬN HÔM NAY
+const { count: earnedToday } = await supabase
+  .from("spin_history")
+  .select("*", { count: "exact", head: true })
+  .eq("user_id", decoded.id)
+  .eq("spin_date", today);
+
+// ❌ QUÁ 5 SPIN NHẬN
+if (earnedToday >= 5) {
+  return res.json({
+    success: false,
+    message: "You reached daily earn limit (5 spins). Come back tomorrow!"
+  });
+}
 try {
 const token = req.cookies.token;
 
