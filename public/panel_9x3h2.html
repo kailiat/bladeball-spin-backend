@@ -194,11 +194,12 @@ table{
     <h2 id="rejectedCount">0</h2>
     <p>Rejected</p>
   </div>
-</div>
-  
+
+  <!-- ✅ PHẢI NẰM TRONG -->
   <div class="card">
-  <h2 id="onlineCount">0</h2>
-  <p>Online</p>
+    <h2 id="onlineCount">0</h2>
+    <p>Online</p>
+  </div>
 </div>
 
 <table>
@@ -366,13 +367,17 @@ setInterval(loadWithdraws, 10000);
 
     alert(res.message || "Banned!");
 
-    loadWithdraws(); // reload lại bảng
+    loadWithdraws();
 
   }catch(err){
     alert("Ban lỗi!");
     console.error(err);
   }
-  async function loadDashboard(){
+} // ✅ ĐÓNG Ở ĐÂY
+
+
+// 👇 VIẾT RIÊNG RA NGOÀI
+async function loadDashboard(){
   const res = await callAPI("/admin/dashboard");
 
   if(!res.success) return;
