@@ -298,6 +298,7 @@ table{
         <th>Spin</th>
         <th>Created</th>
         <th>Status</th>
+        <th>Flag</th>
       </tr>
     </thead>
 
@@ -342,20 +343,31 @@ table{
 }) // 🔥 THÊM DÒNG NÀY
   .map(u => {
 
-    return `
-    <tr onclick="openUser(${u.id})" style="cursor:pointer;">
-      <td>${u.id}</td>
-      <td class="${u.banned ? 'banned' : ''}">
-        ${u.username}
-      </td>
-      <td>${u.tokens}</td>
-      <td>${u.spin_chances}</td>
-      <td>${u.created_at}</td>
-      <td>${u.banned ? '🚫 BANNED' : 'ACTIVE'}</td>
-    </tr>
-    `;
+  let flag = "";
 
-  }).join("");
+  if(u.spin_chances >= 1000){
+    flag = "🚨 HACK";
+  }else if(u.spin_chances >= 500){
+    flag = "⚠️ SUS";
+  }else{
+    flag = "OK";
+  }
+
+  return `
+  <tr onclick="openUser(${u.id})" style="cursor:pointer;">
+    <td>${u.id}</td>
+    <td class="${u.banned ? 'banned' : ''}">
+      ${u.username}
+    </td>
+    <td>${u.tokens}</td>
+    <td>${u.spin_chances}</td>
+    <td>${u.created_at}</td>
+    <td>${u.banned ? '🚫 BANNED' : 'ACTIVE'}</td>
+    <td>${flag}</td>
+  </tr>
+  `;
+
+}).join("");
 
   document.getElementById("usersTable").innerHTML = html;
 }
