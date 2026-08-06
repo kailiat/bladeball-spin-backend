@@ -641,15 +641,8 @@ if (todaySpins >= 10) {
 }
 
     // ✅ CHẶN SPAM
-    if (spinningUsers.has(userId)) {
-
-  await supabase
-    .from("users")
-    .update({
-      suspect_score: (userData.suspect_score || 0) + 1
-    })
-    .eq("id", userId);
-
+    // ✅ CHẶN SPAM
+if (spinningUsers.has(userId)) {
   return res.json({
     success: false,
     message: "Already spinning"
