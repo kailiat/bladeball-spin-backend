@@ -328,8 +328,38 @@ setInterval(loadWithdraws, 10000);
       handleBan(userId);
     }
   } else {
-    alert("TODO: mở profile user (sẽ làm sau)");
+    async function openUser(userId){
+
+  const action = confirm("👉 OK = Xem profile\n❌ Cancel = BAN");
+
+  if(!action){
+    if(confirm("Bạn chắc chắn BAN user này?")){
+      handleBan(userId);
+    }
+    return;
   }
+
+  const res = await callAPI(`/admin/user/${userId}`);
+
+  if(!res.success){
+    alert("Lỗi load user");
+    return;
+  }
+
+  const u = res.user;
+  const s = res.stats;
+
+  document.getElementById("uName").innerText = u.username;
+  document.getElementById("uTokens").innerText = u.tokens;
+  document.getElementById("uSpins").innerText = s.total_spins;
+  document.getElementById("uWon").innerText = s.total_won;
+  document.getElementById("uWithdraw").innerText = s.total_withdraw;
+  document.getElementById("uCreated").innerText = u.created_at;
+
+  document.getElementById("userPopup").style.display = "flex";
+}
+    function closeUser(){
+  document.getElementById("userPopup").style.display = "none";
 }
   async function handleBan(userId){
   try{
