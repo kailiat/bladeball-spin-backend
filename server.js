@@ -1807,6 +1807,34 @@ app.get("/admin/users", async (req, res) => {
   }
 
 });
+app.post("/admin/update-user", async (req, res) => {
+if(req.cookies.admin !== "true"){
+return res.json({ success:false });
+}
+
+try{
+const { user_id, tokens, spin_chances } = req.body;
+
+await supabase
+  .from("users")
+  .update({
+    tokens: Number(tokens),
+    spin_chances: Number(spin_chances)
+  })
+  .eq("id", user_id);
+
+res.json({
+  success:true,
+  message:"Updated"
+});
+
+}catch(err){
+res.json({
+  success:false,
+  error:err.message
+});
+}
+});
 const PORT = process.env.PORT || 3000;
 
 
