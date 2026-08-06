@@ -672,7 +672,6 @@ if (userData.banned) {
   });
 }
 
-    const today = new Date().toISOString().slice(0,10);
     
 
     // ✅ RESET MISSION
