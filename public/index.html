@@ -1282,18 +1282,17 @@ function closePopup(){
 
     async function startMission(type){
 
-    // 🚨 CHẶN TẠI ĐÂY
+    // 🚨 CHẶN LOGIN
     if(!isLoggedIn){
         showToast("Please login first");
         return;
     }
 
-    // 👉 nếu đã login thì mới chạy
+    // 👉 mở link server
     window.open(
         `https://bladeball-spin-backend-kpjl.onrender.com/watch?provider=${type}`,
         "_blank"
     );
-}
 
     // 👉 mở link ads THẬT
     if(type === "lootlabs"){
@@ -1304,7 +1303,7 @@ function closePopup(){
         window.open("https://direct-link.net/4248703/FxVrNlMWnooH", "_blank");
     }
 
-    // 👉 lưu thời gian LOCAL để chạy WAIT
+    // 👉 set WAIT
     const now = Date.now();
     const delay = (90 + Math.random() * 30) * 1000;
 
