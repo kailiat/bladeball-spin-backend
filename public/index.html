@@ -1089,7 +1089,7 @@ Close
 
 </script>
 <script>
-
+let isLoggedIn = false;
 let spinning = false;
 let currentRotation = 0; // ✅ THÊM DÒNG NÀY
 
@@ -1282,11 +1282,18 @@ function closePopup(){
 
     async function startMission(type){
 
-    // 👉 gọi server để lưu session
+    // 🚨 CHẶN TẠI ĐÂY
+    if(!isLoggedIn){
+        showToast("Please login first");
+        return;
+    }
+
+    // 👉 nếu đã login thì mới chạy
     window.open(
-    `https://bladeball-spin-backend-kpjl.onrender.com/watch?provider=${type}`,
-    "_blank"
-);
+        `https://bladeball-spin-backend-kpjl.onrender.com/watch?provider=${type}`,
+        "_blank"
+    );
+}
 
     // 👉 mở link ads THẬT
     if(type === "lootlabs"){
@@ -1353,6 +1360,7 @@ updateProgressUI("linkvertise", data.user.linkvertise_progress);
 
 
     if(data.success){
+    isLoggedIn = true;
 
 
         // cập nhật balance
@@ -1378,6 +1386,9 @@ updateProgressUI("linkvertise", data.user.linkvertise_progress);
         </button>
 
         `;
+        } else {
+    isLoggedIn = false;
+}
                 // Daily login đã nhận hôm nay chưa
 
 
