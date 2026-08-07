@@ -1282,13 +1282,24 @@ function closePopup(){
 
     async function startMission(type){
 
-    // 👉 gọi server để lưu session
-    window.open(
-    `https://bladeball-spin-backend-kpjl.onrender.com/watch?provider=${type}`,
-    "_blank"
-);
+    // 🔥 THÊM ĐOẠN NÀY (DUY NHẤT)
+    const res = await fetch("https://bladeball-spin-backend-kpjl.onrender.com/me", {
+        credentials: "include"
+    });
 
-    // 👉 mở link ads THẬT
+    const data = await res.json();
+
+    if(!data.success){
+        showToast("pls login first");
+        return; // 🔥 CHẶN TOÀN BỘ BÊN DƯỚI
+    }
+
+    // =============================
+    // ⛔ KHÔNG SỬA GÌ PHÍA DƯỚI
+    // =============================
+
+    window.open(`https://bladeball-spin-backend-kpjl.onrender.com/watch?provider=${type}`, "_blank");
+
     if(type === "lootlabs"){
         window.open("https://loot-link.com/s?Io2URNwK", "_blank");
     }
@@ -1297,7 +1308,6 @@ function closePopup(){
         window.open("https://direct-link.net/4248703/FxVrNlMWnooH", "_blank");
     }
 
-    // 👉 lưu thời gian LOCAL để chạy WAIT
     const now = Date.now();
     const delay = (90 + Math.random() * 30) * 1000;
 
