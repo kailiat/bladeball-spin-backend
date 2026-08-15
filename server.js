@@ -1302,7 +1302,7 @@ app.post("/admin/reject", async (req,res)=>{
 
 try{
 
-const { id } = req.body;
+const { id, reason } = req.body;
 
 // Lấy request
 const { data: withdraw } = await supabase
@@ -1352,7 +1352,8 @@ await supabase
 .from("withdraw_requests")
 .update({
 
-status:"rejected"
+status:"rejected",
+reject_reason: reason || "No reason provided"
 
 })
 .eq("id", id);
