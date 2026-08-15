@@ -466,9 +466,33 @@ ${level === 'warn' ? 'row-warn' : ''}
 };
   async function handleAction(id, action) {
 
-  if (!confirm(`Bạn chắc muốn ${action}?`)) return;
+  if (action === "reject") {
 
-  await callAPI(`/admin/${action}`, "POST", { id });
+    const reason = prompt("Nhập lý do từ chối:");
+
+    if (reason === null) return;
+
+    if (!reason.trim()) {
+      alert("Vui lòng nhập lý do từ chối!");
+      return;
+    }
+
+    if (!confirm("Bạn chắc muốn từ chối withdraw này?")) return;
+
+    await callAPI("/admin/reject", "POST", {
+      id,
+      reason: reason.trim()
+    });
+
+  } else {
+
+    if (!confirm("Bạn chắc muốn approve?")) return;
+
+    await callAPI("/admin/approve", "POST", {
+      id
+    });
+
+  }
 
   loadWithdraws();
 }
