@@ -2001,19 +2001,25 @@ if(data.withdraws.length === 0){
 html = "<p>No withdraw yet.</p>";
 }else{
 
-data.withdraws.forEach(w=>{
-
-let color = "#ffd54f";
-let statusText = "⏳ Pending";
-
-if(w.status === "completed"){
-color = "#00e676";
-statusText = "✅ Completed";
+data.withdraws.forEach(w=>{ 
+ 
+let color = "#ffd54f"; 
+let statusText = "⏳ Pending"; 
+ 
+if(w.status === "completed"){ 
+color = "#00e676"; 
+statusText = "✅ Completed"; 
+} 
+ 
+if(w.status === "rejected"){ 
+color = "#ff5252"; 
+statusText = "❌ Rejected"; 
 }
 
+let rejectReason = "";
+
 if(w.status === "rejected"){
-color = "#ff5252";
-statusText = "❌ Rejected";
+    rejectReason = w.reject_reason || "No reason provided";
 }
 
 html += `
@@ -2029,7 +2035,15 @@ border:1px solid rgba(139,61,255,.35);
 <span style="color:${color};font-weight:bold;">
 ${statusText}
 </span>
-</div>
+
+${w.status === "rejected" ? `
+<br>
+<span style="color:#ff8a8a;font-size:13px;">
+Reason: ${rejectReason}
+</span>
+` : ""}
+
+</div> 
 `;
 
 });
