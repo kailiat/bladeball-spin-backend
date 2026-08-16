@@ -1253,38 +1253,98 @@ error:err.message
 
 });
 app.post("/admin/approve", async (req,res)=>{
+
   if(req.cookies.admin !== "true"){
 
     return res.json({
-        success:false,
-        message:"Unauthorized"
+      success:false,
+      message:"Unauthorized"
     });
 
-}
+  }
 
-try{
+  try{
 
-const {id}=req.body;
+    const { id } = req.body;
 
-await supabase
-.from("withdraw_requests")
-.update({
-status:"completed"
-})
-.eq("id",id);
+    // 🔍 Lấy withdraw request
+    const { data: withdraw, error: withdrawError } = await supabase
+      .from("withdraw_requests")
+      .select("*")
+      .eq("id", id)
+      .single();
 
-res.json({
-success:true
-});
+    if(withdrawError || !withdraw){
 
-}catch(err){
+      return res.json({
+        success:false,
+        message:"Withdraw not found"
+      });
 
-res.json({
-success:false,
-error:err.message
-});
+    }
 
-}
+    // Chỉ approve khi đang pending
+    if(withdraw.status !== "pending"){
+
+      return res.json({
+        success:false,
+        message:"Already processed"
+      });
+
+    }
+
+    // ✅ Đổi trạng thái
+    const { error:updateError } = await supabase
+      .from("withdraw_requests")
+      .update({
+        status:"completed"
+      })
+      .eq("id", id);
+
+    if(updateError){
+
+      return res.json({
+        success:false,
+        error:updateError.message
+      });
+
+    }
+
+    // 🔔 TẠO THÔNG BÁO CHO USER
+    const { error:notificationError } = await supabase
+      .from("notifications")
+      .insert({
+        user_id: withdraw.user_id,
+        type: "withdraw_approved",
+        title: "Withdraw Approved",
+        message: "Your withdraw has been approved!",
+        reference_id: id,
+        is_read: false
+      });
+
+    if(notificationError){
+
+      console.log(
+        "APPROVE NOTIFICATION ERROR:",
+        notificationError.message
+      );
+
+    }
+
+    res.json({
+      success:true
+    });
+
+  }catch(err){
+
+    console.log("APPROVE ERROR:", err);
+
+    res.json({
+      success:false,
+      error:err.message
+    });
+
+  }
 
 });
 // =============================
