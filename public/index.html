@@ -2026,6 +2026,7 @@ function closeRules(){
 }
     async function showWithdrawHistory(){
         document.getElementById("withdrawBadge").style.display = "none";
+        localStorage.removeItem("withdrawBadgeUnread");
 
 const res = await fetch(
 "https://bladeball-spin-backend-kpjl.onrender.com/withdraw-history",
@@ -2227,46 +2228,50 @@ async function checkWithdrawBadge(){
 
         const withdraws = data.withdraws || [];
 
-        // Nếu có withdraw mới
-        if(withdraws.length > lastWithdrawHistoryCount){
+        const currentStatuses = {};
 
-            if(lastWithdrawHistoryCount !== 0){
+        withdraws.forEach(w => {
+            currentStatuses[w.id] = w.status;
+        });
 
-                document.getElementById("withdrawBadge").style.display =
-                    "flex";
+        // 🔴 KIỂM TRA WITHDRAW MỚI HOẶC STATUS THAY ĐỔI
+        let changed = false;
 
-            }
+        withdraws.forEach(w => {
 
-        }
+            // Withdraw mới
+            if(lastWithdrawStatuses[w.id] === undefined){
 
-        // Nếu số lượng không đổi nhưng STATUS thay đổi
-        // thì cũng hiện badge đỏ
-        if(withdraws.length === lastWithdrawHistoryCount){
-
-            const currentStatuses =
-                withdraws.map(w => `${w.id}:${w.status}`).join("|");
-
-            if(window.lastWithdrawStatuses !== undefined){
-
-                if(currentStatuses !== window.lastWithdrawStatuses){
-
-                    document.getElementById("withdrawBadge").style.display =
-                        "flex";
-
+                // Không tính dữ liệu có sẵn lúc mới load
+                if(Object.keys(lastWithdrawStatuses).length > 0){
+                    changed = true;
                 }
 
             }
 
-            window.lastWithdrawStatuses = currentStatuses;
+            // Pending -> Completed / Rejected
+            else if(lastWithdrawStatuses[w.id] !== w.status){
 
-        }else{
+                changed = true;
 
-            // Cập nhật trạng thái khi có withdraw mới
-            window.lastWithdrawStatuses =
-                withdraws.map(w => `${w.id}:${w.status}`).join("|");
+            }
+
+        });
+
+        if(changed){
+
+            document.getElementById("withdrawBadge").style.display =
+                "flex";
+
+            // 🔴 LƯU TRẠNG THÁI CHƯA ĐỌC
+            localStorage.setItem(
+                "withdrawBadgeUnread",
+                "true"
+            );
 
         }
 
+        lastWithdrawStatuses = currentStatuses;
         lastWithdrawHistoryCount = withdraws.length;
 
     }catch(err){
@@ -2311,10 +2316,31 @@ async function initHistoryBadges(){
 
         if(withdrawData.success){
 
-            lastWithdrawHistoryCount =
-                (withdrawData.withdraws || []).length;
+    const withdraws =
+        withdrawData.withdraws || [];
 
-        }
+    lastWithdrawHistoryCount =
+        withdraws.length;
+
+    // Lưu trạng thái hiện tại để so sánh
+    lastWithdrawStatuses = {};
+
+    withdraws.forEach(w => {
+
+        lastWithdrawStatuses[w.id] =
+            w.status;
+
+    });
+
+    // 🔴 KHÔNG mất badge sau F5
+    if(localStorage.getItem("withdrawBadgeUnread") === "true"){
+
+        document.getElementById("withdrawBadge").style.display =
+            "flex";
+
+    }
+
+}
 
     }catch(err){
 
