@@ -1358,6 +1358,18 @@ reject_reason: reason || "No reason provided"
 })
 .eq("id", id);
 
+// 🔔 TẠO THÔNG BÁO CHO USER
+await supabase
+.from("notifications")
+.insert({
+  user_id: withdraw.user_id,
+  type: "withdraw_rejected",
+  title: "Withdraw Rejected",
+  message: reason || "No reason provided",
+  reference_id: id,
+  is_read: false
+});
+
 res.json({
 
 success:true
@@ -1911,6 +1923,107 @@ app.get("/withdraw-history", async (req, res) => {
       error: err.message
     });
   }
+});
+// =============================
+// USER - GET NOTIFICATIONS
+// =============================
+app.get("/notifications", async (req, res) => {
+
+  try {
+
+    const token = req.cookies.token;
+
+    if (!token) {
+      return res.json({
+        success: false,
+        message: "Please login first"
+      });
+    }
+
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET
+    );
+
+    const { data, error } = await supabase
+      .from("notifications")
+      .select("*")
+      .eq("user_id", decoded.id)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      return res.json({
+        success: false,
+        error: error.message
+      });
+    }
+
+    res.json({
+      success: true,
+      notifications: data
+    });
+
+  } catch (err) {
+
+    res.json({
+      success: false,
+      error: err.message
+    });
+
+  }
+
+});
+// =============================
+// USER - MARK NOTIFICATION AS READ
+// =============================
+app.post("/notifications/read", async (req, res) => {
+
+  try {
+
+    const token = req.cookies.token;
+
+    if (!token) {
+      return res.json({
+        success: false,
+        message: "Please login first"
+      });
+    }
+
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET
+    );
+
+    const { id } = req.body;
+
+    const { error } = await supabase
+      .from("notifications")
+      .update({
+        is_read: true
+      })
+      .eq("id", id)
+      .eq("user_id", decoded.id);
+
+    if (error) {
+      return res.json({
+        success: false,
+        error: error.message
+      });
+    }
+
+    res.json({
+      success: true
+    });
+
+  } catch (err) {
+
+    res.json({
+      success: false,
+      error: err.message
+    });
+
+  }
+
 });
 const PORT = process.env.PORT || 3000;
 
