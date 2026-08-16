@@ -840,9 +840,53 @@ CLAIM
         <button onclick="testSpin()">🎲 Test Spin</button>
     </div>
     <div class="menu">
-    <button onclick="showWithdraw()">🎁 Withdraw</button>
-    <button onclick="showHistory()">📜 History</button>
-    <button onclick="showWithdrawHistory()">💸 Withdraw History</button>
+
+    <button onclick="showWithdraw()">
+        🎁 Withdraw
+    </button>
+
+    <button onclick="showHistory()" id="historyBtn" style="position:relative;">
+        📜 History
+        <span id="historyBadge" style="
+            display:none;
+            position:absolute;
+            top:-6px;
+            right:-6px;
+            background:#ff3030;
+            color:white;
+            font-size:11px;
+            font-weight:bold;
+            min-width:18px;
+            height:18px;
+            padding:0 4px;
+            border-radius:20px;
+            align-items:center;
+            justify-content:center;
+            box-sizing:border-box;
+        ">1</span>
+    </button>
+
+    <button onclick="showWithdrawHistory()" id="withdrawHistoryBtn" style="position:relative;">
+        💸 Withdraw History
+        <span id="withdrawBadge" style="
+            display:none;
+            position:absolute;
+            top:-6px;
+            right:-6px;
+            background:#ff3030;
+            color:white;
+            font-size:11px;
+            font-weight:bold;
+            min-width:18px;
+            height:18px;
+            padding:0 4px;
+            border-radius:20px;
+            align-items:center;
+            justify-content:center;
+            box-sizing:border-box;
+        ">1</span>
+    </button>
+
 </div>
 
 </div>
@@ -1532,6 +1576,7 @@ discord_username
 
 }
 async function showHistory(){
+    document.getElementById("historyBadge").style.display = "none";
 
 const res = await fetch(
 "https://bladeball-spin-backend-kpjl.onrender.com/history",
@@ -1980,6 +2025,7 @@ function closeRules(){
   }
 }
     async function showWithdrawHistory(){
+        document.getElementById("withdrawBadge").style.display = "none";
 
 const res = await fetch(
 "https://bladeball-spin-backend-kpjl.onrender.com/withdraw-history",
@@ -2112,6 +2158,148 @@ async function loadNotifications(){
     loadNotifications();
 
 setInterval(loadNotifications, 10000);
+    // =============================
+// 🔴 HISTORY BADGES
+// =============================
+
+let lastSpinHistoryCount = 0;
+let lastWithdrawHistoryCount = 0;
+
+
+// CHECK SPIN HISTORY
+async function checkHistoryBadge(){
+
+    try{
+
+        const res = await fetch(
+            "https://bladeball-spin-backend-kpjl.onrender.com/history",
+            {
+                credentials:"include"
+            }
+        );
+
+        const data = await res.json();
+
+        if(!data.success) return;
+
+        const history = data.history || [];
+
+        // Nếu có lịch sử mới
+        if(history.length > lastSpinHistoryCount){
+
+            // Không hiện lần đầu load trang
+            if(lastSpinHistoryCount !== 0){
+
+                document.getElementById("historyBadge").style.display =
+                    "flex";
+
+            }
+
+        }
+
+        lastSpinHistoryCount = history.length;
+
+    }catch(err){
+
+        console.log("HISTORY BADGE ERROR:",err);
+
+    }
+
+}
+
+
+// CHECK WITHDRAW HISTORY
+async function checkWithdrawBadge(){
+
+    try{
+
+        const res = await fetch(
+            "https://bladeball-spin-backend-kpjl.onrender.com/withdraw-history",
+            {
+                credentials:"include"
+            }
+        );
+
+        const data = await res.json();
+
+        if(!data.success) return;
+
+        const withdraws = data.withdraws || [];
+
+        if(withdraws.length > lastWithdrawHistoryCount){
+
+            if(lastWithdrawHistoryCount !== 0){
+
+                document.getElementById("withdrawBadge").style.display =
+                    "flex";
+
+            }
+
+        }
+
+        lastWithdrawHistoryCount = withdraws.length;
+
+    }catch(err){
+
+        console.log("WITHDRAW BADGE ERROR:",err);
+
+    }
+
+}
+
+
+// LOAD BAN ĐẦU
+async function initHistoryBadges(){
+
+    try{
+
+        const historyRes = await fetch(
+            "https://bladeball-spin-backend-kpjl.onrender.com/history",
+            {
+                credentials:"include"
+            }
+        );
+
+        const historyData = await historyRes.json();
+
+        if(historyData.success){
+
+            lastSpinHistoryCount =
+                (historyData.history || []).length;
+
+        }
+
+
+        const withdrawRes = await fetch(
+            "https://bladeball-spin-backend-kpjl.onrender.com/withdraw-history",
+            {
+                credentials:"include"
+            }
+        );
+
+        const withdrawData = await withdrawRes.json();
+
+        if(withdrawData.success){
+
+            lastWithdrawHistoryCount =
+                (withdrawData.withdraws || []).length;
+
+        }
+
+    }catch(err){
+
+        console.log("BADGE INIT ERROR:",err);
+
+    }
+
+}
+
+
+// KIỂM TRA MỖI 5 GIÂY
+setInterval(checkHistoryBadge,5000);
+setInterval(checkWithdrawBadge,5000);
+
+initHistoryBadges();
 </script>
 <!-- ⭐ RULES BUTTON -->
 <div class="rules-btn" onclick="openRules()">
