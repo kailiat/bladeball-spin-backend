@@ -2226,6 +2226,7 @@ async function checkWithdrawBadge(){
 
         const withdraws = data.withdraws || [];
 
+        // Nếu có withdraw mới
         if(withdraws.length > lastWithdrawHistoryCount){
 
             if(lastWithdrawHistoryCount !== 0){
@@ -2234,6 +2235,34 @@ async function checkWithdrawBadge(){
                     "flex";
 
             }
+
+        }
+
+        // Nếu số lượng không đổi nhưng STATUS thay đổi
+        // thì cũng hiện badge đỏ
+        if(withdraws.length === lastWithdrawHistoryCount){
+
+            const currentStatuses =
+                withdraws.map(w => `${w.id}:${w.status}`).join("|");
+
+            if(window.lastWithdrawStatuses !== undefined){
+
+                if(currentStatuses !== window.lastWithdrawStatuses){
+
+                    document.getElementById("withdrawBadge").style.display =
+                        "flex";
+
+                }
+
+            }
+
+            window.lastWithdrawStatuses = currentStatuses;
+
+        }else{
+
+            // Cập nhật trạng thái khi có withdraw mới
+            window.lastWithdrawStatuses =
+                withdraws.map(w => `${w.id}:${w.status}`).join("|");
 
         }
 
