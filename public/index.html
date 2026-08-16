@@ -2058,6 +2058,60 @@ document.getElementById("withdrawHistoryPopup").style.display="flex";
 function closeWithdrawHistory(){
 document.getElementById("withdrawHistoryPopup").style.display="none";
 }
+    // =============================
+// 🔔 USER NOTIFICATIONS
+// =============================
+async function loadNotifications(){
+
+    try{
+
+        const res = await fetch(
+            "https://bladeball-spin-backend-kpjl.onrender.com/notifications",
+            {
+                credentials:"include"
+            }
+        );
+
+        const data = await res.json();
+
+        if(!data.success) return;
+
+        const unread = data.notifications.filter(n => !n.is_read);
+
+        unread.forEach(notification => {
+
+            showToast(
+                `❌ <b>${notification.title}</b><br>
+                ${notification.message}`
+            );
+
+            // Đánh dấu đã đọc
+            fetch(
+                "https://bladeball-spin-backend-kpjl.onrender.com/notifications/read",
+                {
+                    method:"POST",
+                    credentials:"include",
+                    headers:{
+                        "Content-Type":"application/json"
+                    },
+                    body:JSON.stringify({
+                        id: notification.id
+                    })
+                }
+            );
+
+        });
+
+    }catch(err){
+
+        console.log("NOTIFICATION ERROR:", err);
+
+    }
+
+}
+    loadNotifications();
+
+setInterval(loadNotifications, 10000);
 </script>
 <!-- ⭐ RULES BUTTON -->
 <div class="rules-btn" onclick="openRules()">
